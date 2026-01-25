@@ -1,6 +1,6 @@
 import { defineRouting } from 'next-intl/routing';
 
-import { getBrandConfigSSR } from '@/lib/brand';
+import { getBrandConfigSSR } from '@/libs/brand';
 
 const brandConfig = await getBrandConfigSSR();
 
@@ -14,4 +14,6 @@ export const routing = defineRouting({
   defaultLocale,
   // 语言前缀
   localePrefix: 'as-needed',
+  // 禁用语言检测
+  localeDetection: false,
 });

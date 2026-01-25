@@ -4,7 +4,7 @@ import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'r
 
 import { motion } from 'framer-motion';
 
-import { cn } from '@/lib/class-helpers';
+import { cn } from '@/libs/class-helpers';
 
 export interface ScrollableTabsRef {
   /** 重置滚动位置 */

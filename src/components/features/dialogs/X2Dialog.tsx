@@ -4,7 +4,7 @@
 import Button from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
 import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/lib/routes';
+import { Routes } from '@/libs/routes';
 import { useBrandConfig } from '@/providers/brand.provider';
 
 export default function X2Dialog() {
@@ -16,7 +16,7 @@ export default function X2Dialog() {
       <h2 className="text-xl font-bold">X2 Dialog 标题</h2>
       <p>这是 X2 弹框内容</p>
       <p>
-        {brand.brandName} - {brand.skin}
+        {brand.appName} - {brand.skin}
       </p>
       <div className="flex items-center gap-4">
         <Button

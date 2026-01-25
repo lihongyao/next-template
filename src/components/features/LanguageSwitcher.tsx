@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useLocale } from 'next-intl';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { clsx } from '@/lib/class-helpers';
+import { clsx } from '@/libs/class-helpers';
 
 /**
  * LanguageSwitcher 组件

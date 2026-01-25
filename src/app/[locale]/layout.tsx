@@ -5,9 +5,12 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
-import { cn } from '@/lib/class-helpers';
-import { geistMono } from '@/lib/fonts';
+import { getBrandConfigSSR } from '@/libs/brand';
+import { cn } from '@/libs/class-helpers';
+import { geistMono } from '@/libs/fonts';
+import { BrandConfigProvider } from '@/providers/brand.provider';
 
 export const runtime = 'edge';
 export const viewport: Viewport = {
@@ -44,11 +47,16 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
+  // 获取品牌配置
+  const brandConfig = await getBrandConfigSSR();
+
   return (
     <html lang={locale}>
       <body className={cn('antialiased', geistMono.variable)}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          {children}
+          <BrandConfigProvider value={brandConfig}>
+            <DialogProvider>{children} </DialogProvider>
+          </BrandConfigProvider>
         </NextIntlClientProvider>
       </body>
     </html>
