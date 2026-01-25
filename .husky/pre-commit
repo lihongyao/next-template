@@ -1,1 +1,2 @@
+# 在提交前执行代码格式化与检查
 pnpm lint-staged

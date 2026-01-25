@@ -24,5 +24,12 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  // i18n-ally 配置
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.displayLanguage": "zh-CN",
+  "i18n-ally.localesPaths": ["src/i18n/messages"],
+  "i18n-ally.pathMatcher": "{locale}.json",
+  "i18n-ally.enabledFrameworks": ["next-intl", "general"],
+  "i18n-ally.keystyle": "nested"
 }
