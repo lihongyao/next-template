@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
@@ -55,7 +56,10 @@ export default async function RootLayout({
       <body className={cn('antialiased', geistMono.variable)}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
-            <DialogProvider>{children} </DialogProvider>
+            <DialogProvider>
+              {children}
+              <RouteModalRenderer />
+            </DialogProvider>
           </BrandConfigProvider>
         </NextIntlClientProvider>
       </body>
