@@ -1,4 +1,4 @@
-// src/app/[lang]/(modals)/Profile.tsx
+// src/app/[locale]/(modals)/profile.tsx
 'use client';
 import type { ModalComponentProps } from '@/components/features/RouteModalRenderer';
 

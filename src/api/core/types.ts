@@ -45,6 +45,17 @@ export interface RequestOptions extends RequestInit {
    * - 'auto': 自动判断（包含 token 时使用 Vary，否则允许缓存）
    */
   noCache?: boolean | 'auto';
+  /**
+   * 请求取消信号
+   * 可以传入 AbortSignal 来取消请求
+   * @example
+   * ```ts
+   * const controller = new AbortController();
+   * const promise = api('/users', { signal: controller.signal });
+   * controller.abort(); // 取消请求
+   * ```
+   */
+  signal?: AbortSignal;
 }
 
 /**

@@ -3,16 +3,16 @@
 
 import { type ComponentType, useCallback, useEffect, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import ModalProfile from '@/app/(modals)/profile';
 import { routing } from '@/i18n/routing';
 import { cn } from '@/libs/class-helpers';
 
 export type ModalComponentProps = {
   onCloseAction: () => void;
 };
-
+const ModalProfile = dynamic(() => import('@/app/[locale]/(modals)/profile'));
 const MODAL_COMPONENTS = {
   'modal-profile': ModalProfile,
 } as Record<string, ComponentType<ModalComponentProps>>;

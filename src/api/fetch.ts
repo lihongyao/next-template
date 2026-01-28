@@ -7,7 +7,7 @@
 import { getBaseURL } from './core/config';
 import { baseFetch } from './core/fetch';
 import { getRefreshedToken } from './core/refresh';
-import { getToken, getTokenString } from './core/token';
+import { getTokenString } from './core/token';
 import type { RequestOptions } from './core/types';
 import { ApiError, ErrorCode } from './core/types';
 
@@ -169,7 +169,12 @@ export async function api<T = unknown>(
 
   try {
     // 执行请求
-    const data = await baseFetch<T>(fullUrl, fetchOptions, restOptions.retry ?? 0);
+    const data = await baseFetch<T>(
+      fullUrl,
+      fetchOptions,
+      restOptions.retry ?? 0,
+      restOptions.timeout,
+    );
     return data;
   } catch (err: unknown) {
     // Token 过期处理（仅在客户端支持刷新）
