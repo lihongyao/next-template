@@ -4,8 +4,11 @@
 import { type ComponentType, useCallback, useEffect, useMemo } from 'react';
 
 import dynamic from 'next/dynamic';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
+import { useScroll } from 'ahooks';
+
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { cn } from '@/libs/class-helpers';
 
@@ -24,14 +27,14 @@ export default function RouteModalRenderer() {
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
 
-  // const scroll = typeof document === "undefined" ? { left: 0, top: 0 } : useScroll(document);
+  const scrollResult = useScroll(typeof document !== 'undefined' ? document : null);
+  const scroll = scrollResult || { top: 0 };
 
   // 过滤出所有 modal-xxx
   const modalKeys = useMemo(() => pathSegments.filter((s) => MODAL_COMPONENTS[s]), [pathSegments]);
-  const ModalComponent = useMemo(
-    () => modalKeys.filter(Boolean).map((m) => MODAL_COMPONENTS[m]),
-    [modalKeys],
-  );
+  const ModalComponent = useMemo(() => {
+    return modalKeys.filter(Boolean).map((m) => MODAL_COMPONENTS[m]);
+  }, [modalKeys]);
 
   const onCloseAction = useCallback(() => {
     if (ModalComponent.length <= 0) return;
@@ -60,7 +63,11 @@ export default function RouteModalRenderer() {
 
   useEffect(() => {
     if (ModalComponent.length) {
-      // window.scrollTo({ top: scroll?.top || 0, behavior: "auto" });
+      console.log(' to scroll >>> ', scroll?.top);
+
+      if (scroll?.top) {
+        window.scrollTo({ top: scroll?.top || 0, behavior: 'auto' });
+      }
 
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';

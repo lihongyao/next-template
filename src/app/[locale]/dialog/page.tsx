@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
+import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { Routes } from '@/libs/routes';
 
@@ -20,6 +21,7 @@ export default function Demo() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
+  const { getMergePath } = useModalRoutes();
 
   const openX1 = () => {
     dialog.open('X1Dialog', {
@@ -177,6 +179,7 @@ export default function Demo() {
 
   return (
     <div className="flex flex-wrap gap-4 p-4">
+      <Button onClick={() => router.push(getMergePath(Routes.ModalProfile))}>路由弹框</Button>
       <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
       <Button onClick={openX1}>Open X1</Button>
       <Button onClick={openX2}>Open X2</Button>
