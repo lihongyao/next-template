@@ -7,6 +7,7 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
