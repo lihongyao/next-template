@@ -1,249 +1,140 @@
 /**
- * 基础 Fetch 封装
- * 2026 最佳实践：完善的错误处理、重试机制、超时控制
+ * 底层请求封装
+ *
+ * 后端约定：只要请求到了后端，HTTP 状态码均为成功（如 200），用 body 里的 code 区分成功/失败；
+ * 成功（code 为 0）时只返回 data，失败则抛 ApiError(code, message)；401 需要登录，402 token 过期。
+ * HTTP 非 2xx 仅表示未到后端（网络/网关等），此时按 HTTP 状态抛错。
+ * 支持超时（与 AbortSignal 合并）、仅对网络类错误重试（指数退避）。
  */
-import { DEV_CONFIG, RETRY_CONFIG } from './config';
-import type { ApiResponse } from './types';
+import { DEFAULT_CONFIG, DEV_CONFIG, RETRY_CONFIG } from './config';
+import type { BaseResponse } from './types';
 import { ApiError, ErrorCode } from './types';
 
-/**
- * 创建超时控制器
- * 支持自定义超时时间和 AbortSignal 合并
- */
+/** 后端约定：code 为 0 表示成功 */
+const SUCCESS_CODES = [0];
+
 function createTimeoutController(
   timeout: number,
-  existingSignal?: AbortSignal,
+  signal?: AbortSignal,
 ): { controller: AbortController; clear: () => void } {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  // 如果已有 signal，监听其取消事件
-  if (existingSignal) {
-    if (existingSignal.aborted) {
-      controller.abort();
-    } else {
-      existingSignal.addEventListener('abort', () => {
-        controller.abort();
-        clearTimeout(id);
-      });
-    }
-  }
-
-  return {
-    controller,
-    clear: () => {
+  const c = new AbortController();
+  const id = setTimeout(() => c.abort(), timeout);
+  if (signal?.aborted) c.abort();
+  else
+    signal?.addEventListener('abort', () => {
+      c.abort();
       clearTimeout(id);
-    },
-  };
+    });
+  return { controller: c, clear: () => clearTimeout(id) };
 }
 
-/**
- * 判断是否为可重试的错误
- * 只有网络错误才重试，业务错误不重试
- */
-function isRetryableError(err: unknown): boolean {
-  if (err instanceof ApiError) {
-    // 业务错误不重试
-    return false;
-  }
-
+function isRetryable(err: unknown): boolean {
+  if (err instanceof ApiError) return false;
   if (err instanceof Error) {
-    // 网络错误、超时错误可以重试
     return (
-      err.name === 'TypeError' ||
-      err.name === 'NetworkError' ||
-      err.name === 'AbortError' ||
+      ['TypeError', 'NetworkError', 'AbortError'].includes(err.name) ||
       err.message.includes('fetch')
     );
   }
-
   return false;
 }
 
-/**
- * 带重试的 fetch（指数退避）
- * 只在网络错误时重试，业务错误不重试
- */
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
   retries: number,
 ): Promise<Response> {
-  let lastError: unknown;
-
+  let last: unknown;
   for (let i = 0; i <= retries; i++) {
     try {
-      const res = await fetch(url, options);
-
-      // HTTP 错误状态码（4xx, 5xx）不重试，直接返回
-      // 让上层处理业务错误
-      return res;
-    } catch (err) {
-      lastError = err;
-
-      // 如果不可重试或已达到最大重试次数，直接抛出
-      if (!isRetryableError(err) || i === retries) {
-        throw err;
-      }
-
-      // 指数退避：使用配置的初始延迟和倍数
+      return await fetch(url, options);
+    } catch (e) {
+      last = e;
+      if (!isRetryable(e) || i === retries) throw e;
       const delay = Math.min(
         RETRY_CONFIG.initialDelay * RETRY_CONFIG.backoffMultiplier ** i,
         RETRY_CONFIG.maxDelay,
       );
-      await new Promise((resolve) => setTimeout(resolve, delay));
-
-      // 如果请求已被取消，不再重试
-      if (options.signal?.aborted) {
-        throw err;
-      }
+      await new Promise((r) => setTimeout(r, delay));
+      if (options.signal?.aborted) throw e;
     }
   }
+  throw last;
+}
 
-  throw lastError || new Error('Unknown error');
+function parseMessage(json: Record<string, unknown>): string {
+  return (json.message as string) ?? (json.msg as string) ?? '请求失败';
 }
 
 /**
- * 开发环境日志记录
+ * 底层 fetch：带超时、重试，按 BaseResponse 解析，成功返回 data，失败抛 ApiError
  */
-function logRequest(url: string, options: RequestInit, response?: Response, error?: unknown) {
-  if (!DEV_CONFIG.enableRequestLog) {
-    return;
-  }
-
-  const method = options.method || 'GET';
-  const timestamp = new Date().toISOString();
-
-  if (error) {
-    console.group(`🚫 [API] ${method} ${url} - Error`);
-    console.error('Time:', timestamp);
-    console.error('Error:', error);
-    console.groupEnd();
-  } else if (response) {
-    const status = response.status;
-    const statusEmoji = status >= 200 && status < 300 ? '✅' : '⚠️';
-    console.group(`${statusEmoji} [API] ${method} ${url} - ${status}`);
-    console.log('Time:', timestamp);
-    if (options.body) {
-      try {
-        console.log('Request Body:', JSON.parse(options.body as string));
-      } catch {
-        console.log('Request Body:', options.body);
-      }
-    }
-    console.groupEnd();
-  } else {
-    console.log(`📤 [API] ${method} ${url}`, timestamp);
-  }
-}
-
-/**
- * 基础 Fetch 封装
- *
- * @param url 请求 URL
- * @param options 请求配置
- * @param retry 重试次数
- * @param timeout 超时时间（毫秒）
- * @returns 响应数据（直接返回 data）
- */
-export async function baseFetch<T = unknown>(
+export async function baseFetch<T>(
   url: string,
   options: RequestInit = {},
-  retry = 0,
-  timeout = 60000,
+  retry: number = DEFAULT_CONFIG.retry,
+  timeout: number = DEFAULT_CONFIG.timeout,
 ): Promise<T> {
-  // 合并 AbortSignal（支持外部取消）
-  const existingSignal = options.signal;
-  const { controller, clear } = createTimeoutController(timeout, existingSignal);
-
-  // Fetch 缓存控制
-  // 注意：如果设置了 Vary 头，CDN 会根据不同的 token 缓存不同的响应
-  // 所以可以安全地使用缓存，不需要完全禁用
+  const existing = options.signal ?? undefined;
+  const { controller, clear } = createTimeoutController(timeout, existing);
   const fetchOptions: RequestInit = {
     ...options,
     signal: controller.signal,
-    // 使用默认缓存策略，让 Vary 头来处理不同 token 的缓存区分
-    // 如果用户明确指定了 cache，使用用户指定的值
-    cache: options.cache || 'default',
+    cache: options.cache ?? 'default',
   };
 
-  // 开发环境记录请求日志
-  logRequest(url, fetchOptions);
+  if (DEV_CONFIG.enableRequestLog) {
+    console.log(`[API] ${options.method ?? 'GET'} ${url}`);
+  }
 
   try {
     const res = await fetchWithRetry(url, fetchOptions, retry);
     clear();
 
-    // 开发环境记录响应日志
-    logRequest(url, fetchOptions, res);
+    const text = await res.text();
+    let json: BaseResponse<T> | null = null;
+    try {
+      json = text ? (JSON.parse(text) as BaseResponse<T>) : null;
+    } catch {
+      // 非 JSON（如网关 502 返回 HTML）时按 HTTP 状态处理
+    }
 
-    // 处理 HTTP 错误状态码
-    if (!res.ok) {
-      const text = await res.text();
-      let errorBody: unknown = text;
-      let message = res.statusText;
-
-      try {
-        errorBody = JSON.parse(text);
-        if (typeof errorBody === 'object' && errorBody !== null) {
-          const body = errorBody as Record<string, unknown>;
-          message = (body.msg as string) || (body.message as string) || message;
-        }
-      } catch {
-        // 如果不是 JSON，使用原始文本
-        if (text && !text.startsWith('<!DOCTYPE')) {
-          message = text;
-        }
+    // 能解析出 body 且带 code：以 code 为准（后端约定 HTTP 200 + 自定义 code）
+    if (json && typeof json === 'object' && 'code' in json) {
+      if (SUCCESS_CODES.includes(json.code)) {
+        return json.data;
       }
+      throw new ApiError(
+        json.code,
+        parseMessage(json as unknown as Record<string, unknown>),
+        json.data,
+        res.status,
+      );
+    }
 
+    // 无法按 body.code 判断时（未到后端、网关错误等）：按 HTTP 状态处理
+    if (!res.ok) {
+      let msg = res.statusText;
+      if (json && typeof json === 'object') msg = parseMessage(json as Record<string, unknown>);
+      else if (text && !text.startsWith('<!')) msg = text;
       throw new ApiError(
         res.status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNAUTHORIZED,
-        message || `HTTP ${res.status}`,
-        errorBody,
+        msg,
+        json ?? text,
         res.status,
       );
     }
 
-    // 解析 JSON 响应
-    let json: ApiResponse<T>;
-    try {
-      json = await res.json();
-    } catch (parseError) {
-      throw new ApiError(
-        ErrorCode.SERVER_ERROR,
-        '响应格式错误：无法解析 JSON',
-        undefined,
-        res.status,
-      );
-    }
-
-    // 业务错误处理
-    if (json.code !== 0 && json.code !== 200) {
-      throw new ApiError(json.code, json.msg || '请求失败', json.data, res.status);
-    }
-
-    // 直接返回 data
-    return json.data;
-  } catch (err: unknown) {
+    throw new ApiError(ErrorCode.SERVER_ERROR, '响应格式异常', json ?? text, res.status);
+  } catch (e: unknown) {
     clear();
-
-    // 开发环境记录错误日志
-    logRequest(url, fetchOptions, undefined, err);
-
-    // 超时错误
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (e instanceof Error && e.name === 'AbortError') {
       throw new ApiError(ErrorCode.TIMEOUT, '请求超时', undefined, 408);
     }
-
-    // ApiError 直接抛出
-    if (err instanceof ApiError) {
-      throw err;
-    }
-
-    // 其他错误
+    if (e instanceof ApiError) throw e;
     throw new ApiError(
       ErrorCode.SERVER_ERROR,
-      err instanceof Error ? err.message : 'Network Error',
+      e instanceof Error ? e.message : 'Network Error',
       undefined,
       500,
     );

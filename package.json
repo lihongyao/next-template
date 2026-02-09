@@ -38,7 +38,7 @@
     "lodash": "^4.17.23",
     "lru-cache": "^11.2.4",
     "next": "16.1.4",
-    "next-intl": "^4.7.0",
+    "next-intl": "^4.8.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-qr-code": "^2.0.18",

@@ -45,10 +45,8 @@ export interface UserListResponse {
  * 'use client';
  * const users = await getUserList({ page: 1, limit: 10 });
  *
- * // 服务端组件
- * import { headers } from 'next/headers';
- * const serverHeaders = await headers();
- * const users = await getUserList({ page: 1, limit: 10 }, { serverHeaders });
+ * // 服务端组件（无需传 serverHeaders，自动从 Cookie 读 token）
+ * const users = await getUserList({ page: 1, limit: 10 });
  * ```
  */
 export async function getUserList(params?: UserListParams, options?: RequestOptions) {

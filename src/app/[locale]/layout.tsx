@@ -1,13 +1,12 @@
 // src/app/[locale]/layout.tsx
 import type { Metadata, Viewport } from 'next';
-import { NextIntlClientProvider, hasLocale } from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import ClientInitializer from '@/components/features/ClientInitializer';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
-import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
 import { cn } from '@/libs/class-helpers';
 import { geistMono } from '@/libs/fonts';
@@ -34,12 +33,13 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }>) {
+  console.log('__RootLayout__');
   const { locale } = await params;
 
   // Ensure that the incoming `locale` is valid
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
+  // if (!hasLocale(routing.locales, locale)) {
+  //   notFound();
+  // }
 
   // Enable static rendering
   setRequestLocale(locale);
@@ -59,6 +59,7 @@ export default async function RootLayout({
             <DialogProvider>
               {children}
               <RouteModalRenderer />
+              <ClientInitializer />
             </DialogProvider>
           </BrandConfigProvider>
         </NextIntlClientProvider>

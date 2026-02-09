@@ -178,45 +178,48 @@ export default function Demo() {
   };
 
   return (
-    <div className="flex flex-wrap gap-4 p-4">
-      <Button onClick={() => router.push(getMergePath(Routes.ModalProfile))}>路由弹框</Button>
-      <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
-      <Button onClick={openX1}>Open X1</Button>
-      <Button onClick={openX2}>Open X2</Button>
-      <Button onClick={openX2AutoClose}>openX2AutoClose</Button>
-      <Button onClick={openQueue}>queue dialogs</Button>
-      <Button onClick={openStatic}>静态调用</Button>
-      <Button onClick={openMuiltipleSameDialog}>延迟弹相同弹框</Button>
-      <Button
-        onClick={() => {
-          router.back();
-          dialog.open('X2Dialog', {
-            closeOnPopstate: false,
-          });
-        }}
-      >
-        后退时是否自动关闭
-      </Button>
+    <div>
+      <div className="mb-4 h-[800px] bg-pink-300"></div>
+      <div className="flex flex-wrap gap-4 p-4">
+        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile))}>路由弹框</Button>
+        <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
+        <Button onClick={openX1}>Open X1</Button>
+        <Button onClick={openX2}>Open X2</Button>
+        <Button onClick={openX2AutoClose}>openX2AutoClose</Button>
+        <Button onClick={openQueue}>queue dialogs</Button>
+        <Button onClick={openStatic}>静态调用</Button>
+        <Button onClick={openMuiltipleSameDialog}>延迟弹相同弹框</Button>
+        <Button
+          onClick={() => {
+            router.back();
+            dialog.open('X2Dialog', {
+              closeOnPopstate: false,
+            });
+          }}
+        >
+          后退时是否自动关闭
+        </Button>
 
-      {/* 组件调用(受控) */}
-      <Dialog
-        open={open}
-        onClose={() => {
-          console.log('close');
-          setOpen(false);
-        }}
-        onAfterClose={() => {
-          console.log('onAfterClose');
-        }}
-      >
-        <div className="flex w-[80%] min-w-[300px] flex-col items-center justify-center gap-4 rounded-md bg-white p-5">
-          <div>这是弹框内容</div>
-          <div className="flex items-center gap-4">
-            <Button onClick={() => setOpen(false)}>关闭</Button>
-            <Button onClick={() => router.push(Routes.Home)}>跳转页面</Button>
+        {/* 组件调用(受控) */}
+        <Dialog
+          open={open}
+          onClose={() => {
+            console.log('close');
+            setOpen(false);
+          }}
+          onAfterClose={() => {
+            console.log('onAfterClose');
+          }}
+        >
+          <div className="flex w-[80%] min-w-[300px] flex-col items-center justify-center gap-4 rounded-md bg-white p-5">
+            <div>这是弹框内容</div>
+            <div className="flex items-center gap-4">
+              <Button onClick={() => setOpen(false)}>关闭</Button>
+              <Button onClick={() => router.push(Routes.Home)}>跳转页面</Button>
+            </div>
           </div>
-        </div>
-      </Dialog>
+        </Dialog>
+      </div>
     </div>
   );
 }

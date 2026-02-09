@@ -1,6 +1,6 @@
 // src/proxy.ts
 import createMiddleware from 'next-intl/middleware';
-import type { NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 
 import { routing } from './i18n/routing';
 import { ModalRoute, ModalRoutes } from './libs/routes';
@@ -9,12 +9,11 @@ const intlMiddleware = createMiddleware(routing);
 
 // Modal 路由值集合，用于快速匹配
 const modalRouteValues = new Set(Object.values(ModalRoutes));
-
 const defaultLocale = routing.defaultLocale;
 const locales = routing.locales;
 
 /**
- * Next.js 16 的 proxy 函数（替代 middleware）
+ * Next.js 16 的 proxy 函数
  * 处理国际化路由和 modal 路由重写
  */
 export default function proxy(request: NextRequest) {
@@ -23,33 +22,24 @@ export default function proxy(request: NextRequest) {
 
   // 检测并处理 modal 路由重写
   const rewriteTarget = modalRewriteUrl(request);
-  console.log('rewriteTarget >>> ', rewriteTarget);
   if (rewriteTarget) {
     // 使用 x-middleware-rewrite 告诉 Next.js 进行 URL 重写
     intlResponse.headers.set('x-middleware-rewrite', rewriteTarget.toString());
   }
-
-  // 设置 X-Path 头（可选，用于调试）
-  const { pathname } = request.nextUrl;
-  intlResponse.headers.set('X-Path', pathname);
 
   return intlResponse;
 }
 
 function modalRewriteUrl(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
+
   // modal 路由判断：是否命中 ModalRoutes
   const modalRouteKey = matchModalRoute(pathname);
   if (!modalRouteKey) {
     return null;
   }
 
-  let pathnames = [];
-  if (pathname.includes('/modal-activity/')) {
-    pathnames = pathname.split('/modal-activity/').filter(Boolean);
-  } else {
-    pathnames = pathname.split('/').filter(Boolean);
-  }
+  const pathnames = pathname.split('/').filter(Boolean);
   const modalIndex = pathnames.findIndex((segment) => `/${segment}` == modalRouteKey);
   if (modalIndex === -1) {
     return null;
@@ -65,6 +55,7 @@ function modalRewriteUrl(request: NextRequest) {
   }
 
   const basePath = `/${basePaths.join('/')}`;
+
   // 克隆请求的URL对象，在其基础上修改
   const rewriteUrl = request.nextUrl.clone();
   // 设置基础路径，确保没有多余的斜杠

@@ -1,24 +1,17 @@
 // src/components/features/RouteModalRenderer.tsx
 'use client';
 
-import { type ComponentType, useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { useScroll } from 'ahooks';
-
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { ModalComponents } from '@/app/[locale]/(modals)';
 import { routing } from '@/i18n/routing';
 import { cn } from '@/libs/class-helpers';
 
 export type ModalComponentProps = {
   onCloseAction: () => void;
 };
-const ModalProfile = dynamic(() => import('@/app/[locale]/(modals)/profile'));
-const MODAL_COMPONENTS = {
-  'modal-profile': ModalProfile,
-} as Record<string, ComponentType<ModalComponentProps>>;
 
 export default function RouteModalRenderer() {
   const router = useRouter();
@@ -27,13 +20,30 @@ export default function RouteModalRenderer() {
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
 
-  const scrollResult = useScroll(typeof document !== 'undefined' ? document : null);
-  const scroll = scrollResult || { top: 0 };
+  // const scrollResult = useScroll(typeof document !== 'undefined' ? document : null);
+  // const scroll = scrollResult || { top: 0 };
+  const scrollTopRef = useRef(0);
+
+  useEffect(() => {
+    // 监听 body 滚动事件，保持 scroll.top 的更新
+    const handleScroll = () => {
+      scrollTopRef.current =
+        window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      // console.log('滚动事件触发，更新 scrollTopRef:', scrollTopRef.current);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      console.log('RouteModalRenderer 卸载，移除滚动事件监听');
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // 过滤出所有 modal-xxx
-  const modalKeys = useMemo(() => pathSegments.filter((s) => MODAL_COMPONENTS[s]), [pathSegments]);
+  const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
+
   const ModalComponent = useMemo(() => {
-    return modalKeys.filter(Boolean).map((m) => MODAL_COMPONENTS[m]);
+    return modalKeys.filter(Boolean).map((m) => ModalComponents[m]);
   }, [modalKeys]);
 
   const onCloseAction = useCallback(() => {
@@ -63,12 +73,7 @@ export default function RouteModalRenderer() {
 
   useEffect(() => {
     if (ModalComponent.length) {
-      console.log(' to scroll >>> ', scroll?.top);
-
-      if (scroll?.top) {
-        window.scrollTo({ top: scroll?.top || 0, behavior: 'auto' });
-      }
-
+      window.scrollTo({ top: scrollTopRef.current || 0, behavior: 'auto' });
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -78,6 +83,7 @@ export default function RouteModalRenderer() {
   }, [ModalComponent]);
 
   if (ModalComponent.length === 0) return null;
+
   return (
     <div
       data-name="RouteModalRenderer"
