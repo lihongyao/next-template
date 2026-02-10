@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* 锁住滚动 */
 .lock-scroll {
   overflow: hidden;
