@@ -181,7 +181,9 @@ export default function Demo() {
     <div>
       <div className="mb-4 h-[800px] bg-pink-300"></div>
       <div className="flex flex-wrap gap-4 p-4">
-        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile))}>路由弹框</Button>
+        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile), { scroll: false })}>
+          路由弹框
+        </Button>
         <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
         <Button onClick={openX1}>Open X1</Button>
         <Button onClick={openX2}>Open X2</Button>

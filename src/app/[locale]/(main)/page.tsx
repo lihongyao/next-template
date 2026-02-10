@@ -13,9 +13,15 @@ export default function HomePage() {
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[600px] w-full bg-red-500" />
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile))}>路由弹窗</Button>
+        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile), { scroll: false })}>
+          路由弹窗(个人中心)
+        </Button>
+        <Button onClick={() => router.push(getMergePath(Routes.ModalLogin), { scroll: false })}>
+          路由弹窗(登录)
+        </Button>
         <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
+        <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
 
       <div className="h-[600px] w-full bg-red-500" />

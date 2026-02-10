@@ -3,7 +3,6 @@ export default function TopNavLayout({ children }: { children: React.ReactNode }
     <div data-name="top-nav-layout">
       <header>modern layout</header>
       <main>
-        <aside>top nav</aside>
         <div>{children}</div>
       </main>
     </div>

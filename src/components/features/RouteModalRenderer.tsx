@@ -1,10 +1,16 @@
 // src/components/features/RouteModalRenderer.tsx
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { AnimatePresence, motion } from 'framer-motion';
+
+import {
+  modalBackdropVariantsRight,
+  pageLayoutSlideVariants,
+} from '@/animations/motion-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
 import { routing } from '@/i18n/routing';
 import { cn } from '@/libs/class-helpers';
@@ -19,25 +25,6 @@ export default function RouteModalRenderer() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
-
-  // const scrollResult = useScroll(typeof document !== 'undefined' ? document : null);
-  // const scroll = scrollResult || { top: 0 };
-  const scrollTopRef = useRef(0);
-
-  useEffect(() => {
-    // 监听 body 滚动事件，保持 scroll.top 的更新
-    const handleScroll = () => {
-      scrollTopRef.current =
-        window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      // console.log('滚动事件触发，更新 scrollTopRef:', scrollTopRef.current);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      console.log('RouteModalRenderer 卸载，移除滚动事件监听');
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   // 过滤出所有 modal-xxx
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
@@ -73,7 +60,6 @@ export default function RouteModalRenderer() {
 
   useEffect(() => {
     if (ModalComponent.length) {
-      window.scrollTo({ top: scrollTopRef.current || 0, behavior: 'auto' });
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -83,6 +69,47 @@ export default function RouteModalRenderer() {
   }, [ModalComponent]);
 
   if (ModalComponent.length === 0) return null;
+
+  return (
+    <AnimatePresence
+      onExitComplete={() => {
+        console.log('onExitComplete');
+      }}
+    >
+      {ModalComponent.length &&
+        ModalComponent.map((Modal, i) => {
+          const modalKey = modalKeys[i];
+          return (
+            <motion.div
+              data-name={`modal-${modalKey}`}
+              className="fixed inset-0 z-auto flex items-center justify-center"
+              key={modalKey}
+            >
+              {/* 遮罩层 */}
+              <motion.div
+                variants={modalBackdropVariantsRight}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onClick={() => {
+                  console.log('onMaskClick');
+                }}
+              />
+              {/* 弹窗内容 */}
+              <motion.div
+                variants={pageLayoutSlideVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                style={{ willChange: 'transform, opacity' }}
+              >
+                <Modal onCloseAction={onCloseAction} />
+              </motion.div>
+            </motion.div>
+          );
+        })}
+    </AnimatePresence>
+  );
 
   return (
     <div

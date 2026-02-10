@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+/* 锁住滚动 */
+.lock-scroll {
+  overflow: hidden;
+}
+
+/* 隐藏滚动条 */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}

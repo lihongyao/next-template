@@ -15,10 +15,12 @@ export const PageRoutes = {
   Motion: '/motion',
   MotionSub: '/motion/sub',
   CdnImage: '/cdn-image',
+  DataPathThrough: '/data-pass-through',
 } as const;
 
 export const ModalRoutes = {
   ModalProfile: '/modal-profile',
+  ModalLogin: '/modal-login',
 } as const;
 
 export const Routes = {
