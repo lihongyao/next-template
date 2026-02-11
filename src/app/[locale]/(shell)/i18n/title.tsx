@@ -1,3 +1,3 @@
 export default function Title() {
-  return <h1>设置</h1>;
+  return '设置';
 }

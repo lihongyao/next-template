@@ -19,6 +19,7 @@ export default function HomePage() {
         <Button onClick={() => router.push(getMergePath(Routes.ModalLogin), { scroll: false })}>
           路由弹窗(登录)
         </Button>
+        <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>
         <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>

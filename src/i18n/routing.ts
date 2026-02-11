@@ -1,8 +1,6 @@
 import { defineRouting } from 'next-intl/routing';
 
-import { getBrandConfigSSR } from '@/libs/brand';
-
-const brandConfig = await getBrandConfigSSR();
+import brandConfig from '@/configs/brands';
 
 const locales = brandConfig.locales.map((locale) => locale.code);
 const defaultLocale = brandConfig.defaultLocale;

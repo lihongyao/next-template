@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
+import { useMount } from 'ahooks';
+
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
+import brandConfig from '@/configs/brands';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { Routes } from '@/libs/routes';
@@ -22,6 +25,10 @@ export default function Demo() {
   const dialog = useDialog();
   const router = useRouter();
   const { getMergePath } = useModalRoutes();
+
+  useMount(() => {
+    console.log('brandConfig >>> ', brandConfig);
+  });
 
   const openX1 = () => {
     dialog.open('X1Dialog', {

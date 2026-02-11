@@ -1,6 +1,7 @@
 // src/providers/brand.provider.tsx
 
 'use client';
+
 import { type ReactNode, createContext, useContext } from 'react';
 
 import type { BrandConfig } from '@/configs/brands/types';
