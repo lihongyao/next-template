@@ -1,7 +1,7 @@
 // src/components/features/RouteModalRenderer.tsx
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -12,8 +12,8 @@ import {
   pageLayoutSlideVariants,
 } from '@/animations/motion-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { routing } from '@/i18n/routing';
-import { cn } from '@/libs/class-helpers';
 
 export type ModalComponentProps = {
   onCloseAction: () => void;
@@ -25,6 +25,8 @@ export default function RouteModalRenderer() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
+
+  const [isAllow, setIsAllow] = useState(true);
 
   // 过滤出所有 modal-xxx
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
@@ -58,11 +60,21 @@ export default function RouteModalRenderer() {
     router.replace(nextUrl, { scroll: false });
   }, [ModalComponent, router, pathSegments, searchParams]);
 
+  useSwipeBack(
+    (value) => {
+      setIsAllow(!value);
+    },
+    {
+      enabled: ModalComponent.length > 0,
+    },
+  );
+
   useEffect(() => {
     if (ModalComponent.length) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
+      setIsAllow(true);
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     }
@@ -87,7 +99,7 @@ export default function RouteModalRenderer() {
             >
               {/* 遮罩层 */}
               <motion.div
-                variants={modalBackdropVariantsRight}
+                variants={isAllow ? modalBackdropVariantsRight : undefined}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
@@ -97,7 +109,7 @@ export default function RouteModalRenderer() {
               />
               {/* 弹窗内容 */}
               <motion.div
-                variants={pageLayoutSlideVariants}
+                variants={isAllow ? pageLayoutSlideVariants : undefined}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
@@ -109,21 +121,5 @@ export default function RouteModalRenderer() {
           );
         })}
     </AnimatePresence>
-  );
-
-  return (
-    <div
-      data-name="RouteModalRenderer"
-      className={cn(
-        'fixed inset-0 z-4000 h-screen w-screen items-center justify-center bg-black/70 backdrop-blur-xs',
-        ModalComponent ? 'flex' : 'hidden',
-      )}
-    >
-      {ModalComponent.length &&
-        ModalComponent.map((ModalComponent, i) => {
-          const modalKey = modalKeys[i];
-          return <ModalComponent key={modalKey} onCloseAction={onCloseAction} />;
-        })}
-    </div>
   );
 }
