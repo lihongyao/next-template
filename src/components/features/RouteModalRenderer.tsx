@@ -19,6 +19,10 @@ export type ModalComponentProps = {
   onCloseAction: () => void;
 };
 
+/**
+ * 根据 URL 中的 modal 段（如 /en/modal-login）渲染对应弹窗，支持多层级叠加。
+ * 进入从右往左滑，关闭时由 AnimatePresence 播完 exit 再卸载。
+ */
 export default function RouteModalRenderer() {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,50 +31,39 @@ export default function RouteModalRenderer() {
   const searchParamsString = searchParams.toString();
 
   const [isAllow, setIsAllow] = useState(true);
+  // 路由里没 modal 时先不拆 AnimatePresence，等 exit 播完再隐藏，否则关的时候会闪没
+  const [pureHidden, setPureHidden] = useState(false);
 
-  // 过滤出所有 modal-xxx
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
-
-  const ModalComponent = useMemo(() => {
-    return modalKeys.filter(Boolean).map((m) => ModalComponents[m]);
-  }, [modalKeys]);
+  const ModalComponent = useMemo(
+    () => modalKeys.filter(Boolean).map((m) => ModalComponents[m]),
+    [modalKeys],
+  );
 
   const onCloseAction = useCallback(() => {
     if (ModalComponent.length <= 0) return;
 
-    // 判断浏览器是否有可回退的历史记录（>2 表示有正常页面历史）
     const canGoBack = window.history.length > 2;
     if (canGoBack) {
       router.back();
       return;
     }
 
-    // 手动从 URL 中移除 modal 参数，并更新路由
     const params = new URLSearchParams(searchParamsString);
     const nextQuery = params.toString();
-
-    // 移除最后一个 modal 段
     const newPathSegments = [...pathSegments];
     newPathSegments.pop();
     const nextPath = `/${newPathSegments.join('/')}`;
     const finalPath = nextPath || `/${routing.defaultLocale}`;
     const nextUrl = nextQuery ? `${finalPath}?${nextQuery}` : finalPath;
-
-    // 使用 replace 替换当前路由（不触发页面刷新，不滚动）
     router.replace(nextUrl, { scroll: false });
   }, [ModalComponent, router, pathSegments, searchParams]);
 
-  useSwipeBack(
-    (value) => {
-      setIsAllow(!value);
-    },
-    {
-      enabled: ModalComponent.length > 0,
-    },
-  );
+  useSwipeBack((value) => setIsAllow(!value), { enabled: ModalComponent.length > 0 });
 
   useEffect(() => {
     if (ModalComponent.length) {
+      setPureHidden(false);
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
     } else {
@@ -78,48 +71,45 @@ export default function RouteModalRenderer() {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     }
-  }, [ModalComponent]);
+  }, [ModalComponent.length]);
 
-  if (ModalComponent.length === 0) return null;
+  if (pureHidden) return null;
 
   return (
     <AnimatePresence
       onExitComplete={() => {
-        console.log('onExitComplete');
+        if (ModalComponent.length <= 0) setPureHidden(true);
       }}
     >
-      {ModalComponent.length &&
-        ModalComponent.map((Modal, i) => {
-          const modalKey = modalKeys[i];
-          return (
+      {ModalComponent.map((Modal, idx) => {
+        const modalKey = modalKeys[idx];
+        return (
+          <motion.div
+            key={modalKey}
+            data-name={`modal-${modalKey}`}
+            className="fixed inset-0 z-auto flex items-center justify-center"
+          >
             <motion.div
-              data-name={`modal-${modalKey}`}
-              className="fixed inset-0 z-auto flex items-center justify-center"
-              key={modalKey}
+              variants={isAllow ? modalBackdropVariantsRight : undefined}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={() => {
+                console.log('onMaskClick');
+              }}
+            />
+            <motion.div
+              variants={isAllow ? pageLayoutSlideVariants : undefined}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              style={{ willChange: 'transform, opacity' }}
             >
-              {/* 遮罩层 */}
-              <motion.div
-                variants={isAllow ? modalBackdropVariantsRight : undefined}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                onClick={() => {
-                  console.log('onMaskClick');
-                }}
-              />
-              {/* 弹窗内容 */}
-              <motion.div
-                variants={isAllow ? pageLayoutSlideVariants : undefined}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                style={{ willChange: 'transform, opacity' }}
-              >
-                <Modal onCloseAction={onCloseAction} />
-              </motion.div>
+              <Modal onCloseAction={onCloseAction} />
             </motion.div>
-          );
-        })}
+          </motion.div>
+        );
+      })}
     </AnimatePresence>
   );
 }

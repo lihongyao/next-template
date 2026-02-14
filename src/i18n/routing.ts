@@ -12,6 +12,6 @@ export const routing = defineRouting({
   defaultLocale,
   // 语言前缀
   localePrefix: 'as-needed',
-  // 禁用语言检测
+  // 禁用自动语言检测，当没有语言前缀时始终使用默认语言
   localeDetection: false,
 });

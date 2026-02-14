@@ -1,33 +1,28 @@
 // src/proxy.ts
 import createMiddleware from 'next-intl/middleware';
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { routing } from './i18n/routing';
 import { ModalRoute, ModalRoutes } from './libs/routes';
 
 const intlMiddleware = createMiddleware(routing);
 
-// Modal 路由值集合，用于快速匹配
 const modalRouteValues = new Set(Object.values(ModalRoutes));
 const defaultLocale = routing.defaultLocale;
 const locales = routing.locales;
 
 /**
- * Next.js 16 的 proxy 函数
+ * Next.js 16 的 proxy 函数（必须用命名导出 export function proxy，Next.js 16 才会识别）
  * 处理国际化路由和 modal 路由重写
+ * 注意：Next.js 16 用 NextResponse.rewrite() 做重写，不再使用 x-middleware-rewrite header
  */
-export default function proxy(request: NextRequest) {
-  // 调用国际化中间件，处理多语言路径的逻辑
-  const intlResponse = intlMiddleware(request);
-
-  // 检测并处理 modal 路由重写
+export function proxy(request: NextRequest) {
+  // 先判断是否是路由弹窗：若是则直接 return rewrite，这样请求会以「带 locale 的 base 路径」进入 app，layout 的 params.locale 才正确
   const rewriteTarget = modalRewriteUrl(request);
   if (rewriteTarget) {
-    // 使用 x-middleware-rewrite 告诉 Next.js 进行 URL 重写
-    intlResponse.headers.set('x-middleware-rewrite', rewriteTarget.toString());
+    return NextResponse.rewrite(rewriteTarget);
   }
-
-  return intlResponse;
+  return intlMiddleware(request);
 }
 
 function modalRewriteUrl(request: NextRequest) {
@@ -35,17 +30,12 @@ function modalRewriteUrl(request: NextRequest) {
 
   // modal 路由判断：是否命中 ModalRoutes
   const modalRouteKey = matchModalRoute(pathname);
-  if (!modalRouteKey) {
-    return null;
-  }
+  if (!modalRouteKey) return null;
 
   const pathnames = pathname.split('/').filter(Boolean);
   const modalIndex = pathnames.findIndex((segment) => `/${segment}` == modalRouteKey);
-  if (modalIndex === -1) {
-    return null;
-  }
+  if (modalIndex === -1) return null;
 
-  const modalPathname = pathnames[modalIndex];
   const basePaths = pathnames.slice(0, modalIndex);
 
   // 检查路径是否包含语言前缀，则加上默认语言
@@ -74,9 +64,7 @@ function matchModalRoute(pathname: string) {
   // 遍历路径段，找到是否有段匹配 ModalRoutes 的值（忽略前导斜杠差异）
   for (let i = 0; i < segments.length; i++) {
     const seg = `/${segments[i]}`;
-    if (modalRouteValues.has(seg as ModalRoute)) {
-      return seg;
-    }
+    if (modalRouteValues.has(seg as ModalRoute)) return seg;
   }
   return null;
 }
