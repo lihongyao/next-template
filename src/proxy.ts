@@ -11,15 +11,11 @@ const modalRouteValues = new Set(Object.values(ModalRoutes));
 const defaultLocale = routing.defaultLocale;
 const locales = routing.locales;
 
-/**
- * Next.js 16 的 proxy 函数（必须用命名导出 export function proxy，Next.js 16 才会识别）
- * 处理国际化路由和 modal 路由重写
- * 注意：Next.js 16 用 NextResponse.rewrite() 做重写，不再使用 x-middleware-rewrite header
- */
+// 处理国际化路由和 modal 路由重写
 export function proxy(request: NextRequest) {
-  // 先判断是否是路由弹窗：若是则直接 return rewrite，这样请求会以「带 locale 的 base 路径」进入 app，layout 的 params.locale 才正确
   const rewriteTarget = modalRewriteUrl(request);
   if (rewriteTarget) {
+    // Next.js 16 用 NextResponse.rewrite() 做重写，不再使用 x-middleware-rewrite header
     return NextResponse.rewrite(rewriteTarget);
   }
   return intlMiddleware(request);

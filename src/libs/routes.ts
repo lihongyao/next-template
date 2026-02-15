@@ -1,3 +1,4 @@
+// src/lib/routes.ts
 export const PageRoutes = {
   Home: '/',
   Cart: '/cart',

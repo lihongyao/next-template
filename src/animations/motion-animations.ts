@@ -9,7 +9,6 @@ import type { Variants } from 'framer-motion';
 const EASE_ENTER = [0.32, 0.72, 0, 1] as const; // 进入  弹窗/页面
 const EASE_EXIT = [0.25, 1, 0.5, 1] as const; // 关闭  弹窗 (减速曲线)
 const EASE_EXIT_PAGE = [0.32, 0.32, 0.32, 0.32] as const; // 关闭  页面(减速曲线)
-const EASE_LINEAR = 'linear' as const; //匀速播放动画
 
 /** 遮罩层动画配置 - 左右滑动（从右往左打开，从左往右关闭） */
 export const modalBackdropVariantsRight: Variants = {
