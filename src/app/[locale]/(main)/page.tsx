@@ -5,16 +5,20 @@ import Button from '@/components/ui/Button';
 import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
+import { ModalPageRoutes, Routes } from '@/libs/routes';
 
 export default function HomePage() {
   const router = useRouter();
-  const { getMergePath } = useModalRoutes();
+  const { getMergePath, getModalOrPagePath } = useModalRoutes();
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[600px] w-full bg-red-500" />
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile), { scroll: false })}>
+        <Button
+          onClick={() =>
+            router.push(getModalOrPagePath(ModalPageRoutes.profile), { scroll: false })
+          }
+        >
           路由弹窗(个人中心)
         </Button>
         <Button onClick={() => router.push(getMergePath(Routes.ModalLogin), { scroll: false })}>
