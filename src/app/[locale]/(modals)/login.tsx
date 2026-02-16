@@ -1,10 +1,15 @@
 import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
 
-export default function Login({ onCloseAction }: ModalComponentProps) {
+export default function Login({ onClose }: ModalComponentProps) {
   return (
-    <div data-name="Login" className="h-screen w-screen bg-amber-600">
-      <div>登录</div>
-      <div onClick={onCloseAction}>返回</div>
+    <div
+      data-name="Login"
+      className="flex h-screen w-screen flex-col items-center justify-center gap-4 rounded-md bg-white p-3 sm:h-[600px] sm:w-[400px]"
+    >
+      <h1 className="text-2xl font-bold">登录</h1>
+      <div className="cursor-pointer hover:text-blue-500" onClick={onClose}>
+        返回
+      </div>
     </div>
   );
 }

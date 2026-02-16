@@ -37,7 +37,13 @@ export default function X2Dialog() {
         >
           跳转其他页面
         </Button>
-        <Button onClick={() => router.back()}>返回</Button>
+        <Button
+          onClick={() => {
+            dialog.close('X2Dialog').then(() => router.back());
+          }}
+        >
+          返回
+        </Button>
       </div>
     </div>
   );

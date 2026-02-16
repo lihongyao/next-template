@@ -240,7 +240,11 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
         onAnimationEnd={handleAnimationEnd}
       >
         <div
-          className={cn(isExiting ? exitAnimation : enterAnimation, contentClassName)}
+          className={cn(
+            'flex h-full w-full items-center justify-center',
+            isExiting ? exitAnimation : enterAnimation,
+            contentClassName,
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           {children}

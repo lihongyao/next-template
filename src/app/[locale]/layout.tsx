@@ -10,8 +10,6 @@ import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
-import { cn } from '@/libs/class-helpers';
-import { geistMono } from '@/libs/fonts';
 import { BrandConfigProvider } from '@/providers/brand.provider';
 
 export const runtime = 'edge';
@@ -61,14 +59,14 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <head>
         {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}
-        <meta name="theme-color" content={'#000'} />
+        <meta name="theme-color" content={'#874334'} />
         {/* PWA - 隐藏地址栏、底部工具栏 */}
         {/* For iOS Safari*/}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {/* For Android Chrome */}
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={cn('antialiased', geistMono.variable)}>
+      <body style={{ background: '#F5F5F5' }}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
             <DialogProvider>

@@ -1,7 +1,9 @@
-import { usePathname } from '@/i18n/navigation';
+// src/hooks/useModalRoutes.ts
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 export const useModalRoutes = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const getMergePath = (target: string) => {
     if (!target) return target;
@@ -11,6 +13,7 @@ export const useModalRoutes = () => {
     const index = pathname.indexOf(target);
     return index !== -1 ? `${pathname.slice(0, index)}${target}` : `${base}${target}`;
   };
+  const getModalOrPagePath = () => {};
 
   return {
     getMergePath,

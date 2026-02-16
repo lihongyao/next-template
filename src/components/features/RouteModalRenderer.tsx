@@ -8,15 +8,18 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import {
-  modalBackdropVariantsRight,
-  pageLayoutSlideVariants,
-} from '@/animations/motion-animations';
+  modalBackdropVariantsDesktop,
+  modalBackdropVariantsMobile,
+  modalContentVariantsDesktop,
+  modalContentVariantsMobile,
+} from '@/animations/modal-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
+import { useDevice } from '@/hooks/useDevices';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { routing } from '@/i18n/routing';
 
 export type ModalComponentProps = {
-  onCloseAction: () => void;
+  onClose: () => void;
 };
 
 /**
@@ -40,7 +43,7 @@ export default function RouteModalRenderer() {
     [modalKeys],
   );
 
-  const onCloseAction = useCallback(() => {
+  const onClose = useCallback(() => {
     if (ModalComponent.length <= 0) return;
 
     const canGoBack = window.history.length > 2;
@@ -59,6 +62,7 @@ export default function RouteModalRenderer() {
     router.replace(nextUrl, { scroll: false });
   }, [ModalComponent, router, pathSegments, searchParams]);
 
+  const { isMobile } = useDevice();
   useSwipeBack((value) => setIsAllow(!value), { enabled: ModalComponent.length > 0 });
 
   useEffect(() => {
@@ -90,7 +94,14 @@ export default function RouteModalRenderer() {
             className="fixed inset-0 z-auto flex items-center justify-center"
           >
             <motion.div
-              variants={isAllow ? modalBackdropVariantsRight : undefined}
+              className="absolute size-full bg-black/70"
+              variants={
+                isAllow
+                  ? isMobile
+                    ? modalBackdropVariantsMobile
+                    : modalBackdropVariantsDesktop
+                  : undefined
+              }
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -99,13 +110,19 @@ export default function RouteModalRenderer() {
               }}
             />
             <motion.div
-              variants={isAllow ? pageLayoutSlideVariants : undefined}
+              variants={
+                isAllow
+                  ? isMobile
+                    ? modalContentVariantsMobile
+                    : modalContentVariantsDesktop
+                  : undefined
+              }
               initial="hidden"
               animate="visible"
               exit="exit"
               style={{ willChange: 'transform, opacity' }}
             >
-              <Modal onCloseAction={onCloseAction} />
+              <Modal onClose={onClose} />
             </motion.div>
           </motion.div>
         );

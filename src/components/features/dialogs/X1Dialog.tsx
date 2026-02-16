@@ -17,7 +17,7 @@ export default function X1Dialog({ message, count }: X1DialogProps) {
   const onClose2 = () => dialog.close('X1Dialog');
 
   return (
-    <div data-name="X1Dialog" className="h-full w-full rounded bg-white p-4 shadow-lg">
+    <div data-name="X1Dialog" className="rounded bg-white p-4 shadow-lg">
       <h2 className="text-lg font-bold">X1 Dialog</h2>
 
       <p>{message}</p>
