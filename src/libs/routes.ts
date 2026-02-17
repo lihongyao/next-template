@@ -19,12 +19,14 @@ export const PageRoutes = {
   MotionSub: '/motion/sub',
   CdnImage: '/cdn-image',
   DataPathThrough: '/data-pass-through',
+  Game: '/game',
 } as const;
 
 // 弹窗路由
 export const ModalRoutes = {
   ModalProfile: '/modal-profile',
   ModalLogin: '/modal-login',
+  ModalGame: '/modal-game',
 } as const;
 
 // 所有路由
@@ -43,10 +45,9 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
  * 当H5为路由弹窗页面，PC为独立页面时， 为实现H5/PC之间的动态切换。
  * 需在这里定义对应的映射关系。useModalPageAutoCollapse 会自动处理。
  *
- * ⚠️ 如果涉及到参数传递，比如 list -> details，如果独立页面是动态路由，参数传递应该这样：
- * 1. 独立页面：/list/:id
- * 2. 弹窗路由：/modal-details?id=xxx
- * 参数拼接需要在获取到路由之后处理。
+ * ⚠️ 如果涉及到参数传递，比如 list -> details，无论是页面路由还是弹窗路由，都需使用动态路由。
+ * 1. 页面路由：/list/:id
+ * 2. 弹窗路由：/modal-details/:id
  *
  * @see useModalPageAutoCollapse
  * @see useModalRoutes
@@ -55,6 +56,10 @@ export const ModalPageRoutes = {
   profile: {
     pc: Routes.Profile,
     h5: Routes.ModalProfile,
+  },
+  game: {
+    pc: Routes.Game,
+    h5: Routes.ModalGame,
   },
 } as const satisfies Record<string, { readonly pc: Route; readonly h5: Route }>;
 

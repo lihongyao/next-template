@@ -16,7 +16,7 @@ export default function HomePage() {
       <div className="flex flex-wrap gap-2">
         <Button
           onClick={() =>
-            router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile).route ?? '', {
+            router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), {
               scroll: false,
             })
           }
@@ -28,11 +28,23 @@ export default function HomePage() {
         >
           路由弹窗(登录)
         </Button>
+        <Button
+          onClick={() => {
+            const route = resolveRouteForCurrentDevice(ModalPageRoutes.game);
+            const jumpToUrl = route + '/1';
+            router.push(jumpToUrl, {
+              scroll: false,
+            });
+          }}
+        >
+          游戏详情
+        </Button>
         <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>
         <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
+
       <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
         desktop="https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg"

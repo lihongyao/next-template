@@ -28,14 +28,17 @@ export const useModalRoutes = () => {
   const resolveRouteForCurrentDevice = (config: ModalPageRouteConfig) => {
     const jumpToUrl = isMobile ? config.h5 : config.pc;
     const isModalRoute = (Object.values(ModalRoutes) as string[]).includes(jumpToUrl);
-    return {
-      isModalRoute,
-      route: isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl,
-    };
+    return isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl;
   };
 
-  return {
-    mergeRouteIntoPath,
-    resolveRouteForCurrentDevice,
+  /** 从目标路由中获取参数 */
+  const getModalParams = (target: string) => {
+    const pathnameSegments = pathname.split('/').filter(Boolean);
+    const targetSegments = target.split('/').filter(Boolean);
+    const targetIndex = pathnameSegments.findIndex((segment) => targetSegments.includes(segment));
+    const params = pathnameSegments.slice(targetIndex + 1);
+    return params;
   };
+
+  return { mergeRouteIntoPath, resolveRouteForCurrentDevice, getModalParams };
 };

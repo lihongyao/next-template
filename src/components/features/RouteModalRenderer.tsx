@@ -87,6 +87,8 @@ export default function RouteModalRenderer() {
     >
       {ModalComponent.map((Modal, idx) => {
         const modalKey = modalKeys[idx];
+        const modalSegmentIndex = pathSegments.indexOf(modalKey);
+        const params = modalSegmentIndex === -1 ? [] : pathSegments.slice(modalSegmentIndex + 1);
         return (
           <motion.div
             key={modalKey}
@@ -122,7 +124,7 @@ export default function RouteModalRenderer() {
               exit="exit"
               style={{ willChange: 'transform, opacity' }}
             >
-              <Modal onClose={onClose} />
+              <Modal onClose={onClose} params={params} />
             </motion.div>
           </motion.div>
         );
