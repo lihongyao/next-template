@@ -9,19 +9,21 @@ import { ModalPageRoutes, Routes } from '@/libs/routes';
 
 export default function HomePage() {
   const router = useRouter();
-  const { getMergePath, getModalOrPagePath } = useModalRoutes();
+  const { mergeRouteIntoPath, getPathForCurrentDevice } = useModalRoutes();
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[600px] w-full bg-red-500" />
       <div className="flex flex-wrap gap-2">
         <Button
           onClick={() =>
-            router.push(getModalOrPagePath(ModalPageRoutes.profile), { scroll: false })
+            router.push(getPathForCurrentDevice(ModalPageRoutes.profile), { scroll: false })
           }
         >
           路由弹窗(个人中心)
         </Button>
-        <Button onClick={() => router.push(getMergePath(Routes.ModalLogin), { scroll: false })}>
+        <Button
+          onClick={() => router.push(mergeRouteIntoPath(Routes.ModalLogin), { scroll: false })}
+        >
           路由弹窗(登录)
         </Button>
         <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>

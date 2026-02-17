@@ -18,24 +18,6 @@ const routeToKeyMap: Record<string, ModalPageRouteKey> = {};
   routeToKeyMap[h5] = key;
 });
 
-/** 从 localStorage 读取 H5 modal 的 basePath */
-function getBasePath(): string {
-  try {
-    return localStorage.getItem(BASE_KEY) || '';
-  } catch {
-    return '';
-  }
-}
-
-/** 将 H5 modal 的 basePath 写入 localStorage */
-function setBasePath(value: string): void {
-  try {
-    localStorage.setItem(BASE_KEY, value);
-  } catch {
-    // ignore
-  }
-}
-
 /**
  * 监听设备断点变化，自动将 H5 弹窗路由与 PC 页面路由相互切换
  *
@@ -81,10 +63,10 @@ export default function useModalPageAutoCollapse(): void {
 
     // ③ H5 modal 挂在 basePath 下，需记住以便设备切换时恢复
     if (subPath === config.h5) {
-      setBasePath(basePath);
+      localStorage.setItem(BASE_KEY, basePath);
     }
 
-    const restoredBase = getBasePath();
+    const restoredBase = localStorage.getItem(BASE_KEY) || '';
 
     // ④ 根据设备计算目标路径并跳转
     const targetSub = isMobile ? config.h5 : config.pc;

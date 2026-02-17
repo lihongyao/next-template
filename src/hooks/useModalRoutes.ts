@@ -1,20 +1,21 @@
 // src/hooks/useModalRoutes.ts
 import { usePathname } from '@/i18n/navigation';
-import { ModalPageRouteConfig, Route } from '@/libs/routes';
+import { ModalPageRouteConfig, ModalRoutes } from '@/libs/routes';
 
 import { useDevice } from './useDevices';
 
 /**
  * 提供弹窗/页面路由相关工具方法
  *
- * - getModalOrPagePath: 根据当前设备返回 pc 或 h5 路径，传 ModalPageRoutes.xxx 可获得联想
- * - getMergePath: 将目标路由合并到当前 pathname
+ * - getPathForCurrentDevice: 根据当前设备从配置中返回 pc 或 h5 路径，传 ModalPageRoutes.xxx
+ * - mergeRouteIntoPath: 将目标路由合并到当前 pathname，返回完整路径（路由弹窗时用）
  */
 export const useModalRoutes = () => {
   const pathname = usePathname();
   const { isMobile } = useDevice();
 
-  const getMergePath = (target: string) => {
+  /** 将目标路由合并进当前 pathname，返回完整路径 */
+  const mergeRouteIntoPath = (target: string) => {
     if (!target) return target;
     // 确保目标路由以斜杠开头
     target = target.startsWith('/') ? target : `/${target}`;
@@ -22,15 +23,17 @@ export const useModalRoutes = () => {
     const index = pathname.indexOf(target);
     return index !== -1 ? `${pathname.slice(0, index)}${target}` : `${base}${target}`;
   };
-  const getModalOrPagePath = (source: ModalPageRouteConfig): Route => {
-    if (isMobile) {
-      return source.h5;
-    }
-    return source.pc;
+
+  /** 根据当前设备（pc/h5）从配置中取对应路径 */
+  const getPathForCurrentDevice = (config: ModalPageRouteConfig) => {
+    const jumpToUrl = isMobile ? config.h5 : config.pc;
+    const isModalRoute = (Object.values(ModalRoutes) as string[]).includes(jumpToUrl);
+    console.log('getPathForCurrentDevice', jumpToUrl, isModalRoute);
+    return isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl;
   };
 
   return {
-    getMergePath,
-    getModalOrPagePath,
+    mergeRouteIntoPath,
+    getPathForCurrentDevice,
   };
 };

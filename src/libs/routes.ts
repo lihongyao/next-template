@@ -40,12 +40,8 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
 /**
  * 弹窗路由 ↔ 页面路由映射
  *
- * 为实现移动端页面切换交互动效，二级页面在 H5 上以路由弹窗形式展现；
- * PC 端可为独立页面。根据设备断点动态切换对应路由。
- *
- * 使用方式：
- * - getModalOrPagePath(ModalPageRoutes.profile) 获取当前设备应跳转的路径
- * - 输入 ModalPageRoutes. 可联想所有已注册的 key（如 profile）
+ * 当H5为路由弹窗页面，PC为独立页面时， 为实现H5/PC之间的动态切换。
+ * 需在这里定义对应的映射关系。useModalPageAutoCollapse 会自动处理。
  *
  * @see useModalPageAutoCollapse
  * @see useModalRoutes

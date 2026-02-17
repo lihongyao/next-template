@@ -24,7 +24,7 @@ export default function Demo() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
-  const { getMergePath } = useModalRoutes();
+  const { mergeRouteIntoPath } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
@@ -188,7 +188,9 @@ export default function Demo() {
     <div>
       <div className="mb-4 h-[800px] bg-pink-300"></div>
       <div className="flex flex-wrap gap-4 p-4">
-        <Button onClick={() => router.push(getMergePath(Routes.ModalProfile), { scroll: false })}>
+        <Button
+          onClick={() => router.push(mergeRouteIntoPath(Routes.ModalProfile), { scroll: false })}
+        >
           路由弹框
         </Button>
         <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
