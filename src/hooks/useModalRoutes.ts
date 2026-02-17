@@ -7,7 +7,7 @@ import { useDevice } from './useDevices';
 /**
  * 提供弹窗/页面路由相关工具方法
  *
- * - getPathForCurrentDevice: 根据当前设备从配置中返回 pc 或 h5 路径，传 ModalPageRoutes.xxx
+ * - resolveRouteForCurrentDevice: 根据当前设备从配置中返回 pc 或 h5 路径，传 ModalPageRoutes.xxx
  * - mergeRouteIntoPath: 将目标路由合并到当前 pathname，返回完整路径（路由弹窗时用）
  */
 export const useModalRoutes = () => {
@@ -25,15 +25,17 @@ export const useModalRoutes = () => {
   };
 
   /** 根据当前设备（pc/h5）从配置中取对应路径 */
-  const getPathForCurrentDevice = (config: ModalPageRouteConfig) => {
+  const resolveRouteForCurrentDevice = (config: ModalPageRouteConfig) => {
     const jumpToUrl = isMobile ? config.h5 : config.pc;
     const isModalRoute = (Object.values(ModalRoutes) as string[]).includes(jumpToUrl);
-    console.log('getPathForCurrentDevice', jumpToUrl, isModalRoute);
-    return isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl;
+    return {
+      isModalRoute,
+      route: isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl,
+    };
   };
 
   return {
     mergeRouteIntoPath,
-    getPathForCurrentDevice,
+    resolveRouteForCurrentDevice,
   };
 };
