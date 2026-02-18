@@ -9,7 +9,7 @@ import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
+import { ModalPageRoutes, Routes } from '@/libs/routes';
 
 type DialogConfig = {
   type: DialogType; // 对应 dialogRegistry 的 key
@@ -24,7 +24,7 @@ export default function Demo() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
-  const { mergeRouteIntoPath } = useModalRoutes();
+  const { mergeRouteIntoPath, resolveRouteForCurrentDevice } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
@@ -189,7 +189,9 @@ export default function Demo() {
       <div className="mb-4 h-[800px] bg-pink-300"></div>
       <div className="flex flex-wrap gap-4 p-4">
         <Button
-          onClick={() => router.push(mergeRouteIntoPath(Routes.ModalProfile), { scroll: false })}
+          onClick={() => {
+            router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), { scroll: false });
+          }}
         >
           路由弹框
         </Button>
