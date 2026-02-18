@@ -8,6 +8,7 @@
     "source.organizeImports": "explicit"
   },
   "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
+  "css.lint.unknownAtRules": "ignore",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

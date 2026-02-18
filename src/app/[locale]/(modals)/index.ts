@@ -7,10 +7,10 @@ import type { ModalComponentProps } from '@/components/features/RouteModalRender
 
 const ModalProfile = dynamic(() => import('@/app/[locale]/(modals)/profile'));
 const ModalLogin = dynamic(() => import('@/app/[locale]/(modals)/login'));
-const ModalGame = dynamic(() => import('@/app/[locale]/(modals)/game'));
+const ModalGameDetails = dynamic(() => import('@/app/[locale]/(modals)/game-details'));
 
 export const ModalComponents: Record<string, ComponentType<ModalComponentProps>> = {
   'modal-profile': ModalProfile,
   'modal-login': ModalLogin,
-  'modal-game': ModalGame,
+  'modal-game-details': ModalGameDetails,
 };

@@ -12,7 +12,7 @@ export default function GamePage() {
       <h1>游戏列表</h1>
       <Button
         onClick={() => {
-          const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.game);
+          const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
           router.push(jumpToUrl + '/1');
         }}
       >

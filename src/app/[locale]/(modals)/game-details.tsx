@@ -8,12 +8,12 @@ export default function ModalGame({ onClose }: ModalComponentProps) {
   const { getModalParams } = useModalRoutes();
 
   useEffect(() => {
-    const params = getModalParams(Routes.ModalGame);
+    const params = getModalParams(Routes.ModalGameDetails);
     console.log('params >> ', params);
   }, []);
   return (
     <div className="h-screen w-screen bg-white">
-      <div>游戏列表</div>123
+      <div>游戏详情</div>
       <div onClick={onClose}>返回</div>
     </div>
   );
