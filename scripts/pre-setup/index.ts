@@ -8,6 +8,7 @@ const SCRIPT_NAME = 'scripts/pre-setup/index.ts';
 console.log('pre-setup app:', app);
 console.log('pre-setup env:', env);
 console.log('pre-setup ...');
+console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND);
 
 (async function main() {
   try {

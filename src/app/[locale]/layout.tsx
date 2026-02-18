@@ -11,6 +11,7 @@ import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
+import { getSSRDeviceContext } from '@/libs/device.server';
 import { BrandConfigProvider } from '@/providers/brand.provider';
 
 export const runtime = 'edge';
@@ -55,6 +56,9 @@ export default async function LocaleLayout({
 
   // 获取品牌配置
   const brandConfig = await getBrandConfigSSR();
+
+  const { initialIsMobile } = await getSSRDeviceContext();
+  console.log('__initialIsMobile__', initialIsMobile);
 
   return (
     <html lang={locale}>

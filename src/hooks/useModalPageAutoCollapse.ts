@@ -62,6 +62,10 @@ export default function useModalPageAutoCollapse(): void {
       return;
     }
 
+    // 仅详情页（带参数段）随视窗切换；列表页如 /game 不切换，避免拖拽视窗时误跳
+    const hasDetailSegment = paramSegment.length > 1;
+    if (!hasDetailSegment) return;
+
     if (prevIsMobile.current === isMobile) return;
     prevIsMobile.current = isMobile;
 

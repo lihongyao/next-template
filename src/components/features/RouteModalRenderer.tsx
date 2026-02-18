@@ -63,6 +63,8 @@ export default function RouteModalRenderer() {
   }, [ModalComponent, router, pathSegments, searchParams]);
 
   const { isMobile } = useDevice();
+
+  console.log('__isMobile__', isMobile);
   useSwipeBack((value) => setIsAllow(!value), { enabled: ModalComponent.length > 0 });
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function RouteModalRenderer() {
               exit="exit"
               style={{ willChange: 'transform, opacity' }}
             >
-              <Modal onClose={onClose} params={params} />
+              <Modal onClose={onClose} />
             </motion.div>
           </motion.div>
         );

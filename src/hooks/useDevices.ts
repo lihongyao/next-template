@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(true);
+  const [matches, setMatches] = useState(() => {
+    // FIXME：临时处理，有水合问题
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
     const media = window.matchMedia(query);

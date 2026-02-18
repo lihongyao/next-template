@@ -13,7 +13,7 @@ export default function ModalGame({ onClose }: ModalComponentProps) {
   }, []);
   return (
     <div className="h-screen w-screen bg-white">
-      <div>新闻列表</div>123
+      <div>游戏列表</div>123
       <div onClick={onClose}>返回</div>
     </div>
   );
