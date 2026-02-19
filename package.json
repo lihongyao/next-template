@@ -5,8 +5,8 @@
   "scripts": {
     "predev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
     "dev": "dotenv -e env/.env.${app-afun}.${env-dev} -- next dev --turbopack",
-    "prebuild": "cross-env app=${app} env=${env} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
-    "build": "cross-env app=${app} env=${env} dotenv -e env/.env.${app-afun}.${env-dev} -- next build --turbopack",
+    "prebuild": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
+    "build": "dotenv -e env/.env.${app-afun}.${env-dev} -- next build --turbopack",
     "start": "next start",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
