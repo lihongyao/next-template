@@ -6,7 +6,6 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { ModalPageRouteKey, ModalPageRoutes } from '@/libs/routes';
 
 import { useDevice } from './useDevices';
-import { useMounted } from './useMounted';
 
 const BASE_KEY = '__modal_base_path__';
 
@@ -20,12 +19,11 @@ function matchRoute(pathname: string, route: string): boolean {
 export default function useModalPageAutoCollapse(): void {
   const pathname = usePathname();
   const router = useRouter();
-  const mounted = useMounted();
   const { isMobile } = useDevice();
   const prevIsMobile = useRef(isMobile);
 
   useLayoutEffect(() => {
-    if (!mounted) return;
+    if (isMobile === null) return;
 
     let matchedKey: ModalPageRouteKey | '' = '';
     let basePath = '';
@@ -57,12 +55,14 @@ export default function useModalPageAutoCollapse(): void {
       return;
     }
 
-    // 仅 gameDetails 区分列表/详情：列表页不随视窗切换，详情页才切；profile 等无参页始终随视窗切换
-    if (matchedKey === 'gameDetails' && paramSegment.length <= 1) return;
+    const config = ModalPageRoutes[matchedKey];
+    // 列表+详情型：仅当路径带参数（如 /game-list/1、/modal-game-details/1）时才随视窗切换，列表页（无参）不切换
+    const onlyWhenParam =
+      'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
+    if (onlyWhenParam && paramSegment.length <= 1) return;
     if (prevIsMobile.current === isMobile) return;
     prevIsMobile.current = isMobile;
 
-    const config = ModalPageRoutes[matchedKey];
     let targetPath: string;
     if (isMobile) {
       const finalBase = basePath || localStorage.getItem(BASE_KEY) || '';
@@ -73,5 +73,5 @@ export default function useModalPageAutoCollapse(): void {
       localStorage.setItem(BASE_KEY, basePath);
     }
     if (targetPath !== pathname) router.replace(targetPath);
-  }, [pathname, isMobile, mounted, router]);
+  }, [pathname, isMobile, router]);
 }

@@ -2,30 +2,41 @@
 
 import { useEffect, useState } from 'react';
 
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(() => {
-    // FIXME：临时处理，有水合问题
-    // return window.matchMedia(query).matches;
-    return true;
-  });
-
-  useEffect(() => {
-    const media = window.matchMedia(query);
-    setMatches(media.matches);
-
-    const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
-
-    return () => media.removeEventListener('change', listener);
-  }, [query]);
-
-  return matches;
-}
+const MOBILE_QUERY = '(max-width: 767px)';
+const TABLET_QUERY = '(min-width: 768px) and (max-width: 1023px)';
+const PC_QUERY = '(min-width: 1024px)';
 
 export function useDevice() {
-  const isMobile = useMediaQuery('(max-width: 767px)');
-  const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
-  const isPC = useMediaQuery('(min-width: 1024px)');
+  const [state, setState] = useState<{
+    isMobile: boolean | null;
+    isTablet: boolean | null;
+    isPC: boolean | null;
+  }>({ isMobile: null, isTablet: null, isPC: null });
 
-  return { isMobile, isTablet, isPC };
+  useEffect(() => {
+    const mobile = window.matchMedia(MOBILE_QUERY);
+    const tablet = window.matchMedia(TABLET_QUERY);
+    const pc = window.matchMedia(PC_QUERY);
+
+    const update = () => {
+      setState({
+        isMobile: mobile.matches,
+        isTablet: tablet.matches,
+        isPC: pc.matches,
+      });
+    };
+
+    update();
+    mobile.addEventListener('change', update);
+    tablet.addEventListener('change', update);
+    pc.addEventListener('change', update);
+
+    return () => {
+      mobile.removeEventListener('change', update);
+      tablet.removeEventListener('change', update);
+      pc.removeEventListener('change', update);
+    };
+  }, []);
+
+  return state;
 }

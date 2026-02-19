@@ -4,12 +4,36 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ---------------------------------------------------------------------------------- */
+
 @theme {
   /* sm: tablet (768px), md: desktop (1024px), lg: large (1440px) */
   --breakpoint-sm: 768px;
   --breakpoint-md: 1024px;
   --breakpoint-lg: 1440px;
 }
+
+.isMobile {
+  @apply flex sm:hidden;
+}
+
+.isTablet {
+  @apply hidden sm:flex md:hidden;
+}
+
+.isMobileOrTablet {
+  @apply flex md:hidden;
+}
+
+.isTabletOrDesktop {
+  @apply hidden sm:flex;
+}
+
+.isDesktop {
+  @apply hidden md:flex;
+}
+
+/* ---------------------------------------------------------------------------------- */
 
 /* 锁住滚动 */
 .lock-scroll {

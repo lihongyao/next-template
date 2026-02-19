@@ -1,4 +1,3 @@
-// src/components/features/RouteModalRenderer.tsx
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -23,52 +22,43 @@ export type ModalComponentProps = {
 };
 
 /**
- * 根据 URL 中的 modal 段（如 /en/modal-login）渲染对应弹窗，支持多层级叠加。
- * 进入从右往左滑，关闭时由 AnimatePresence 播完 exit 再卸载。
+ * 按 URL 里的 modal 段（如 /en/modal-login）渲染弹窗，支持多层叠。
+ * 进场右滑、退场等 AnimatePresence exit 播完再卸。isMobile 为 null 时不画。
  */
 export default function RouteModalRenderer() {
   const router = useRouter();
   const pathname = usePathname();
   const pathSegments = pathname.split('/').filter(Boolean);
-  const searchParams = useSearchParams();
-  const searchParamsString = searchParams.toString();
+  const searchParamsString = useSearchParams().toString();
+  const { isMobile } = useDevice();
 
   const [isAllow, setIsAllow] = useState(true);
-  // 路由里没 modal 时先不拆 AnimatePresence，等 exit 播完再隐藏，否则关的时候会闪没
-  const [pureHidden, setPureHidden] = useState(false);
+  const [pureHidden, setPureHidden] = useState(false); // 等 exit 播完再隐藏，否则关时会闪
 
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
-  const ModalComponent = useMemo(
+  const modalComponents = useMemo(
     () => modalKeys.filter(Boolean).map((m) => ModalComponents[m]),
     [modalKeys],
   );
 
   const onClose = useCallback(() => {
-    if (ModalComponent.length <= 0) return;
-
-    const canGoBack = window.history.length > 2;
-    if (canGoBack) {
+    if (!modalComponents.length) return;
+    if (window.history.length > 2) {
       router.back();
       return;
     }
-
     const params = new URLSearchParams(searchParamsString);
     const nextQuery = params.toString();
     const newPathSegments = [...pathSegments];
     newPathSegments.pop();
-    const nextPath = `/${newPathSegments.join('/')}`;
-    const finalPath = nextPath || `/${routing.defaultLocale}`;
-    const nextUrl = nextQuery ? `${finalPath}?${nextQuery}` : finalPath;
-    router.replace(nextUrl, { scroll: false });
-  }, [ModalComponent, router, pathSegments, searchParams]);
+    const nextPath = `/${newPathSegments.join('/')}` || `/${routing.defaultLocale}`;
+    router.replace(nextQuery ? `${nextPath}?${nextQuery}` : nextPath, { scroll: false });
+  }, [modalComponents.length, router, pathSegments, searchParamsString]);
 
-  const { isMobile } = useDevice();
-
-  console.log('__isMobile__', isMobile);
-  useSwipeBack((value) => setIsAllow(!value), { enabled: ModalComponent.length > 0 });
+  useSwipeBack((value) => setIsAllow(!value), { enabled: modalComponents.length > 0 });
 
   useEffect(() => {
-    if (ModalComponent.length) {
+    if (modalComponents.length) {
       setPureHidden(false);
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
@@ -77,20 +67,30 @@ export default function RouteModalRenderer() {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     }
-  }, [ModalComponent.length]);
+  }, [modalComponents.length]);
 
   if (pureHidden) return null;
+  if (isMobile === null) return null;
+
+  const backdropVariants = isAllow
+    ? isMobile
+      ? modalBackdropVariantsMobile
+      : modalBackdropVariantsDesktop
+    : undefined;
+  const contentVariants = isAllow
+    ? isMobile
+      ? modalContentVariantsMobile
+      : modalContentVariantsDesktop
+    : undefined;
 
   return (
     <AnimatePresence
       onExitComplete={() => {
-        if (ModalComponent.length <= 0) setPureHidden(true);
+        if (!modalComponents.length) setPureHidden(true);
       }}
     >
-      {ModalComponent.map((Modal, idx) => {
+      {modalComponents.map((Modal, idx) => {
         const modalKey = modalKeys[idx];
-        const modalSegmentIndex = pathSegments.indexOf(modalKey);
-        const params = modalSegmentIndex === -1 ? [] : pathSegments.slice(modalSegmentIndex + 1);
         return (
           <motion.div
             key={modalKey}
@@ -99,28 +99,14 @@ export default function RouteModalRenderer() {
           >
             <motion.div
               className="absolute size-full bg-black/70"
-              variants={
-                isAllow
-                  ? isMobile
-                    ? modalBackdropVariantsMobile
-                    : modalBackdropVariantsDesktop
-                  : undefined
-              }
+              variants={backdropVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={() => {
-                console.log('onMaskClick');
-              }}
+              onClick={onClose}
             />
             <motion.div
-              variants={
-                isAllow
-                  ? isMobile
-                    ? modalContentVariantsMobile
-                    : modalContentVariantsDesktop
-                  : undefined
-              }
+              variants={contentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"

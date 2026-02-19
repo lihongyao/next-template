@@ -11,7 +11,6 @@ import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
-import { getSSRDeviceContext } from '@/libs/device.server';
 import { BrandConfigProvider } from '@/providers/brand.provider';
 
 export const runtime = 'edge';
@@ -36,11 +35,7 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }>) {
-  console.log('__LocaleLayout__');
   const { locale } = await params;
-
-  console.log('__locale__', locale);
-  console.log('__routing.locales__', routing.locales);
 
   // Ensure that the incoming `locale` is valid
   if (!hasLocale(routing.locales, locale)) {
@@ -56,9 +51,6 @@ export default async function LocaleLayout({
 
   // 获取品牌配置
   const brandConfig = await getBrandConfigSSR();
-
-  const { initialIsMobile } = await getSSRDeviceContext();
-  console.log('__initialIsMobile__', initialIsMobile);
 
   return (
     <html lang={locale}>

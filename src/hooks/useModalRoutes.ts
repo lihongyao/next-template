@@ -24,9 +24,9 @@ export const useModalRoutes = () => {
     return index !== -1 ? `${pathname.slice(0, index)}${target}` : `${base}${target}`;
   };
 
-  /** 根据当前设备（pc/h5）从配置中取对应路径 */
+  /** 根据当前设备（pc/h5）从配置中取对应路径，null 当 PC */
   const resolveRouteForCurrentDevice = (config: ModalPageRouteConfig) => {
-    const jumpToUrl = isMobile ? config.h5 : config.pc;
+    const jumpToUrl = isMobile === true ? config.h5 : config.pc;
     const isModalRoute = (Object.values(ModalRoutes) as string[]).includes(jumpToUrl);
     return isModalRoute ? mergeRouteIntoPath(jumpToUrl) : jumpToUrl;
   };
