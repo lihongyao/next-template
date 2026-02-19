@@ -9,7 +9,7 @@ import { ModalPageRoutes, Routes } from '@/libs/routes';
 
 export default function HomePage() {
   const router = useRouter();
-  const { mergeRouteIntoPath, resolveRouteForCurrentDevice } = useModalRoutes();
+  const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[600px] w-full bg-red-500" />
@@ -24,7 +24,9 @@ export default function HomePage() {
           路由弹窗(个人中心)
         </Button>
         <Button
-          onClick={() => router.push(mergeRouteIntoPath(Routes.ModalLogin), { scroll: false })}
+          onClick={() =>
+            router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false })
+          }
         >
           路由弹窗(登录)
         </Button>

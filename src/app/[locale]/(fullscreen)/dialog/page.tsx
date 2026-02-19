@@ -24,7 +24,7 @@ export default function Demo() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
-  const { mergeRouteIntoPath, resolveRouteForCurrentDevice } = useModalRoutes();
+  const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
