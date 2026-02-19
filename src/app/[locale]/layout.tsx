@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import '@/assets/styles/generated/brand.css';
 import ClientInitializer from '@/components/features/ClientInitializer';
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
