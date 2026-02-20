@@ -74,7 +74,7 @@ function setupBrandCssImports(brandConfig: BrandConfig) {
 */
 
 import "../core/index.css";
-import "../thems/${brandConfig.theme}.css";
+import "../themes/${brandConfig.theme}.css";
 import "../skins/${brandConfig.skin}.css";
 `;
 
