@@ -80,7 +80,8 @@ import "../skins/${brandConfig.skin}.css";
 
   const stylesRoot = path.resolve(ROOT, 'src/assets/styles');
   const generatedDir = path.resolve(stylesRoot, 'generated');
-  fs.mkdirSync(stylesRoot, { recursive: true });
+
+  if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir, { recursive: true });
 
   const brandCssFilePath = path.resolve(generatedDir, 'brand.css.ts');
   fs.writeFileSync(brandCssFilePath, brandCssContent, 'utf8');

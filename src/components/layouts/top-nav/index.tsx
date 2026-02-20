@@ -1,10 +1,11 @@
-export default function TopNavLayout({ children }: { children: React.ReactNode }) {
+// src/components/layout/TopNavLayot.tsx
+export default function TopNavLayot({ children }: { children: React.ReactNode }) {
   return (
-    <div data-name="top-nav-layout">
-      <header>modern layout</header>
-      <main>
-        <div>{children}</div>
-      </main>
+    <div className="min-h-screen">
+      <header className="flex h-14 items-center border-b px-5">
+        <h1 className="tracking-xs">Modern Layout</h1>
+      </header>
+      <main className="m-4">{children}</main>
     </div>
   );
 }
