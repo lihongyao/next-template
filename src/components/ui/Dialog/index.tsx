@@ -124,16 +124,26 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   const afterCloseResolveRef = useRef<(() => void) | null>(null);
   const afterClosePromiseRef = useRef<Promise<void> | null>(null);
   const closeReasonRef = useRef<DialogCloseReason>('manual');
+  const isAnimatingRef = useRef(false);
 
   useImperativeHandle(ref, () => ({
     setIsExiting: (reason: DialogCloseReason = 'manual') => {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
       closeReasonRef.current = reason;
       setIsExiting(true);
     },
   }));
 
-  // 初始化挂载
-  useEffect(() => setMounted(true), []);
+  // 初始化挂载；非受控模式下首次展示时也标记为动画中，避免在进入动画期间重复触发
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  useEffect(() => {
+    if (mounted && visible && !isExiting) {
+      isAnimatingRef.current = true;
+    }
+  }, [mounted]);
 
   // 创建动画结束 promise
   useEffect(() => {
@@ -144,8 +154,11 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     _setAfterClosePromise?.(p);
   }, [_setAfterClosePromise]);
 
-  // 用户触发关闭意图（遮罩/closeDialog）
+  // 用户触发关闭意图（遮罩/closeDialog）- 动画中忽略重复触发
   const requestClose = (reason: DialogCloseReason = 'manual') => {
+    console.log('requestClose', reason, isAnimatingRef.current);
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
     closeReasonRef.current = reason;
     if (isControlled) {
       onClose?.();
@@ -154,14 +167,18 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     }
   };
 
-  // 响应受控组件 open 状态变化
+  // 响应受控组件 open 状态变化（动画中忽略重复的 open/close 切换）
   useEffect(() => {
     if (!isControlled) return;
     if (open) {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
       setVisible(true);
       setIsExiting(false);
       closeReasonRef.current = 'manual'; // 重置 reason
     } else if (visible) {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
       // 受控模式下，open 变为 false 时，reason 保持为 "manual"（由外部控制）
       setIsExiting(true);
     }
@@ -186,13 +203,18 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     requestClose('mask');
   };
 
-  // 动画结束处理
+  // 动画结束处理（进入/退出动画结束时解除「动画中」锁）
   const handleAnimationEnd = (e: React.AnimationEvent) => {
     if (e.target !== e.currentTarget) return;
-    if (!isExiting) return;
+    if (!isExiting) {
+      // 进入动画结束，允许后续交互
+      isAnimatingRef.current = false;
+      return;
+    }
 
     setVisible(false);
     setIsExiting(false);
+    isAnimatingRef.current = false;
 
     visibleDialogs.delete(dialogId.current);
     unlockBodyScroll();

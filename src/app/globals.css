@@ -40,11 +40,13 @@ body {
   overflow: hidden;
 }
 
-/* 隐藏滚动条 */
+/* 隐藏滚动条，但保留滚动功能 */
 .no-scrollbar {
+  overflow: auto;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  -ms-overflow-style: none; /* IE 10+ */
 }
+
 .no-scrollbar::-webkit-scrollbar {
-  display: none; /* WebKit */
+  display: none; /* Chrome / Safari */
 }
