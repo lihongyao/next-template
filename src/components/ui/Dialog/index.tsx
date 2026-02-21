@@ -122,7 +122,6 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   const dialogId = useRef(`DIALOG_${Math.random().toString(36).slice(2).toUpperCase()}`);
   const autoDestroyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const afterCloseResolveRef = useRef<(() => void) | null>(null);
-  const afterClosePromiseRef = useRef<Promise<void> | null>(null);
   const closeReasonRef = useRef<DialogCloseReason>('manual');
   const isAnimatingRef = useRef(false);
 
@@ -150,19 +149,17 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     const p = new Promise<void>((resolve) => {
       afterCloseResolveRef.current = resolve;
     });
-    afterClosePromiseRef.current = p;
     _setAfterClosePromise?.(p);
   }, [_setAfterClosePromise]);
 
   // 用户触发关闭意图（遮罩/closeDialog）- 动画中忽略重复触发
   const requestClose = (reason: DialogCloseReason = 'manual') => {
-    console.log('requestClose', reason, isAnimatingRef.current);
     if (isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
     closeReasonRef.current = reason;
     if (isControlled) {
-      onClose?.();
+      onClose?.(); // 父组件 setOpen(false)，由 useEffect 负责 setIsExiting
     } else {
+      isAnimatingRef.current = true;
       setIsExiting(true);
     }
   };
@@ -252,6 +249,7 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
 
   const content = (
     <div data-name="dialog-root" className="fixed inset-0" style={{ zIndex }}>
+      {/* 遮罩 */}
       <div
         className={cn(
           'flex h-full w-full items-center justify-center bg-black/70 backdrop-blur-xs',
@@ -261,12 +259,9 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
         onClick={handleMaskClick}
         onAnimationEnd={handleAnimationEnd}
       >
+        {/* 内容 */}
         <div
-          className={cn(
-            'flex h-full w-full items-center justify-center',
-            isExiting ? exitAnimation : enterAnimation,
-            contentClassName,
-          )}
+          className={cn(isExiting ? exitAnimation : enterAnimation, contentClassName)}
           onClick={(e) => e.stopPropagation()}
         >
           {children}
@@ -296,7 +291,6 @@ type DialogEntry = {
   key: string;
   closeDialog: () => void;
   promise?: Promise<void>;
-  resolve?: () => void;
 };
 
 let dialogZIndex = 4000;
@@ -338,7 +332,7 @@ Dialog.open = (options: DialogStaticOptions) => {
     </DialogComponent>,
   );
 
-  dialogMap.set(key, { root, container, key, closeDialog, promise, resolve: resolveFn! });
+  dialogMap.set(key, { root, container, key, closeDialog, promise });
 
   return {
     key,
@@ -468,28 +462,13 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
     const handlePopstate = () => {
       dialogsRef.current.forEach((d) => {
         if (d.closeOnPopstate) {
-          // 直接通过 ref 设置 reason 为 "popstate"
           d._dialogRef?.current?.setIsExiting('popstate');
-          // 同时设置 open=false（受控模式需要）
-          updateDialogs((prev) =>
-            prev.map((dialog) =>
-              dialog.key === d.key && React.isValidElement(dialog.content)
-                ? {
-                    ...dialog,
-                    content: React.cloneElement(
-                      dialog.content as ReactElement<{ open?: boolean }>,
-                      { open: false },
-                    ),
-                  }
-                : dialog,
-            ),
-          );
         }
       });
     };
     window.addEventListener('popstate', handlePopstate);
     return () => window.removeEventListener('popstate', handlePopstate);
-  }, [updateDialogs]);
+  }, []);
 
   /** open 方法 */
   const open = <K extends DialogType>(
@@ -537,34 +516,12 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
     const dialogRef = React.createRef<DialogRef | null>();
     instance._dialogRef = dialogRef;
 
-    // requestClose 实现
     instance.requestClose = () => {
-      // 默认使用 "manual" reason
       dialogRef.current?.setIsExiting('manual');
-      updateDialogs((prev) =>
-        prev.map((d) =>
-          d.key === dialogKey && React.isValidElement(d.content)
-            ? {
-                ...d,
-                content: React.cloneElement(d.content as ReactElement<{ open?: boolean }>, {
-                  open: false,
-                }),
-              }
-            : d,
-        ),
-      );
     };
 
-    // 渲染 Dialog
-    const element = (() => {
-      const Comp = Component as React.ComponentType<unknown>;
-      // 有 props
-      if (initialProps != null) {
-        return <Comp {...initialProps} />;
-      }
-      // 无 props
-      return <Comp />;
-    })();
+    const Comp = Component as React.ComponentType<unknown>;
+    const element = <Comp {...(initialProps ?? {})} />;
     instance.content = (
       <Dialog
         ref={dialogRef}

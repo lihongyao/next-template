@@ -14,6 +14,15 @@
 - 与路由状态联动，自动处理回退场景
 - Provider 管理的强类型业务弹窗体系
 
+# 文件结构
+
+```
+Dialog/
+├── index.tsx      # 主组件、静态方法、Provider、useDialog
+├── animate.css    # 动画样式（fade/zoom/slide）
+└── README.md
+```
+
 # 设计理念
 
 在使用前，建议先了解以下设计原则，这些原则直接影响弹窗的使用方式与行为预期。
@@ -67,7 +76,9 @@ await dialog.queue(...);
 
 在保证灵活性的同时，提高了整体的可维护性和可重构性。
 
-# DialogProps
+# API 参考
+
+## DialogProps
 
 ```ts
 interface DialogProps {
@@ -83,13 +94,13 @@ interface DialogProps {
   children: ReactNode;
   /** 是否允许点击遮罩关闭，默认true */
   maskClosable?: boolean;
-  /** 自动销毁 */
+  /** 自动销毁，单位：秒。到达时间后自动触发关闭 */
   autoDestroy?: number;
   /** 进入动画，默认zoom-in */
   enterAnimation?: DialogEnterAnimation;
   /** 退出动画，默认zoom-out */
   exitAnimation?: DialogExitAnimation;
-  /** 是否允许同一类型 Dialog 同时打开多个实例 */
+  /** 是否允许同一类型 Dialog 同时打开多个实例（仅 Provider 模式有效） */
   multiple?: boolean;
 
   /** 用户意图关闭（仅受控模式触发） */
@@ -102,11 +113,32 @@ interface DialogProps {
 }
 ```
 
+## DialogRef
+
+组件支持 `forwardRef`，用于 imperative 控制关闭：
+
+```ts
+interface DialogRef {
+  setIsExiting: (reason?: DialogCloseReason) => void;
+}
+```
+
+```tsx
+const dialogRef = useRef<DialogRef>(null);
+
+<Dialog ref={dialogRef} open={open} onClose={() => setOpen(false)}>
+  <div>内容</div>
+</Dialog>;
+
+// 程序化关闭
+dialogRef.current?.setIsExiting('manual');
+```
+
 ## DialogCloseReason
 
 ```ts
 type DialogCloseReason =
-  | 'manual' // 手动关闭（调用 close）
+  | 'manual' // 手动关闭（调用 close / requestClose）
   | 'mask' // 点击遮罩
   | 'autoDestroy' // 定时自动关闭
   | 'popstate'; // 路由返回
@@ -114,13 +146,24 @@ type DialogCloseReason =
 
 > 提示：所有关闭方式都会最终进入 `onAfterClose(reason)`，方便统一处理埋点、回收逻辑。
 
+## DialogEnterAnimation / DialogExitAnimation
+
+```ts
+type DialogEnterAnimation = 'fade-in' | 'zoom-in' | 'slide-up-in' | 'slide-right-in';
+type DialogExitAnimation = 'fade-out' | 'zoom-out' | 'slide-up-out' | 'slide-right-out';
+```
+
+动画样式定义在 `animate.css` 中，遮罩层固定使用 `fade-in` / `fade-out`。
+
 # 调用方式
 
 ## 1️⃣ 组件模式
 
 页面 / 局部弹窗
 
-适合 **页面级、局部控制** 的弹窗，由 open 控制：
+适合 **页面级、局部控制** 的弹窗。
+
+**受控模式：** 传入 `open` 时，由父组件控制开关：
 
 ```tsx
 'use client';
@@ -150,9 +193,17 @@ export default function Page() {
 }
 ```
 
+**非受控模式：** 不传 `open` 时，组件内部管理状态，首次渲染即显示，关闭后 unmount：
+
+```tsx
+<Dialog onAfterClose={(reason) => console.log(reason)}>
+  <div className="rounded bg-white p-6">内容</div>
+</Dialog>
+```
+
 特点：
 
-- 完全受控
+- 受控 / 非受控可选
 - 生命周期清晰
 - 适合局部 UI 弹窗
 
@@ -165,27 +216,39 @@ export default function Page() {
 ```tsx
 import { Dialog } from '@/components/ui/Dialog';
 
-const dialog = Dialog.open({
+const { key, close } = Dialog.open({
   content: (
     <div className="bg-white p-6">
       <p>Hello Dialog</p>
-      <button onClick={() => dialog.close()}>关闭</button>
+      <button onClick={() => close()}>关闭</button>
     </div>
   ),
   maskClosable: false,
+  autoDestroy: 3, // 3 秒后自动关闭
   onAfterClose(reason) {
     console.log('关闭原因:', reason);
   },
 });
 ```
 
-你可以：
+**返回值：**
+
+```ts
+{
+  key: string; // 实例唯一标识
+  close: () => Promise<void>; // 关闭并等待动画结束
+}
+```
+
+**关闭控制：**
 
 ```tsx
-Dialog.close(); // 关闭所有
+await close(); // 关闭当前实例，等待动画结束
 Dialog.close(key); // 关闭指定实例
-await dialog.close(); // 等待动画结束
+Dialog.close(); // 关闭所有静态方法打开的弹窗
 ```
+
+**说明：** 静态方法打开的弹窗由 `createPortal` 渲染到 `document.body`，`zIndex` 从 4000 起自增；`closeOnPopstate` 默认生效，路由后退时会自动关闭。
 
 特点：
 
@@ -254,6 +317,32 @@ dialog.open('user', {
 });
 ```
 
+**在非 Provider 子树中访问：** 若需要在非 `DialogProvider` 子组件中打开弹窗（如 store、utils、事件回调），可使用 `getGlobalDialog()`：
+
+```tsx
+import { getGlobalDialog } from '@/components/ui/Dialog';
+
+// 需确保 DialogProvider 已挂载
+const dialog = getGlobalDialog();
+dialog.open('confirm', { props: { title: '确认' } });
+```
+
+### ⭕️ props 初始化与更新
+
+`props` 支持对象或函数形式，函数可基于 `prev` 计算新值：
+
+```tsx
+// 对象形式
+dialog.open('user', { props: { userId: 1 } });
+
+// 函数形式（prev 为 null 表示首次打开）
+dialog.open('user', {
+  props: (prev) => ({
+    userId: prev ? prev.userId + 1 : 1,
+  }),
+});
+```
+
 ### ⭕️ 单例 vs. 多实例
 
 默认：**同类型只存在一个**
@@ -274,14 +363,34 @@ dialog.open('user', {
 });
 ```
 
-### ⭕️ updateProps
+### ⭕️ DialogInstance 与 updateProps
 
-动态更新内容，特别适合在弹窗显示时，接收到通知，需更新 props 的场景。
+`open()` 返回的实例包含：
+
+```ts
+type DialogInstance<K> = {
+  key: string;
+  type: K;
+  zIndex: number;
+  closeOnPopstate: boolean;
+  props: PropsOf<K>;
+  requestClose: () => void; // 触发关闭
+  updateProps: (updater) => void; // 更新 props
+};
+```
+
+**updateProps** 动态更新内容，特别适合在弹窗显示时，接收到通知需更新 props 的场景：
 
 ```tsx
+const instance = dialog.open('user', { props: { userId: 1 } });
+
+// 对象形式
+dialog.updateProps('user', { userId: 3 });
+
+// 函数形式
 dialog.updateProps('user', (prev) => ({
   ...prev,
-  userId: 3,
+  userId: (prev?.userId ?? 0) + 1,
 }));
 ```
 
@@ -338,6 +447,26 @@ dialog.open('confirm', {
 });
 ```
 
+# useDialog API
+
+```ts
+type DialogContextValue = {
+  open: <K>(type: K, options?) => DialogInstance<K>;
+  queue: <K>(type: K, options?) => Promise<void>;
+  updateProps: <K>(type: K, updater) => void;
+  closeTop: () => void;
+  close: (type?: DialogType) => Promise<void>;
+};
+```
+
+| 方法                         | 说明                                                             |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `open(type, options)`        | 打开弹窗，返回实例；同类型默认单例，传 `multiple: true` 可多实例 |
+| `queue(type, options)`       | 队列打开，等前一个完全关闭后再显示                               |
+| `updateProps(type, updater)` | 更新指定类型弹窗的 props                                         |
+| `closeTop()`                 | 关闭最上层弹窗                                                   |
+| `close(type?)`               | 关闭指定类型或全部，返回 Promise                                 |
+
 # 推荐使用场景
 
 | **场景**        | **推荐方式**               |
@@ -346,3 +475,10 @@ dialog.open('confirm', {
 | 全局确认 / 提示 | Dialog.open                |
 | 复杂业务弹窗    | useDialog + dialogRegistry |
 | 串行用户流程    | queue                      |
+
+# 注意事项
+
+1. **DialogProvider 挂载顺序**：`getGlobalDialog()` 需在 `DialogProvider` 挂载后调用，否则会抛错。
+2. **动画期间防抖**：进入/退出动画期间会忽略重复的关闭请求，避免动画被打断。
+3. **body 滚动锁**：多弹窗叠加时，只有全部关闭后才解锁 body 滚动。
+4. **dialogRegistry**：新增业务弹窗需在 `@/components/features/dialogs/index.ts` 中注册，类型会自动推导。

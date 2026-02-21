@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useMount } from 'ahooks';
 
@@ -12,8 +12,8 @@ import { useRouter } from '@/i18n/navigation';
 import { ModalPageRoutes, Routes } from '@/libs/routes';
 
 type DialogConfig = {
-  type: DialogType; // 对应 dialogRegistry 的 key
-  props?: Record<string, unknown>; // 传递给弹窗组件的 props
+  type: DialogType;
+  props?: Record<string, unknown>;
   maskClosable?: boolean;
   autoDestroy?: number;
   maskClassName?: string;
@@ -24,7 +24,8 @@ export default function Demo() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
-  const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
+  const isJumpToOtherPage = useRef(false);
+  const { resolveRouteForCurrentDevice } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
@@ -220,15 +221,26 @@ export default function Demo() {
             console.log('close');
             setOpen(false);
           }}
+          maskClosable={true}
           onAfterClose={() => {
             console.log('onAfterClose');
+            if (isJumpToOtherPage.current) {
+              router.push(Routes.Home);
+            }
           }}
         >
           <div className="flex w-[80%] min-w-[300px] flex-col items-center justify-center gap-4 rounded-md bg-white p-5">
             <div>这是弹框内容</div>
             <div className="flex items-center gap-4">
               <Button onClick={() => setOpen(false)}>关闭</Button>
-              <Button onClick={() => router.push(Routes.Home)}>跳转页面</Button>
+              <Button
+                onClick={() => {
+                  setOpen(false);
+                  isJumpToOtherPage.current = true;
+                }}
+              >
+                跳转页面
+              </Button>
             </div>
           </div>
         </Dialog>
