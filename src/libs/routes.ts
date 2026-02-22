@@ -1,6 +1,6 @@
 // src/lib/routes.ts
 
-// 普通页面路由
+// 页面路由
 export const PageRoutes = {
   Home: '/',
   Cart: '/cart',

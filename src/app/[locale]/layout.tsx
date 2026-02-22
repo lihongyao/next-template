@@ -62,6 +62,8 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {/* For Android Chrome */}
         <meta name="mobile-web-app-capable" content="yes" />
+        {/* PWA - 添加 manifest.json */}
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body style={{ background: '#F5F5F5' }}>
         <NextIntlClientProvider messages={messages} locale={locale}>
