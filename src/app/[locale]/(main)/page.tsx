@@ -12,7 +12,7 @@ export default function HomePage() {
   const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="h-[600px] w-full bg-red-500" />
+      <div className="h-[200px] w-full bg-blue-500" />
       <div className="flex flex-wrap gap-2">
         <Button
           onClick={() =>
@@ -55,7 +55,7 @@ export default function HomePage() {
         className="w-[300]"
       />
 
-      <div className="h-[600px] w-full bg-red-500" />
+      <div className="h-[600px] w-full bg-blue-500" />
     </div>
   );
 }
