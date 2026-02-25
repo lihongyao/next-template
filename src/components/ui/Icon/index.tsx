@@ -1,3 +1,4 @@
+// src/components/ui/Icon/index.tsx
 import type React from 'react';
 
 import iconMap from '@/assets/svg/generated';
