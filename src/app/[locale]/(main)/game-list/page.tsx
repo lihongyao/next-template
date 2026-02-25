@@ -13,7 +13,7 @@ export default function GamePage() {
       <Button
         onClick={() => {
           const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
-          router.push(jumpToUrl + '/1');
+          router.push(jumpToUrl + '/1?title=游戏详情');
         }}
       >
         查看游戏

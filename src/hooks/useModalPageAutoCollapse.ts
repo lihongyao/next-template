@@ -2,6 +2,8 @@
 
 import { useLayoutEffect, useRef } from 'react';
 
+import { useSearchParams } from 'next/navigation';
+
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { ModalPageRouteKey, ModalPageRoutes } from '@/libs/routes';
 
@@ -19,6 +21,7 @@ function matchRoute(pathname: string, route: string): boolean {
 export default function useModalPageAutoCollapse(): void {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isMobile } = useDevice();
   const prevIsMobile = useRef(isMobile);
 
@@ -72,6 +75,8 @@ export default function useModalPageAutoCollapse(): void {
       targetPath = config.pc + paramSegment;
       localStorage.setItem(BASE_KEY, basePath);
     }
-    if (targetPath !== pathname) router.replace(targetPath);
-  }, [pathname, isMobile, router]);
+    const queryString = searchParams.toString();
+    const targetUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
+    if (targetPath !== pathname) router.replace(targetUrl);
+  }, [pathname, isMobile, router, searchParams]);
 }
