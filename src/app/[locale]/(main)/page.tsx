@@ -2,6 +2,7 @@
 'use client';
 
 import Button from '@/components/ui/Button';
+import Icon from '@/components/ui/Icon';
 import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
@@ -47,6 +48,13 @@ export default function HomePage() {
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
+
+      <Icon
+        name="globe"
+        className="size-6"
+        color="white"
+        wrapperClass="size-12 bg-black rounded-full"
+      />
 
       <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
