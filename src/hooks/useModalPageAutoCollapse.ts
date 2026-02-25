@@ -6,8 +6,7 @@ import { useSearchParams } from 'next/navigation';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { ModalPageRouteKey, ModalPageRoutes } from '@/libs/routes';
-
-import { useDevice } from './useDevices';
+import { useDevice } from '@/providers/device.provider';
 
 const BASE_KEY = '__modal_base_path__';
 

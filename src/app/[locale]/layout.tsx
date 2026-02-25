@@ -12,6 +12,7 @@ import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
 import { BrandConfigProvider } from '@/providers/brand.provider';
+import { DeviceProvider } from '@/providers/device.provider';
 
 export const runtime = 'edge';
 export const viewport: Viewport = {
@@ -69,10 +70,12 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
             <DialogProvider>
-              {/* <LogoLoading /> */}
-              {children}
-              <RouteModalRenderer />
-              <ClientInitializer />
+              <DeviceProvider>
+                {/* <LogoLoading /> */}
+                {children}
+                <RouteModalRenderer />
+                <ClientInitializer />
+              </DeviceProvider>
             </DialogProvider>
           </BrandConfigProvider>
         </NextIntlClientProvider>

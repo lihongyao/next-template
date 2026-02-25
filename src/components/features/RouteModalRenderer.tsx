@@ -13,9 +13,9 @@ import {
   modalContentVariantsMobile,
 } from '@/animations/modal-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
-import { useDevice } from '@/hooks/useDevices';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { routing } from '@/i18n/routing';
+import { useDevice } from '@/providers/device.provider';
 
 export type ModalComponentProps = {
   onClose: () => void;

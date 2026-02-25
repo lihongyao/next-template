@@ -1,8 +1,7 @@
 // src/hooks/useModalRoutes.ts
 import { usePathname } from '@/i18n/navigation';
 import { ModalPageRouteConfig, ModalRoutes } from '@/libs/routes';
-
-import { useDevice } from './useDevices';
+import { useDevice } from '@/providers/device.provider';
 
 /**
  * 提供弹窗/页面路由相关工具方法
