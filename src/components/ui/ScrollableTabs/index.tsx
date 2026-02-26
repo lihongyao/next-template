@@ -256,11 +256,8 @@ export default function ScrollableTabs<T = unknown>({
       onMouseUp={stopDragging}
       onMouseLeave={stopDragging}
     >
-      <div className="w-max">
-        <div
-          ref={wrapperRef}
-          className={cn('relative flex w-max items-center select-none', wrapperClassName)}
-        >
+      <div ref={wrapperRef} className={cn('w-max', wrapperClassName)}>
+        <div className={cn('relative flex w-max items-center select-none')}>
           {cursor && cursorStyle && (
             <motion.div
               data-name="cursor"
