@@ -36,12 +36,12 @@ const visibleDialogs = new Set<string>();
 
 /** 锁住 body 滚动 */
 const lockBodyScroll = () => {
-  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
 };
 
 /** 解锁 body 滚动（只有没有任何弹窗时才解锁） */
 const unlockBodyScroll = () => {
-  if (visibleDialogs.size === 0) document.body.style.overflow = '';
+  if (visibleDialogs.size === 0) document.documentElement.style.overflow = 'auto';
 };
 
 /** 对外暴露的 Ref 方法类型 */
