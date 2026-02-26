@@ -2,10 +2,6 @@
 
 import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-const MOBILE_QUERY = '(max-width: 767px)';
-const TABLET_QUERY = '(min-width: 768px) and (max-width: 1023px)';
-const PC_QUERY = '(min-width: 1024px)';
-
 export type DeviceState = {
   isMobile: boolean | null;
   isTablet: boolean | null;
@@ -22,16 +18,26 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    const mobile = window.matchMedia(MOBILE_QUERY);
-    const tablet = window.matchMedia(TABLET_QUERY);
-    const pc = window.matchMedia(PC_QUERY);
+    const mobile = window.matchMedia('(max-width: 767px)');
+    const tablet = window.matchMedia('(min-width: 768px) and (max-width: 1023px)');
+    const pc = window.matchMedia('(min-width: 1024px)');
 
     const update = () => {
-      console.log('响应式断点更新：', mobile.matches, tablet.matches, pc.matches);
-      setState({
+      const nextState = {
         isMobile: mobile.matches,
         isTablet: tablet.matches,
         isPC: pc.matches,
+      };
+      setState((prev) => {
+        if (
+          prev.isMobile === nextState.isMobile &&
+          prev.isTablet === nextState.isTablet &&
+          prev.isPC === nextState.isPC
+        ) {
+          return prev; // 状态未变，跳过 re-render，避免多个 media query 同时触发时重复更新
+        }
+        console.log('响应式断点变化 >>> ', nextState);
+        return nextState;
       });
     };
 

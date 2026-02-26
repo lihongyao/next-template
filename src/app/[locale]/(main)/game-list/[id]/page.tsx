@@ -1,4 +1,16 @@
-export default async function GamePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function GamePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ title: string }>;
+}) {
   const id = (await params).id;
-  return <div>ID: {id}</div>;
+  const title = (await searchParams).title;
+  return (
+    <div data-name="game-details">
+      <p>ID: {id}</p>
+      <p>标题: {title}</p>
+    </div>
+  );
 }
