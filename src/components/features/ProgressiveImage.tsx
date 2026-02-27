@@ -10,23 +10,27 @@ interface ProgressiveImageProps {
   blurSrc: string;
   alt: string;
 }
+
+const imageCache = new Map<string, boolean>();
+
 export default function ProgressiveImage({ className, src, blurSrc, alt }: ProgressiveImageProps) {
-  const [renderSrc, setRenderSrc] = useState(blurSrc);
-  const [loaded, setLoaded] = useState(false);
+  const cachedSrc = imageCache.has(src);
+
+  const [renderSrc, setRenderSrc] = useState(cachedSrc ? src : blurSrc);
 
   useEffect(() => {
-    if (!src) return;
+    if (!src || cachedSrc) return;
 
     const img = new Image();
     img.src = src;
     img.onload = () => {
+      imageCache.set(src, true);
       setRenderSrc(src);
-      setLoaded(true);
     };
-  }, [src]);
+  }, [src, cachedSrc]);
 
   return (
-    <div className={cn('h-full w-full', !loaded && 'bg-black')}>
+    <div className={cn('h-full w-full', 'bg-[#586566]')}>
       <img
         className={cn('h-full w-full object-cover', className)}
         src={renderSrc}
