@@ -1,6 +1,7 @@
 // src/app/[locale]/(home)/page.tsx
 'use client';
 
+import ProgressiveImage from '@/components/features/ProgressiveImage';
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
 import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
@@ -55,6 +56,14 @@ export default function HomePage() {
         color="white"
         wrapperClass="size-12 bg-black rounded-full"
       />
+      <div className="h-[267px] w-[200px] overflow-hidden">
+        <ProgressiveImage
+          className="h-auto w-[200px]"
+          src="https://web-res-ccc.afunimg8.com/cdn-cgi/image/format=auto,q=80,dpr=3,w=100,h=auto/newres/gameicon_en6020/018/101803175.jpg?202602261618"
+          blurSrc="https://web-res-ccc.afunimg8.com/cdn-cgi/image/format=auto,q=80,dpr=3,w=100,h=auto,blur=45/newres/gameicon_en6020/018/101803175.jpg?202602261618"
+          alt=""
+        />
+      </div>
 
       <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
