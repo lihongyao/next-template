@@ -17,9 +17,12 @@ export default function ProgressiveImage({ className, src, blurSrc, alt }: Progr
   const cachedSrc = imageCache.has(src);
 
   const [renderSrc, setRenderSrc] = useState(cachedSrc ? src : blurSrc);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!src || cachedSrc) return;
+    if (!src || cachedSrc) {
+      return;
+    }
 
     const img = new Image();
     img.src = src;
@@ -30,12 +33,16 @@ export default function ProgressiveImage({ className, src, blurSrc, alt }: Progr
   }, [src, cachedSrc]);
 
   return (
-    <div className={cn('h-full w-full', 'bg-[#586566]')}>
+    <div
+      data-name="ProgressiveImage"
+      className={cn('h-full w-full', !loaded && 'bg-(--home-button-bg-provider-bg)')}
+    >
       <img
         className={cn('h-full w-full object-cover', className)}
         src={renderSrc}
         alt={alt}
         loading="lazy"
+        onLoad={() => setLoaded(true)}
       />
     </div>
   );
