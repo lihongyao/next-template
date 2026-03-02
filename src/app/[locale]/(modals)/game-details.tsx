@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 
 import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
+import Button from '@/components/ui/Button';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
+import { useRouter } from '@/i18n/navigation';
 import { Routes } from '@/libs/routes';
 
 export default function ModalGame({ onClose }: ModalComponentProps) {
-  const { getModalParams } = useModalRoutes();
+  const { getModalParams, mergeRouteIntoCurrentPath } = useModalRoutes();
+
+  const router = useRouter();
 
   useEffect(() => {
     const params = getModalParams(Routes.ModalGameDetails);
@@ -13,9 +17,16 @@ export default function ModalGame({ onClose }: ModalComponentProps) {
   }, []);
 
   return (
-    <div data-name="game-details" className="h-dvh w-dvw bg-white p-2">
+    <div data-name="game-details" className="h-dvh w-dvw space-y-2 bg-white p-2">
       <div>游戏详情</div>
-      <div onClick={onClose}>返回</div>
+      <Button onClick={onClose}>返回</Button>
+      <Button
+        onClick={() => {
+          router.push(mergeRouteIntoCurrentPath(Routes.ModalProfile));
+        }}
+      >
+        个人中心
+      </Button>
     </div>
   );
 }
