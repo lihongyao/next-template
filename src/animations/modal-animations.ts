@@ -25,7 +25,7 @@ export const modalBackdropVariantsMobile: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { type: 'tween', duration: 0.25, ease: EASE_ENTER },
+    transition: { type: 'tween', duration: 0.3, ease: EASE_ENTER },
   },
   exit: {
     opacity: 0,
