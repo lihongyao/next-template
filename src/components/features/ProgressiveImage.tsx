@@ -33,10 +33,7 @@ export default function ProgressiveImage({ className, src, blurSrc, alt }: Progr
   }, [src, cachedSrc]);
 
   return (
-    <div
-      data-name="ProgressiveImage"
-      className={cn('h-full w-full', !loaded && 'bg-(--home-button-bg-provider-bg)')}
-    >
+    <div data-name="ProgressiveImage" className={cn('h-full w-full', !loaded && 'bg-gray-400')}>
       <img
         className={cn('h-full w-full object-cover', className)}
         src={renderSrc}
