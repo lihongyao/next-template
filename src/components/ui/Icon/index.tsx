@@ -12,7 +12,7 @@ export type IconProps = {
   color?: string;
   alt?: string;
   wrapperClass?: string;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 } & Omit<React.SVGProps<SVGSVGElement>, 'name' | 'color'>;
 
 export default function Icon(props: IconProps) {
