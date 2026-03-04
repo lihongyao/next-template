@@ -45,7 +45,7 @@ export default function Icon(props: IconProps) {
           }}
         />
       )}
-      {src && !Comp && <img src={src} className={className} alt={alt || 'icon'} />}
+      {src && !Comp && <img src={src} className={cn('shrink-0', className)} alt={alt || 'icon'} />}
     </div>
   );
 }

@@ -29,7 +29,14 @@ export default function HomePage() {
             router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false })
           }
         >
-          路由弹窗(登录)
+          登录
+        </Button>
+        <Button
+          onClick={() =>
+            router.push(mergeRouteIntoCurrentPath(Routes.ModalRegister), { scroll: false })
+          }
+        >
+          注册
         </Button>
         <Button
           onClick={() => {

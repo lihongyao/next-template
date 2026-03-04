@@ -28,6 +28,7 @@ export const ModalRoutes = {
   ModalProfile: '/modal-profile',
   ModalLogin: '/modal-login',
   ModalGameDetails: '/modal-game-details',
+  ModalRegister: '/modal-register',
 } as const;
 
 // 所有路由

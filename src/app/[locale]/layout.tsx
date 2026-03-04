@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import '@/assets/styles/generated/brand.css';
 import ClientInitializer from '@/components/features/ClientInitializer';
+import { ClientOnly } from '@/components/features/ClientOnly';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
@@ -73,7 +74,9 @@ export default async function LocaleLayout({
               <DeviceProvider>
                 {/* <LogoLoading /> */}
                 {children}
-                <RouteModalRenderer />
+                <ClientOnly>
+                  <RouteModalRenderer />
+                </ClientOnly>
                 <ClientInitializer />
               </DeviceProvider>
             </DialogProvider>
