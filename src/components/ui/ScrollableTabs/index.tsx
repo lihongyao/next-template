@@ -12,6 +12,8 @@ export interface ScrollableTabsRef {
 }
 
 interface ScrollableTabsProps<T = unknown> {
+  /** id */
+  id?: string;
   /** ref */
   ref?: React.Ref<ScrollableTabsRef>;
   /** 容器名称 */
@@ -20,6 +22,7 @@ interface ScrollableTabsProps<T = unknown> {
   className?: string;
   /** wrapper 样式（可滚动容器） */
   wrapperClassName?: string;
+  contentClassName?: string;
   /** 选项 */
   items: T[];
   /** 默认选中 */
@@ -41,9 +44,11 @@ interface ScrollableTabsProps<T = unknown> {
 }
 
 export default function ScrollableTabs<T = unknown>({
+  id = '',
   dataName,
   className,
   wrapperClassName,
+  contentClassName,
   items,
   currentIndex = 0,
   defaultIndex = 0,
@@ -204,8 +209,10 @@ export default function ScrollableTabs<T = unknown>({
   // -- events
   const onItemTap = useCallback(
     (item: T, index: number) => {
+      console.log('onItemTap >>> ', item, index, innerIndex);
       // 拖拽状态下或已经选中，不触发
-      if (isDragging.current || innerIndex === index) return;
+      if (isDragging.current || (currentIndex > 0 && innerIndex === index)) return;
+
       // 标记为用户交互，后续滚动会使用平滑动画
       isUserInteraction.current = true;
       setInnerIndex(index);
@@ -250,6 +257,7 @@ export default function ScrollableTabs<T = unknown>({
     <div
       ref={containerRef}
       data-name={dataName ?? 'ScrollableTabs'}
+      id={id}
       className={cn('no-scrollbar cursor-grab overflow-x-auto', className)}
       onMouseDown={onMouseDown}
       onMouseMove={(e) => isDragging.current && onMouseMove(e)}
@@ -257,7 +265,7 @@ export default function ScrollableTabs<T = unknown>({
       onMouseLeave={stopDragging}
     >
       <div ref={wrapperRef} className={cn('w-max', wrapperClassName)}>
-        <div className={cn('relative flex w-max items-center select-none')}>
+        <div className={cn('relative flex w-max items-center select-none', contentClassName)}>
           {cursor && cursorStyle && (
             <motion.div
               data-name="cursor"
@@ -274,10 +282,9 @@ export default function ScrollableTabs<T = unknown>({
                 width: cursorStyle.width,
               }}
               transition={{
-                type: 'spring',
-                stiffness: 350,
-                damping: 35,
-                duration: 0.6,
+                type: 'tween',
+                duration: 0.1,
+                ease: 'easeOut',
               }}
             />
           )}
@@ -288,7 +295,7 @@ export default function ScrollableTabs<T = unknown>({
 
             return (
               <div
-                key={String(idx)}
+                key={idx}
                 data-item-index={idx}
                 className="relative shrink-0"
                 onClick={() => onItemTap(item, idx)}
@@ -297,7 +304,7 @@ export default function ScrollableTabs<T = unknown>({
                 {showDivider && (
                   <div
                     className={cn(
-                      'absolute top-1/2 right-0 h-[22px] w-px shrink-0 -translate-y-1/2 bg-(--color-fade-white-10)',
+                      'absolute top-1/2 right-0 h-[22px] w-[1px] shrink-0 -translate-y-1/2 bg-gray-400',
                       dividerClassName,
                     )}
                   />
