@@ -16,10 +16,7 @@ import { ModalComponents } from '@/app/[locale]/(modals)';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { routing } from '@/i18n/routing';
 import { useDevice } from '@/providers/device.provider';
-
-export type ModalComponentProps = {
-  onClose: () => void;
-};
+import { useModal } from '@/providers/modal.provider';
 
 /**
  * 按 URL 里的 modal 段（如 /en/modal-login）渲染弹窗，支持多层叠。
@@ -31,6 +28,7 @@ export default function RouteModalRenderer() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const searchParamsString = useSearchParams().toString();
   const { isMobile } = useDevice();
+  const { setOnClose } = useModal();
 
   const [isAllow, setIsAllow] = useState(true);
   const [pureHidden, setPureHidden] = useState(false); // 等 exit 播完再隐藏，否则关时会闪
@@ -54,6 +52,10 @@ export default function RouteModalRenderer() {
     const nextPath = `/${newPathSegments.join('/')}` || `/${routing.defaultLocale}`;
     router.replace(nextQuery ? `${nextPath}?${nextQuery}` : nextPath, { scroll: false });
   }, [modalComponents.length, router, pathSegments, searchParamsString]);
+
+  useEffect(() => {
+    setOnClose(onClose);
+  }, [onClose, setOnClose]);
 
   useSwipeBack((value) => setIsAllow(!value), { enabled: modalComponents.length > 0 });
 
@@ -112,7 +114,7 @@ export default function RouteModalRenderer() {
               exit="exit"
               style={{ willChange: 'transform, opacity' }}
             >
-              <Modal onClose={onClose} />
+              <Modal />
             </motion.div>
           </motion.div>
         );

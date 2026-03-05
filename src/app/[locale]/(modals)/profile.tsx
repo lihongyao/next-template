@@ -1,7 +1,9 @@
-// src/app/[locale]/(modals)/profile.tsx
-import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
+'use client';
 
-export default function Profile({ onClose }: ModalComponentProps) {
+import { useModal } from '@/providers/modal.provider';
+
+export default function Profile() {
+  const { onClose } = useModal();
   return (
     <div
       data-name="Profile"

@@ -1,12 +1,15 @@
+'use client';
+
 import { useEffect } from 'react';
 
-import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
 import Button from '@/components/ui/Button';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { Routes } from '@/libs/routes';
+import { useModal } from '@/providers/modal.provider';
 
-export default function ModalGame({ onClose }: ModalComponentProps) {
+export default function ModalGame() {
+  const { onClose } = useModal();
   const { getModalParams, mergeRouteIntoCurrentPath } = useModalRoutes();
 
   const router = useRouter();

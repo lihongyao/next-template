@@ -1,12 +1,15 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 
-import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+
+import { useModal } from '@/providers/modal.provider';
 import { RegisterFormValues, registerSchema } from '@/schemas/user.schema';
 
-export default function Register({ onClose }: ModalComponentProps) {
+export default function Register() {
+  const { onClose } = useModal();
   const form = useForm<RegisterFormValues>({
+    // @ts-expect-error
     resolver: zodResolver(registerSchema),
     mode: 'onChange',
   });
@@ -26,7 +29,10 @@ export default function Register({ onClose }: ModalComponentProps) {
         返回
       </div>
 
-      <form className="flex w-full flex-col gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className="flex w-full flex-col gap-4"
+        onSubmit={form.handleSubmit(onSubmit as unknown as SubmitHandler<FieldValues>)}
+      >
         <div className="w-full">
           <input
             className="h-10 w-full rounded-md border border-gray-200 px-2"
@@ -50,7 +56,6 @@ export default function Register({ onClose }: ModalComponentProps) {
         <div className="w-full">
           <input
             className="h-10 w-full rounded-md border border-gray-200 px-2"
-            type="email"
             {...form.register('email')}
             placeholder="请输入邮箱"
           />

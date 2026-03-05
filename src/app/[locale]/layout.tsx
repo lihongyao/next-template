@@ -14,6 +14,7 @@ import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
 import { BrandConfigProvider } from '@/providers/brand.provider';
 import { DeviceProvider } from '@/providers/device.provider';
+import { ModalProvider } from '@/providers/modal.provider';
 
 export const runtime = 'edge';
 export const viewport: Viewport = {
@@ -72,12 +73,14 @@ export default async function LocaleLayout({
           <BrandConfigProvider value={brandConfig}>
             <DialogProvider>
               <DeviceProvider>
-                {/* <LogoLoading /> */}
-                {children}
-                <ClientOnly>
-                  <RouteModalRenderer />
-                </ClientOnly>
-                <ClientInitializer />
+                <ModalProvider>
+                  {/* <LogoLoading /> */}
+                  {children}
+                  <ClientOnly>
+                    <RouteModalRenderer />
+                  </ClientOnly>
+                  <ClientInitializer />
+                </ModalProvider>
               </DeviceProvider>
             </DialogProvider>
           </BrandConfigProvider>

@@ -1,6 +1,9 @@
-import { ModalComponentProps } from '@/components/features/RouteModalRenderer';
+'use client';
 
-export default function Login({ onClose }: ModalComponentProps) {
+import { useModal } from '@/providers/modal.provider';
+
+export default function Login() {
+  const { onClose } = useModal();
   return (
     <div
       data-name="Login"
