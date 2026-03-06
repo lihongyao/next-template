@@ -15,7 +15,7 @@ export default function SwiperGameList() {
   const swiperRef = useRef<SwiperType | null>(null);
   const [isInit, setIsInit] = useState(false);
   return (
-    <div data-name="SwiperGameList">
+    <div data-name="SwiperGameList" className="h-fit">
       <header className="mb-2 flex items-center justify-between">
         <h1 className="text-white">游戏列表</h1>
         <div className="flex items-center gap-2">
@@ -39,15 +39,17 @@ export default function SwiperGameList() {
       >
         {games.map((item, index) => {
           if (!isInit) {
-            // return null;
             return (
               <div className="grid grid-cols-3 gap-3" key={index}>
-                <div className="aspect-[110/162]">3123</div>
+                <div className="aspect-[110/162]"></div>
               </div>
             );
           }
           return (
-            <SwiperSlide key={index} className="aspect-[110/162] overflow-hidden rounded-md">
+            <SwiperSlide
+              key={index}
+              className="aspect-[110/162] overflow-hidden rounded-md bg-gray-700"
+            >
               <LazyImg
                 className="h-full w-full"
                 loading="lazy"
@@ -55,8 +57,6 @@ export default function SwiperGameList() {
                 src={item.src}
                 alt=""
               />
-              {/* <div className="swiper-lazy-preloader"></div> */}
-              {/* <ProgressiveImage src={item.src} blurSrc={item.blurSrc} alt="" /> */}
             </SwiperSlide>
           );
         })}

@@ -25,7 +25,7 @@ type LazyImgProps = {
   onClick?: (e: React.MouseEvent | React.KeyboardEvent) => void;
 };
 
-const LazyImg: React.FC<LazyImgProps> = ({
+export default function LazyImg({
   src,
   blurSrc,
   errorSrc,
@@ -39,7 +39,7 @@ const LazyImg: React.FC<LazyImgProps> = ({
   onError,
   onLoad,
   onClick,
-}) => {
+}: LazyImgProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [shouldLoad, setShouldLoad] = useState(loading === 'eager');
   const [isLoaded, setIsLoaded] = useState(false);
@@ -115,7 +115,7 @@ const LazyImg: React.FC<LazyImgProps> = ({
           sizes={sizes}
           loading={loading}
           decoding="async"
-          className="absolute inset-0 size-full object-cover transition-opacity duration-300 ease-out"
+          className="absolute inset-0 size-full object-cover transition-opacity duration-100 ease-linear"
           style={{ opacity: isLoaded ? 1 : 0 }}
           onLoad={handleLoad}
           onError={handleError}
@@ -123,6 +123,4 @@ const LazyImg: React.FC<LazyImgProps> = ({
       )}
     </div>
   );
-};
-
-export default LazyImg;
+}
