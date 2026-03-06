@@ -28,7 +28,7 @@ export default function RouteModalRenderer() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const searchParamsString = useSearchParams().toString();
   const { isMobile } = useDevice();
-  const { setOnClose } = useModal();
+  const { setCloseModal } = useModal();
 
   const [isAllow, setIsAllow] = useState(true);
   const [pureHidden, setPureHidden] = useState(false); // 等 exit 播完再隐藏，否则关时会闪
@@ -39,7 +39,7 @@ export default function RouteModalRenderer() {
     [modalKeys],
   );
 
-  const onClose = useCallback(() => {
+  const closeModal = useCallback(() => {
     if (!modalComponents.length) return;
     if (window.history.length > 2) {
       router.back();
@@ -54,8 +54,8 @@ export default function RouteModalRenderer() {
   }, [modalComponents.length, router, pathSegments, searchParamsString]);
 
   useEffect(() => {
-    setOnClose(onClose);
-  }, [onClose, setOnClose]);
+    setCloseModal(closeModal);
+  }, [closeModal, setCloseModal]);
 
   useSwipeBack((value) => setIsAllow(!value), { enabled: modalComponents.length > 0 });
 
@@ -105,7 +105,7 @@ export default function RouteModalRenderer() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={onClose}
+              onClick={closeModal}
             />
             <motion.div
               variants={contentVariants}

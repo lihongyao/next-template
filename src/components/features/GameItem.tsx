@@ -1,4 +1,4 @@
-import ProgressiveImage from './ProgressiveImage';
+import LazyImg from '../ui/LazyImage';
 
 interface GameItemProps {
   game: {
@@ -10,7 +10,7 @@ interface GameItemProps {
 export default function GameItem({ game, onClick }: GameItemProps) {
   return (
     <div className="aspect-[200/267] overflow-hidden rounded-md" onClick={onClick}>
-      <ProgressiveImage src={game.src} blurSrc={game.blurSrc} className="h-auto w-[200px]" alt="" />
+      <LazyImg src={game.src} className="h-full w-full" blurSrc={game.blurSrc} alt="" />
     </div>
   );
 }

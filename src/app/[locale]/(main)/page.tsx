@@ -49,7 +49,14 @@ export default function HomePage() {
         >
           游戏详情
         </Button>
-        <Button onClick={() => router.push(Routes.GameList)}>游戏列表</Button>
+        <Button
+          onClick={() => {
+            const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);
+            router.push(jumpToUrl, { scroll: false });
+          }}
+        >
+          游戏列表
+        </Button>
         <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>
         <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>

@@ -7,7 +7,7 @@ import { useModal } from '@/providers/modal.provider';
 import { RegisterFormValues, registerSchema } from '@/schemas/user.schema';
 
 export default function Register() {
-  const { onClose } = useModal();
+  const { closeModal } = useModal();
   const form = useForm<RegisterFormValues>({
     // @ts-expect-error
     resolver: zodResolver(registerSchema),
@@ -25,7 +25,7 @@ export default function Register() {
     >
       <h1 className="text-2xl font-bold">Register</h1>
 
-      <div className="cursor-pointer hover:text-blue-500" onClick={onClose}>
+      <div className="cursor-pointer hover:text-blue-500" onClick={closeModal}>
         返回
       </div>
 

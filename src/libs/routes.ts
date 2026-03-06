@@ -6,7 +6,6 @@ export const PageRoutes = {
   Cart: '/cart',
   Order: '/order',
   Profile: '/profile',
-  Login: '/login',
   Details: '/details',
   Dialog: '/dialog',
   DynamicComps: '/dynamic-comps',
@@ -27,6 +26,7 @@ export const PageRoutes = {
 export const ModalRoutes = {
   ModalProfile: '/modal-profile',
   ModalLogin: '/modal-login',
+  ModalGameList: '/modal-game-list',
   ModalGameDetails: '/modal-game-details',
   ModalRegister: '/modal-register',
 } as const;
@@ -62,10 +62,14 @@ export const ModalPageRoutes = {
     pc: Routes.Profile,
     h5: Routes.ModalProfile,
   },
+  gameList: {
+    pc: Routes.GameList,
+    h5: Routes.ModalGameList,
+  },
   gameDetails: {
     pc: Routes.GameDetails,
     h5: Routes.ModalGameDetails,
-    onlySwitchWhenParamPresent: true,
+    onlySwitchWhenParamPresent: false,
   },
 } as const satisfies Record<
   string,

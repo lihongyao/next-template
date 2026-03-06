@@ -3,20 +3,20 @@
 import { type ReactNode, createContext, useCallback, useContext, useReducer } from 'react';
 
 export interface ModalContextValue {
-  onClose: () => void;
-  setOnClose: (onClose: () => void) => void;
+  closeModal: () => void;
+  setCloseModal: (closeModal: () => void) => void;
 }
 
 type ModalState = {
-  onClose: () => void;
+  closeModal: () => void;
 };
 
-type ModalAction = { type: 'SET_ON_CLOSE'; payload: () => void };
+type ModalAction = { type: 'SET_CLOSE_MODAL'; payload: () => void };
 
 function modalReducer(state: ModalState, action: ModalAction): ModalState {
   switch (action.type) {
-    case 'SET_ON_CLOSE':
-      return { onClose: action.payload };
+    case 'SET_CLOSE_MODAL':
+      return { closeModal: action.payload };
     default:
       return state;
   }
@@ -27,15 +27,15 @@ const noop = () => {};
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(modalReducer, { onClose: noop });
+  const [state, dispatch] = useReducer(modalReducer, { closeModal: noop });
 
-  const setOnClose = useCallback((onClose: () => void) => {
-    dispatch({ type: 'SET_ON_CLOSE', payload: onClose });
+  const setCloseModal = useCallback((closeModal: () => void) => {
+    dispatch({ type: 'SET_CLOSE_MODAL', payload: closeModal });
   }, []);
 
   const value: ModalContextValue = {
-    onClose: state.onClose,
-    setOnClose,
+    closeModal: state.closeModal,
+    setCloseModal,
   };
 
   return <ModalContext.Provider value={value}>{children}</ModalContext.Provider>;

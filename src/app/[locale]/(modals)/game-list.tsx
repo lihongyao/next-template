@@ -1,18 +1,19 @@
 'use client';
+
 import GameItem from '@/components/features/GameItem';
-import Button from '@/components/ui/Button';
+import AppHeader from '@/components/ui/AppHeader';
 import { games } from '@/constants/data';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { ModalPageRoutes } from '@/libs/routes';
 
-export default function GamePage() {
+export default function GameList() {
   const router = useRouter();
   const { resolveRouteForCurrentDevice } = useModalRoutes();
   return (
-    <div data-name="game-list">
-      <Button onClick={() => router.back()}>返回</Button>
-      <div className="mt-4 grid grid-cols-5 gap-2 md:grid-cols-7">
+    <div data-name="game-list" className="h-screen w-screen bg-white">
+      <AppHeader title="游戏列表" />
+      <div className="mt-4 grid grid-cols-3 gap-3 px-3">
         {games.map((item, index) => (
           <GameItem
             game={item}
