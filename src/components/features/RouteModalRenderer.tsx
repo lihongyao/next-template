@@ -35,7 +35,10 @@ export default function RouteModalRenderer() {
 
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
   const modalComponents = useMemo(
-    () => modalKeys.filter(Boolean).map((m) => ModalComponents[m]),
+    () =>
+      modalKeys.filter(Boolean).map((m) => {
+        return ModalComponents[m];
+      }),
     [modalKeys],
   );
 
@@ -93,6 +96,7 @@ export default function RouteModalRenderer() {
     >
       {modalComponents.map((Modal, idx) => {
         const modalKey = modalKeys[idx];
+
         return (
           <motion.div
             key={modalKey}

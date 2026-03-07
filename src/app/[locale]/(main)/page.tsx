@@ -7,8 +7,10 @@ import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { ModalPageRoutes, Routes } from '@/libs/routes';
+import { useDevice } from '@/providers/device.provider';
 
 export default function HomePage() {
+  const { isMobile } = useDevice();
   const router = useRouter();
   const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   return (
@@ -25,9 +27,9 @@ export default function HomePage() {
           路由弹窗(个人中心)
         </Button>
         <Button
-          onClick={() =>
-            router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false })
-          }
+          onClick={() => {
+            router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false });
+          }}
         >
           登录
         </Button>
@@ -56,6 +58,15 @@ export default function HomePage() {
           }}
         >
           游戏列表
+        </Button>
+        <Button
+          onClick={() => {
+            if (isMobile) {
+              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper));
+            }
+          }}
+        >
+          游戏列表（自定义Swiper）
         </Button>
         <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>
         <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>

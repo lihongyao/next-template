@@ -56,7 +56,12 @@ export default async function LocaleLayout({
   const brandConfig = await getBrandConfigSSR();
 
   return (
-    <html lang={locale} className="no-scrollbar">
+    <html
+      lang={locale}
+      className="no-scrollbar"
+      data-theme={brandConfig.theme}
+      data-skin={brandConfig.skin}
+    >
       <head>
         {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}
         <meta name="theme-color" content={'#874334'} />

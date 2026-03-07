@@ -27,6 +27,7 @@ export const ModalRoutes = {
   ModalProfile: '/modal-profile',
   ModalLogin: '/modal-login',
   ModalGameList: '/modal-game-list',
+  ModalGameListSwiper: '/modal-game-list-swiper',
   ModalGameDetails: '/modal-game-details',
   ModalRegister: '/modal-register',
 } as const;
