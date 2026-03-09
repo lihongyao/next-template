@@ -2,7 +2,7 @@
 
 import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-import { UAParser } from 'ua-parser-js';
+import { getDeviceType } from '@/libs/device';
 
 export type DeviceState = {
   isMobile: boolean | null;
@@ -11,7 +11,6 @@ export type DeviceState = {
 };
 
 const DeviceContext = createContext<DeviceState | null>(null);
-export const uaParser = new UAParser();
 
 export function DeviceProvider({
   children,
@@ -20,14 +19,9 @@ export function DeviceProvider({
   userAgent: string;
   children: ReactNode;
 }) {
-  uaParser.setUA(userAgent);
-  const result = uaParser.getResult();
+  const result = getDeviceType(userAgent);
 
-  const [state, setState] = useState<DeviceState>({
-    isMobile: result.device.type === 'mobile',
-    isTablet: result.device.type === 'tablet',
-    isDesktop: result.device.type === 'desktop',
-  });
+  const [state, setState] = useState<DeviceState>({ ...result });
 
   useEffect(() => {
     const mobile = window.matchMedia('(max-width: 767px)');

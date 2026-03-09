@@ -1,9 +1,11 @@
-'use client';
-import CustomSwiper from '@/components/ui/CustomSwiper';
-import { useDevice } from '@/providers/device.provider';
+import { headers } from 'next/headers';
 
-export default function DemoPage() {
-  const { isMobile } = useDevice();
+import CustomSwiper from '@/components/ui/CustomSwiper';
+import { getDeviceType } from '@/libs/device';
+
+export default async function DemoPage() {
+  const userAgent = (await headers()).get('user-agent') || '';
+  const { isMobile } = getDeviceType(userAgent);
   return (
     <div
       data-name="Demo"
