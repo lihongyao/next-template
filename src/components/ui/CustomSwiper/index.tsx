@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ *
+ */
 import { useRef, useState } from 'react';
 
 import { games } from '@/constants/data';
@@ -9,20 +12,52 @@ import Button from '../Button';
 import LazyImg from '../LazyImage';
 
 interface CustomSwiperProps {
+  /** 列数 */
   columns?: number;
+  /** 行数 */
+  lines?: number;
+  /** 列间距（建议列间距小于容器 padding，比如容器组有间距是12px，列间距建议为6或者8） */
   gap?: number;
+  /** 是否溢出容器显示 */
+  isOver?: boolean;
 }
 
-export default function CustomSwiper({ columns = 3, gap = 6 }: CustomSwiperProps) {
+export default function CustomSwiper({
+  columns = 3,
+  gap = 6,
+  lines = 1,
+  isOver,
+}: CustomSwiperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<HTMLDivElement[]>([]);
+  const isTouchScroll = useRef(false);
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const totalPages = Math.ceil(games.length / columns);
+  const itemsPerPage = columns * lines;
+  const totalPages = Math.ceil(games.length / itemsPerPage);
+
+  const syncCurrentPage = () => {
+    // 只在触摸滚动时同步
+    if (!isTouchScroll.current) return;
+    // 边界判断
+    const container = containerRef.current;
+    if (!container || totalPages === 0) return;
+    // 计算当前页
+    const paddingLeft = parseInt(getComputedStyle(container).paddingLeft);
+    const paddingRight = parseInt(getComputedStyle(container).paddingRight);
+    const containerRect = container.getBoundingClientRect();
+    const containerPadding = paddingLeft + paddingRight;
+    const containerWidth = isOver ? containerRect.width - containerPadding : containerRect.width;
+    const scrollLeft = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - containerWidth - containerPadding;
+    const currentPage =
+      scrollLeft >= maxScrollLeft ? totalPages - 1 : Math.floor(scrollLeft / containerWidth);
+    setCurrentPage(currentPage);
+  };
 
   const scrollToPage = (page: number) => {
-    const index = page * columns;
+    const index = page * itemsPerPage;
     const el = itemRefs.current[index];
 
     if (!el) return;
@@ -49,7 +84,9 @@ export default function CustomSwiper({ columns = 3, gap = 6 }: CustomSwiperProps
   return (
     <div data-name="custom-swiper">
       <header className="mb-3 flex items-center justify-between">
-        <h1 className="text-white">游戏列表</h1>
+        <h1 className="text-white">
+          游戏列表 - {currentPage + 1}/{totalPages}
+        </h1>
 
         <div className="flex items-center gap-2">
           <Button onClick={handlePrev} disabled={currentPage === 0}>
@@ -62,15 +99,23 @@ export default function CustomSwiper({ columns = 3, gap = 6 }: CustomSwiperProps
         </div>
       </header>
 
+      {/* no-scrollbar -mx-3 grid snap-x snap-mandatory scroll-pl-3 grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth px-3 */}
       <div
         ref={containerRef}
         className={cn(
-          `no-scrollbar -mx-3 grid snap-x snap-mandatory scroll-pl-3 grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth px-3`,
+          `no-scrollbar grid snap-x snap-mandatory grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth`,
+          // ⚠️ 具体情况需要根据外出容器的 padding 决定
+          // 比如页面间距是 px-3，那么这里就是 “-mx-3 scroll-pl-3 px-3”
+          // 比如页面间距是 px-6，那么这里就是 “-mx-6 scroll-pl-6 px-6”
+          isOver ? '-mx-3 scroll-pl-3 px-3' : '',
         )}
         style={{
           gap,
           gridAutoColumns: `calc((100% - ${gap * (columns - 1)}px) / ${columns})`,
+          gridTemplateRows: `repeat(${lines}, auto)`,
         }}
+        onTouchStart={() => (isTouchScroll.current = true)}
+        onScrollEnd={syncCurrentPage}
       >
         {games.map((item, index) => (
           <div
