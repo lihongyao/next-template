@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -14,20 +14,34 @@ import {
 } from '@/animations/modal-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import { getH5PathForPcPath } from '@/libs/modal-page-routes-utils';
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
+
+/** h5 下 pathname 为 pc 格式时，按 ModalPageRoutes 转为 modal 路径用于渲染 */
+function getEffectivePathForModals(pathname: string, isMobile: boolean): string[] {
+  const raw = pathname.split('/').filter(Boolean);
+  if (!isMobile) return raw;
+  const h5Path = getH5PathForPcPath(pathname);
+  return h5Path ? h5Path.split('/').filter(Boolean) : raw;
+}
 
 /**
  * 按 URL 里的 modal 段（如 /en/modal-login）渲染弹窗，支持多层叠。
  * 进场右滑、退场等 AnimatePresence exit 播完再卸。isMobile 为 null 时不画。
+ * h5 下当 pathname 为 pc 格式（如 /game-list）时，会按 ModalPageRoutes 映射为 modal 路径渲染。
  */
 export default function RouteModalRenderer() {
   const router = useRouter();
   const pathname = usePathname();
-  const pathSegments = pathname.split('/').filter(Boolean);
-  const searchParamsString = useSearchParams().toString();
   const { isMobile } = useDevice();
+  const pathSegments = useMemo(
+    () => getEffectivePathForModals(pathname, isMobile === true),
+    [pathname, isMobile],
+  );
+  const searchParamsString = useSearchParams().toString();
   const { setCloseModal } = useModal();
 
   const [isAllow, setIsAllow] = useState(true);

@@ -54,6 +54,7 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
  * 2. 仅当「当前路径带参数」时才随视窗切换；列表页（无参）不切换。无参页（如 profile）始终切换。
  *
  * - onlySwitchWhenParamPresent：设为 true 表示该条是「列表+详情」型，仅当 path 带参数（详情）时才切换，列表页不切换。
+ * - parentKey：当 h5 下该路由嵌套于另一 modal 内时（如 modal-game-list/modal-game-details/1），指定父路由 key，以便 pc/h5 切换时正确展开/折叠路径。
  *
  * @see useModalPageAutoCollapse
  * @see useModalRoutes
@@ -67,14 +68,21 @@ export const ModalPageRoutes = {
     pc: Routes.GameList,
     h5: Routes.ModalGameList,
   },
+  /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
   gameDetails: {
     pc: Routes.GameDetails,
     h5: Routes.ModalGameDetails,
-    onlySwitchWhenParamPresent: false,
+    onlySwitchWhenParamPresent: true,
+    parentKey: 'gameList',
   },
 } as const satisfies Record<
   string,
-  { readonly pc: Route; readonly h5: Route; readonly onlySwitchWhenParamPresent?: boolean }
+  {
+    readonly pc: Route;
+    readonly h5: Route;
+    readonly onlySwitchWhenParamPresent?: boolean;
+    readonly parentKey?: 'gameList' | 'profile';
+  }
 >;
 
 /** ModalPageRoutes 的 key，用于遍历与索引 */

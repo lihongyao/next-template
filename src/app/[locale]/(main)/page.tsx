@@ -42,17 +42,6 @@ export default function HomePage() {
         </Button>
         <Button
           onClick={() => {
-            const route = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
-            const jumpToUrl = route + '/1';
-            router.push(jumpToUrl, {
-              scroll: false,
-            });
-          }}
-        >
-          游戏详情
-        </Button>
-        <Button
-          onClick={() => {
             const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);
             router.push(jumpToUrl, { scroll: false });
           }}

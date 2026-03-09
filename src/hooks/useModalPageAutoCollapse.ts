@@ -1,10 +1,11 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { getMatchOrder } from '@/libs/modal-page-routes-utils';
 import { ModalPageRouteKey, ModalPageRoutes } from '@/libs/routes';
 import { useDevice } from '@/providers/device.provider';
 
@@ -22,7 +23,6 @@ export default function useModalPageAutoCollapse(): void {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isMobile } = useDevice();
-  const prevIsMobile = useRef(isMobile);
 
   useLayoutEffect(() => {
     if (isMobile === null) return;
@@ -31,23 +31,33 @@ export default function useModalPageAutoCollapse(): void {
     let basePath = '';
     let paramSegment = '';
 
-    // 先匹配 h5 再匹配 pc，否则 /game-list/modal-game-details/1 会误命中 pc，paramSegment 带 modal 段，切 PC 不生效
-    for (const key of Object.keys(ModalPageRoutes) as ModalPageRouteKey[]) {
+    for (const key of getMatchOrder()) {
+      if (!(key in ModalPageRoutes)) continue;
       const { pc, h5 } = ModalPageRoutes[key];
 
       const h5Index = pathname.indexOf(h5);
       if (h5Index !== -1 && matchRoute(pathname, h5)) {
+        const config = ModalPageRoutes[key];
+        const onlyWhenParam =
+          'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
+        const seg = pathname.slice(h5Index + h5.length);
+        if (onlyWhenParam && seg.length <= 1) continue;
         matchedKey = key;
         basePath = pathname.slice(0, h5Index);
-        paramSegment = pathname.slice(h5Index + h5.length);
+        paramSegment = seg;
         break;
       }
 
       const pcIndex = pathname.indexOf(pc);
       if (pcIndex !== -1 && matchRoute(pathname, pc)) {
+        const config = ModalPageRoutes[key];
+        const onlyWhenParam =
+          'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
+        const seg = pathname.slice(pcIndex + pc.length);
+        if (onlyWhenParam && seg.length <= 1) continue;
         matchedKey = key;
         basePath = pathname.slice(0, pcIndex);
-        paramSegment = pathname.slice(pcIndex + pc.length);
+        paramSegment = seg;
         break;
       }
     }
@@ -58,22 +68,26 @@ export default function useModalPageAutoCollapse(): void {
     }
 
     const config = ModalPageRoutes[matchedKey];
-    // 列表+详情型：仅当路径带参数（如 /game-list/1、/modal-game-details/1）时才随视窗切换，列表页（无参）不切换
-    const onlyWhenParam =
-      'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
-    if (onlyWhenParam && paramSegment.length <= 1) return;
-    if (prevIsMobile.current === isMobile) return;
-    prevIsMobile.current = isMobile;
+    const parentKey = 'parentKey' in config ? config.parentKey : undefined;
+    const parentConfig = parentKey ? ModalPageRoutes[parentKey] : undefined;
 
     let targetPath: string;
     if (isMobile) {
-      const finalBase = basePath || localStorage.getItem(BASE_KEY) || '';
-      targetPath = finalBase + config.h5 + paramSegment;
-      localStorage.setItem(BASE_KEY, finalBase);
+      if (parentConfig) {
+        targetPath = parentConfig.h5 + config.h5 + paramSegment;
+      } else {
+        const finalBase = basePath || localStorage.getItem(BASE_KEY) || '';
+        targetPath = finalBase + config.h5 + paramSegment;
+        localStorage.setItem(BASE_KEY, finalBase);
+      }
     } else {
       targetPath = config.pc + paramSegment;
       localStorage.setItem(BASE_KEY, basePath);
     }
+    // h5 下从详情返回时，history 里可能是 pc 路径（如 /game-list），若 replace 成 h5 路径会命中 catch-all 导致 404。
+    // 故不替换，保持 pc 路径，由 RouteModalRenderer 根据 pathname+isMobile 渲染对应 modal。
+    if (isMobile && pathname === config.pc) return;
+
     const queryString = searchParams.toString();
     const targetUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
     if (targetPath !== pathname) router.replace(targetUrl);

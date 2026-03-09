@@ -2,8 +2,6 @@
 
 import { useModal } from '@/providers/modal.provider';
 
-import GameListSwiper from './game-list-swiper';
-
 export default function Login() {
   const { closeModal } = useModal();
   return (
@@ -15,7 +13,6 @@ export default function Login() {
       <div className="cursor-pointer hover:text-blue-500" onClick={closeModal}>
         返回
       </div>
-      <GameListSwiper />
     </div>
   );
 }
