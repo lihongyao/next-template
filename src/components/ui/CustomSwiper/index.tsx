@@ -37,9 +37,13 @@ export default function CustomSwiper({
   const itemsPerPage = columns * lines;
   const totalPages = Math.ceil(games.length / itemsPerPage);
 
+  const [enablePrev, setEnablePrev] = useState(currentPage > 0);
+  const [enableNext, setEnableNext] = useState(currentPage < totalPages - 1);
+
   const syncCurrentPage = () => {
     // 只在触摸滚动时同步
     if (!isTouchScroll.current) return;
+    isTouchScroll.current = false;
     // 边界判断
     const container = containerRef.current;
     if (!container || totalPages === 0) return;
@@ -53,7 +57,10 @@ export default function CustomSwiper({
     const maxScrollLeft = container.scrollWidth - containerWidth - containerPadding;
     const currentPage =
       scrollLeft >= maxScrollLeft ? totalPages - 1 : Math.floor(scrollLeft / containerWidth);
+
     setCurrentPage(currentPage);
+    setEnablePrev(scrollLeft > 0);
+    setEnableNext(scrollLeft < maxScrollLeft);
   };
 
   const scrollToPage = (page: number) => {
@@ -69,14 +76,18 @@ export default function CustomSwiper({
     });
 
     setCurrentPage(page);
+    setEnablePrev(page > 0);
+    setEnableNext(page < totalPages - 1);
   };
 
   const handleNext = () => {
+    if (!enableNext) return;
     const next = Math.min(currentPage + 1, totalPages - 1);
     scrollToPage(next);
   };
 
   const handlePrev = () => {
+    if (!enablePrev) return;
     const prev = Math.max(currentPage - 1, 0);
     scrollToPage(prev);
   };
@@ -89,11 +100,19 @@ export default function CustomSwiper({
         </h1>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handlePrev} disabled={currentPage === 0}>
+          <Button
+            className={cn(!enablePrev && 'cursor-not-allowed opacity-35')}
+            onClick={handlePrev}
+            disabled={!enablePrev}
+          >
             上一页
           </Button>
 
-          <Button onClick={handleNext} disabled={currentPage === totalPages - 1}>
+          <Button
+            className={cn(!enableNext && 'cursor-not-allowed opacity-35')}
+            onClick={handleNext}
+            disabled={!enableNext}
+          >
             下一页
           </Button>
         </div>
@@ -115,6 +134,7 @@ export default function CustomSwiper({
           gridTemplateRows: `repeat(${lines}, auto)`,
         }}
         onTouchStart={() => (isTouchScroll.current = true)}
+        onWheel={() => (isTouchScroll.current = true)}
         onScrollEnd={syncCurrentPage}
       >
         {games.map((item, index) => (

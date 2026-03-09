@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
@@ -55,6 +56,8 @@ export default async function LocaleLayout({
   // 获取品牌配置
   const brandConfig = await getBrandConfigSSR();
 
+  const userAgent = (await headers()).get('user-agent') || '';
+
   return (
     <html
       lang={locale}
@@ -77,7 +80,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
             <DialogProvider>
-              <DeviceProvider>
+              <DeviceProvider userAgent={userAgent}>
                 <ModalProvider>
                   {/* <LogoLoading /> */}
                   {children}
