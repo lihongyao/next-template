@@ -1,5 +1,3 @@
-'use client';
-
 import { useRef, useState } from 'react';
 
 import { games } from '@/constants/data';
@@ -9,53 +7,48 @@ import Button from '../Button';
 import LazyImg from '../LazyImage';
 
 interface CustomSwiperProps {
+  /**  一屏显示几列，默认 3 */
   columns?: number;
+  /** 列间距，默认 12px */
   gap?: number;
 }
 
 export default function CustomSwiper({ columns = 3, gap = 6 }: CustomSwiperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<HTMLDivElement[]>([]);
-
   const [currentPage, setCurrentPage] = useState(0);
 
   const totalPages = Math.ceil(games.length / columns);
 
-  const scrollToPage = (page: number) => {
-    const index = page * columns;
-    const el = itemRefs.current[index];
-
-    if (!el) return;
-
-    el.scrollIntoView({
-      behavior: 'smooth',
-      inline: 'start',
-      block: 'nearest',
-    });
-
-    setCurrentPage(page);
-  };
-
+  // 点击下一页
   const handleNext = () => {
-    const next = Math.min(currentPage + 1, totalPages - 1);
-    scrollToPage(next);
+    if (!containerRef.current) return;
+    const style = window.getComputedStyle(containerRef.current);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const clientWidth = containerRef.current.clientWidth;
+    const scrollWidth = clientWidth - paddingLeft * 2 + gap;
+    containerRef.current.scrollBy({ left: scrollWidth, behavior: 'smooth' });
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
   };
 
+  // 点击上一页
   const handlePrev = () => {
-    const prev = Math.max(currentPage - 1, 0);
-    scrollToPage(prev);
+    if (!containerRef.current) return;
+    const style = window.getComputedStyle(containerRef.current);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const clientWidth = containerRef.current.clientWidth;
+    const scrollWidth = clientWidth - paddingLeft * 2 + gap;
+    containerRef.current.scrollBy({ left: -scrollWidth, behavior: 'smooth' });
+    setCurrentPage((prev) => Math.max(prev - 1, 0));
   };
 
   return (
     <div data-name="custom-swiper">
       <header className="mb-3 flex items-center justify-between">
         <h1 className="text-white">游戏列表</h1>
-
         <div className="flex items-center gap-2">
           <Button onClick={handlePrev} disabled={currentPage === 0}>
             上一页
           </Button>
-
           <Button onClick={handleNext} disabled={currentPage === totalPages - 1}>
             下一页
           </Button>
@@ -65,20 +58,17 @@ export default function CustomSwiper({ columns = 3, gap = 6 }: CustomSwiperProps
       <div
         ref={containerRef}
         className={cn(
-          `no-scrollbar -mx-3 grid snap-x snap-mandatory scroll-pl-3 grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth px-3`,
+          'custom-swiper no-scrollbar -mx-3 grid snap-x snap-mandatory scroll-pl-3 grid-flow-col overflow-x-scroll overflow-y-hidden scroll-smooth px-3',
         )}
         style={{
-          gap,
+          gap: gap,
           gridAutoColumns: `calc((100% - ${gap * (columns - 1)}px) / ${columns})`,
         }}
       >
         {games.map((item, index) => (
           <div
             key={index}
-            ref={(el) => {
-              if (el) itemRefs.current[index] = el;
-            }}
-            className="aspect-[200/267] shrink-0 snap-start overflow-hidden rounded-md"
+            className="custom-swiper-item aspect-[200/267] snap-start overflow-hidden rounded-md"
           >
             <LazyImg className="h-full w-full object-cover" src={item.src} blurSrc={item.blurSrc} />
           </div>
