@@ -1,6 +1,7 @@
 // src/app/[locale]/(home)/page.tsx
 'use client';
 
+import Marquee from '@/components/features/Marquee';
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
 import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
@@ -62,6 +63,8 @@ export default function HomePage() {
         <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
+
+      <Marquee />
 
       <Icon
         name="globe"
