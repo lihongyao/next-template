@@ -178,8 +178,10 @@ export default function CustomSwiper({
             <div
               key={index}
               ref={(el) => {
-                itemRefs.current[index] = el;
-                if (el) elementToIndex.current.set(el, index);
+                if (el) {
+                  itemRefs.current[index] = el;
+                  elementToIndex.current.set(el, index);
+                }
               }}
               className="aspect-[200/267] shrink-0 snap-start overflow-hidden rounded-md bg-gray-800"
             >
