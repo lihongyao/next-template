@@ -62,3 +62,16 @@ body {
 .animate-marquee {
   animation: marquee 25s linear infinite;
 }
+
+/* 单 DOM 无缝循环：平移第一份数据宽度后重置 */
+@keyframes marquee-single {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--marquee-translate, -50%));
+  }
+}
+.animate-marquee-single {
+  animation: marquee-single 25s linear infinite;
+}
