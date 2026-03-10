@@ -1,9 +1,6 @@
 'use client';
 
-/**
- *
- */
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { games } from '@/constants/data';
 import { cn } from '@/libs/class-helpers';
@@ -29,16 +26,54 @@ export default function CustomSwiper({
   isOver,
 }: CustomSwiperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<HTMLDivElement[]>([]);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const elementToIndex = useRef(new Map<HTMLDivElement, number>());
   const isTouchScroll = useRef(false);
 
   const [currentPage, setCurrentPage] = useState(0);
-
   const itemsPerPage = columns * lines;
   const totalPages = Math.ceil(games.length / itemsPerPage);
 
+  /** 进入过视口的 item 下标，只增不减，用于懒加载内容 */
+  const [visibleIndices, setVisibleIndices] = useState<Set<number>>(() => {
+    const set = new Set<number>();
+    for (let i = 0; i < Math.min(itemsPerPage, games.length); i++) set.add(i);
+    return set;
+  });
+
   const [enablePrev, setEnablePrev] = useState(currentPage > 0);
   const [enableNext, setEnableNext] = useState(currentPage < totalPages - 1);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || games.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleIndices((prev) => {
+          const next = new Set(prev);
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const index = elementToIndex.current.get(entry.target as HTMLDivElement);
+            if (index !== undefined) next.add(index);
+          }
+          return next.size === prev.size ? prev : next;
+        });
+      },
+      {
+        root: container,
+        rootMargin: '100% 0px',
+        threshold: 0,
+      },
+    );
+
+    const refs = itemRefs.current;
+    for (let i = 0; i < games.length; i++) {
+      const el = refs[i];
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [games.length]);
 
   const syncCurrentPage = () => {
     // 只在触摸滚动时同步
@@ -137,17 +172,27 @@ export default function CustomSwiper({
         onWheel={() => (isTouchScroll.current = true)}
         onScrollEnd={syncCurrentPage}
       >
-        {games.map((item, index) => (
-          <div
-            key={index}
-            ref={(el) => {
-              if (el) itemRefs.current[index] = el;
-            }}
-            className="aspect-[200/267] shrink-0 snap-start overflow-hidden rounded-md"
-          >
-            <LazyImg className="h-full w-full object-cover" src={item.src} blurSrc={item.blurSrc} />
-          </div>
-        ))}
+        {games.map((item, index) => {
+          const isVisible = visibleIndices.has(index);
+          return (
+            <div
+              key={index}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+                if (el) elementToIndex.current.set(el, index);
+              }}
+              className="aspect-[200/267] shrink-0 snap-start overflow-hidden rounded-md bg-gray-800"
+            >
+              {isVisible && (
+                <LazyImg
+                  className="h-full w-full object-cover"
+                  src={item.src}
+                  blurSrc={item.blurSrc}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

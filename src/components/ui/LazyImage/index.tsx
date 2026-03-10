@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/libs/class-helpers';
 
@@ -19,10 +20,10 @@ type LazyImgProps = {
   height?: number;
   loading?: 'lazy' | 'eager';
   sizes?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   onError?: (value: boolean) => void;
   onLoad?: (value: boolean) => void;
-  onClick?: (e: React.MouseEvent | React.KeyboardEvent) => void;
+  onClick?: (e: MouseEvent<HTMLImageElement> | KeyboardEvent<HTMLImageElement>) => void;
 };
 
 export default function LazyImg({
@@ -40,14 +41,14 @@ export default function LazyImg({
   onLoad,
   onClick,
 }: LazyImgProps) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [shouldLoad, setShouldLoad] = useState(loading === 'eager');
-  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [displaySrc, setDisplaySrc] = useState<string | undefined>(blurSrc ?? undefined);
 
   useEffect(() => {
     if (loading !== 'lazy' || !src || shouldLoad) return;
-    const el = wrapperRef.current;
+    const el = imgRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
@@ -63,64 +64,78 @@ export default function LazyImg({
     return () => observer.disconnect();
   }, [loading, src, shouldLoad]);
 
-  // 命中缓存则直接视为已加载，避免先透明再闪一下
+  const realSrc = hasError ? errorSrc || DEFAULT_PLACEHOLDER_ERR : src;
+
   useEffect(() => {
-    if (!shouldLoad || !src || !imageCache.has(src)) return;
-    setIsLoaded(true);
-  }, [shouldLoad, src]);
+    if (!shouldLoad || !realSrc) return;
+
+    if (imageCache.has(src ?? '')) {
+      setDisplaySrc(realSrc);
+      return;
+    }
+
+    if (blurSrc) {
+      setDisplaySrc(blurSrc);
+      const img = new Image();
+      img.src = realSrc;
+      img.onload = () => {
+        if (src) imageCache.set(src, true);
+        setDisplaySrc(realSrc);
+        onLoad?.(false);
+      };
+      img.onerror = () => {
+        setHasError(true);
+        onError?.(true);
+        setDisplaySrc(errorSrc || DEFAULT_PLACEHOLDER_ERR);
+      };
+      return () => {
+        img.src = '';
+        img.onload = null;
+        img.onerror = null;
+      };
+    }
+
+    setDisplaySrc(realSrc);
+  }, [shouldLoad, realSrc, src, blurSrc, errorSrc, onLoad, onError]);
 
   const handleLoad = () => {
     if (src) imageCache.set(src, true);
-    setIsLoaded(true);
     onLoad?.(false);
   };
 
   const handleError = () => {
     setHasError(true);
     onError?.(true);
+    setDisplaySrc(errorSrc || DEFAULT_PLACEHOLDER_ERR);
   };
 
-  const realSrc = hasError ? errorSrc || DEFAULT_PLACEHOLDER_ERR : src;
-  const showRealImg = shouldLoad && realSrc;
-
+  const isRealSrc = displaySrc === realSrc;
+  // if (!shouldLoad) return <div ref={imgRef} className="h-full w-full" />;
   return (
-    <div
-      ref={wrapperRef}
-      className={cn('relative overflow-hidden', className)}
-      style={{
-        width: width ?? undefined,
-        height: height ?? undefined,
-        ...style,
-      }}
+    <img
+      ref={imgRef}
+      src={displaySrc ?? DEFAULT_PLACEHOLDER_ERR}
+      alt={isRealSrc ? (alt ?? '') : ''}
+      aria-hidden={!isRealSrc}
+      width={width}
+      height={height}
+      sizes={isRealSrc ? sizes : undefined}
+      loading={isRealSrc ? loading : undefined}
+      decoding="async"
+      className={cn('size-full object-cover', className)}
+      style={style}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onClick?.(e as React.KeyboardEvent);
-      }}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick(e as KeyboardEvent<HTMLImageElement>);
+            }
+          : undefined
+      }
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-    >
-      {blurSrc && !isLoaded && (
-        <img
-          src={blurSrc}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 size-full object-cover"
-          decoding="async"
-        />
-      )}
-      {showRealImg && (
-        <img
-          src={realSrc}
-          alt={alt ?? ''}
-          sizes={sizes}
-          loading={loading}
-          decoding="async"
-          className="absolute inset-0 size-full object-cover transition-opacity duration-100 ease-linear"
-          style={{ opacity: isLoaded ? 1 : 0 }}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
-      )}
-    </div>
+      onLoad={isRealSrc ? handleLoad : undefined}
+      onError={isRealSrc ? handleError : undefined}
+    />
   );
 }
