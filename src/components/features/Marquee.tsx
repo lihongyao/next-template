@@ -7,9 +7,10 @@ import { games } from '@/constants/data';
 import LazyImg from '../ui/LazyImage';
 
 /** 拷贝到末尾的项数，用于无缝循环（需能填满视口） */
-const PREFETCH_COUNT = 8;
+const PREFETCH_COUNT = 5;
 
 export default function Marquee() {
+  // refs
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const elementToLogicalIndex = useRef(new Map<HTMLDivElement, number>());
@@ -24,7 +25,7 @@ export default function Marquee() {
   );
 
   const [visibleLogicalIndices, setVisibleLogicalIndices] = useState<Set<number>>(
-    () => new Set(Array.from({ length: Math.min(3, games.length) }, (_, i) => i)),
+    () => new Set(Array.from({ length: Math.min(PREFETCH_COUNT, games.length) }, (_, i) => i)),
   );
 
   useEffect(() => {
@@ -66,9 +67,10 @@ export default function Marquee() {
   };
 
   return (
-    <div ref={containerRef} className="relative flex w-full overflow-hidden">
+    // 溢出隐藏，可考虑给 overflow: hidden
+    <div ref={containerRef} className="relative flex w-full">
       <div
-        className="animate-marquee-single flex shrink-0 items-center gap-3 sm:gap-3.5"
+        className="animate-marquee flex shrink-0 items-center gap-3"
         style={
           {
             '--marquee-translate': `-${translatePercent}%`,
@@ -87,13 +89,14 @@ export default function Marquee() {
             >
               {isVisible ? (
                 <LazyImg
-                  className="h-full w-full rounded-lg bg-gray-800 object-cover"
+                  className="h-full w-full rounded-lg bg-amber-950 object-cover"
                   src={game.src}
+                  blurSrc={game.blurSrc}
                   alt=""
                   loading="eager"
                 />
               ) : (
-                <div className="h-full w-full rounded-lg bg-gray-800" />
+                <div className="h-full w-full rounded-lg bg-amber-950" />
               )}
             </div>
           );
