@@ -66,6 +66,7 @@ export default async function LocaleLayout({
       className="no-scrollbar"
       data-theme={brandConfig.theme}
       data-skin={brandConfig.skin}
+      data-version={process.env.NEXT_PUBLIC_APP_VERSION}
     >
       <head>
         {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}

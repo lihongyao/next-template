@@ -23,6 +23,7 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
     setupBrandConfig();
     setupBrandCssImports(brandConfig);
     setupLcpElement();
+    setupEnv();
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -94,6 +95,9 @@ ${isOverridesExist ? `import "../overrides/${app}.css";` : ''}
   console.log('[pre-setup] 已写入 src/assets/styles/generated/brand.css.ts');
 }
 
+/**
+ * 设置 LCP 元素
+ */
 function setupLcpElement() {
   const logoPath = path.resolve(ROOT, `public/images/brands/${app}/logo.png`);
   const logoOutputPath = path.resolve(ROOT, 'src/assets/images/lcp-b64.ts');
@@ -101,4 +105,22 @@ function setupLcpElement() {
   const fileContent = `export const lcpB64 = "data:image/png;base64,${base64}";\n`;
   fs.writeFileSync(logoOutputPath, fileContent);
   console.log('lcp-b64.ts generated');
+}
+
+/**
+ * 设置 APP 版本
+ */
+function setupEnv() {
+  const envOutputFile = path.resolve(ROOT, '.env');
+
+  const timestamp = new Date().getTime();
+  const timestampStr = new Date(timestamp).toISOString().slice(0, 19).replace('T', '_');
+  const version = `v_${app}_${timestampStr}`;
+  const envContent = `# === 自动生成，请勿手动修改 ===
+NEXT_PUBLIC_APP_VERSION=${version}
+`;
+
+  fs.writeFileSync(envOutputFile, envContent, 'utf8');
+
+  console.log('[pre-setup] 已写入 .env');
 }
