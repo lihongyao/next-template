@@ -40,6 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+pnpm-lock.yaml
+
 # 脚本生成的品牌入口，勿提交
 src/configs/brands/index.ts
 # 脚本生成的品牌样式，勿提交
