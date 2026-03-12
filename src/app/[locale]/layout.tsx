@@ -6,9 +6,11 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import { lcpB64 } from '@/assets/images/lcp-b64';
 import '@/assets/styles/generated/brand.css';
 import ClientInitializer from '@/components/features/ClientInitializer';
 import { ClientOnly } from '@/components/features/ClientOnly';
+import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
@@ -77,12 +79,15 @@ export default async function LocaleLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body style={{ background: '#F5F5F5' }}>
+        {/* lcp element */}
+        <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
+
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
             <DialogProvider>
               <DeviceProvider userAgent={userAgent}>
                 <ModalProvider>
-                  {/* <LogoLoading /> */}
+                  <LogoLoading />
                   {children}
                   <ClientOnly>
                     <RouteModalRenderer />

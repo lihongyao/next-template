@@ -22,6 +22,7 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
     const brandConfig = await getBrandConfig();
     setupBrandConfig();
     setupBrandCssImports(brandConfig);
+    setupLcpElement();
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -86,4 +87,13 @@ import "../skins/${brandConfig.skin}.css";
   const brandCssFilePath = path.resolve(generatedDir, 'brand.css.ts');
   fs.writeFileSync(brandCssFilePath, brandCssContent, 'utf8');
   console.log('[pre-setup] 已写入 src/assets/styles/generated/brand.css.ts');
+}
+
+function setupLcpElement() {
+  const logoPath = path.resolve(ROOT, `public/images/brands/${app}/logo.png`);
+  const logoOutputPath = path.resolve(ROOT, 'src/assets/images/lcp-b64.ts');
+  const base64 = fs.readFileSync(logoPath, 'base64');
+  const fileContent = `export const lcpB64 = "data:image/png;base64,${base64}";\n`;
+  fs.writeFileSync(logoOutputPath, fileContent);
+  console.log('lcp-b64.ts generated');
 }

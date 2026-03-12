@@ -61,7 +61,11 @@ export default function LogoLoading() {
             ...animateStyle,
           }}
         >
-          <img style={{ height: '100%' }} src="/logo.png" alt="logo" />
+          <img
+            style={{ height: '100%' }}
+            src={`/images/brands/${process.env.NEXT_PUBLIC_BRAND}/logo.png`}
+            alt="logo"
+          />
         </div>
       </div>
     </>
