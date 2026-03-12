@@ -66,6 +66,10 @@ export { default } from './${app}';`;
 
 function setupBrandCssImports(brandConfig: BrandConfig) {
   const generatedAt = new Date().toISOString();
+  // 判断是否存在样式覆盖文件
+  const overridesFile = path.resolve(ROOT, `src/assets/styles/overrides/${app}.css`);
+  const isOverridesExist = fs.existsSync(overridesFile);
+
   const brandCssContent = `/**
 * 该文件由 ${SCRIPT_NAME} 自动生成，请勿手动修改
 *  
@@ -77,6 +81,7 @@ function setupBrandCssImports(brandConfig: BrandConfig) {
 import "../core/index.css";
 import "../themes/${brandConfig.theme}.css";
 import "../skins/${brandConfig.skin}.css";
+${isOverridesExist ? `import "../overrides/${app}.css";` : ''}
 `;
 
   const stylesRoot = path.resolve(ROOT, 'src/assets/styles');

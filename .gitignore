@@ -44,3 +44,5 @@ next-env.d.ts
 src/configs/brands/index.ts
 # 脚本生成的品牌样式，勿提交
 src/assets/styles/generated/
+# 脚本生成的 LCP 元素（base64）
+lcp-b64.ts
