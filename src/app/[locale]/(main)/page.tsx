@@ -1,6 +1,10 @@
 // src/app/[locale]/(home)/page.tsx
 'use client';
 
+import { useEffect } from 'react';
+
+import { useTransitionRouter } from 'next-view-transitions';
+
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
 import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
@@ -12,7 +16,11 @@ import { useDevice } from '@/providers/device.provider';
 export default function HomePage() {
   const { isMobile } = useDevice();
   const router = useRouter();
+  const routerA = useTransitionRouter();
   const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
+  useEffect(() => {
+    console.log('render home page...');
+  }, []);
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[200px] w-full bg-blue-500" />
@@ -57,10 +65,34 @@ export default function HomePage() {
         >
           游戏列表（自定义Swiper）
         </Button>
-        <Button onClick={() => router.push(Routes.Details + '/Slot')}>详情</Button>
-        <Button onClick={() => router.push(Routes.Dialog)}>普通弹窗</Button>
-        <Button onClick={() => router.push(Routes.I18n)}>国际化</Button>
-        <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
+        <Button
+          onClick={() => {
+            router.push(Routes.Details, {
+              scroll: false,
+            });
+          }}
+        >
+          详情
+        </Button>
+        <Button
+          onClick={() => {
+            router.push(Routes.Dialog, {
+              scroll: false,
+            });
+          }}
+        >
+          普通弹窗
+        </Button>
+        <Button
+          onClick={() => {
+            routerA.push(Routes.I18n, {
+              scroll: false,
+            });
+          }}
+        >
+          国际化
+        </Button>
+        <Button onClick={() => routerA.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
 
       <Icon

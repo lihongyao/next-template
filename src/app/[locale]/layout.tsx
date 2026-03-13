@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
+import { ViewTransitions } from 'next-view-transitions';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
@@ -12,6 +13,7 @@ import ClientInitializer from '@/components/features/ClientInitializer';
 import { ClientOnly } from '@/components/features/ClientOnly';
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
+import { ScrollToTopOnRouteChange } from '@/components/features/ScrollToTopOnRouteChange';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
@@ -61,45 +63,48 @@ export default async function LocaleLayout({
   const userAgent = (await headers()).get('user-agent') || '';
 
   return (
-    <html
-      lang={locale}
-      className="no-scrollbar"
-      data-theme={brandConfig.theme}
-      data-skin={brandConfig.skin}
-      data-version={process.env.NEXT_PUBLIC_APP_VERSION}
-    >
-      <head>
-        {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}
-        <meta name="theme-color" content={'#874334'} />
-        {/* PWA - 隐藏地址栏、底部工具栏 */}
-        {/* For iOS Safari*/}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        {/* For Android Chrome */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        {/* PWA - 添加 manifest.json */}
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body style={{ background: '#F5F5F5' }}>
-        {/* lcp element */}
-        <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
+    <ViewTransitions>
+      <html
+        lang={locale}
+        className="no-scrollbar"
+        data-theme={brandConfig.theme}
+        data-skin={brandConfig.skin}
+        data-version={process.env.NEXT_PUBLIC_APP_VERSION}
+      >
+        <head>
+          {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}
+          <meta name="theme-color" content={'#874334'} />
+          {/* PWA - 隐藏地址栏、底部工具栏 */}
+          {/* For iOS Safari*/}
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          {/* For Android Chrome */}
+          <meta name="mobile-web-app-capable" content="yes" />
+          {/* PWA - 添加 manifest.json */}
+          <link rel="manifest" href="/manifest.json" />
+        </head>
+        <body style={{ background: '#f5f5f5' }}>
+          {/* lcp element */}
+          <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
 
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <BrandConfigProvider value={brandConfig}>
-            <DialogProvider>
-              <DeviceProvider userAgent={userAgent}>
-                <ModalProvider>
-                  <LogoLoading />
-                  {children}
-                  <ClientOnly>
-                    <RouteModalRenderer />
-                  </ClientOnly>
-                  <ClientInitializer />
-                </ModalProvider>
-              </DeviceProvider>
-            </DialogProvider>
-          </BrandConfigProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+          <NextIntlClientProvider messages={messages} locale={locale}>
+            <BrandConfigProvider value={brandConfig}>
+              <DialogProvider>
+                <DeviceProvider userAgent={userAgent}>
+                  <ModalProvider>
+                    <LogoLoading />
+                    <ScrollToTopOnRouteChange />
+                    {children}
+                    <ClientOnly>
+                      <RouteModalRenderer />
+                    </ClientOnly>
+                    <ClientInitializer />
+                  </ModalProvider>
+                </DeviceProvider>
+              </DialogProvider>
+            </BrandConfigProvider>
+          </NextIntlClientProvider>
+        </body>
+      </html>
+    </ViewTransitions>
   );
 }

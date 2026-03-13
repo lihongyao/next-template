@@ -74,3 +74,34 @@ body {
   max-width: 99vw;
   max-height: 99vh;
 }
+
+/* ----------------------------------------------------------------------------------  */
+/* 防止 transition 覆盖 UI */
+::view-transition-group(root) {
+  z-index: auto !important;
+}
+
+/* GPU layer */
+::view-transition-image-pair(root) {
+  isolation: isolate;
+  will-change: transform, opacity, scale;
+  z-index: 1;
+}
+
+/* 新页面截图 */
+::view-transition-new(root) {
+  z-index: var(--vt-new-z, 2);
+  animation: none !important;
+}
+
+/* 旧页面截图 */
+::view-transition-old(root) {
+  z-index: var(--vt-old-z, 1);
+  animation: none !important;
+}
+
+/* 避免 fixed header 抖动 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
