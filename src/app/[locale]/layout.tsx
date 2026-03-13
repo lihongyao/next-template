@@ -13,7 +13,6 @@ import ClientInitializer from '@/components/features/ClientInitializer';
 import { ClientOnly } from '@/components/features/ClientOnly';
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
-import { ScrollToTopOnRouteChange } from '@/components/features/ScrollToTopOnRouteChange';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
@@ -92,7 +91,6 @@ export default async function LocaleLayout({
                 <DeviceProvider userAgent={userAgent}>
                   <ModalProvider>
                     <LogoLoading />
-                    <ScrollToTopOnRouteChange />
                     {children}
                     <ClientOnly>
                       <RouteModalRenderer />

@@ -59,7 +59,7 @@ export default function HomePage() {
         <Button
           onClick={() => {
             if (isMobile) {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper));
+              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper), { scroll: false });
             }
           }}
         >
@@ -76,9 +76,7 @@ export default function HomePage() {
         </Button>
         <Button
           onClick={() => {
-            router.push(Routes.Dialog, {
-              scroll: false,
-            });
+            router.push(Routes.Dialog, { scroll: false });
           }}
         >
           普通弹窗
@@ -92,7 +90,9 @@ export default function HomePage() {
         >
           国际化
         </Button>
-        <Button onClick={() => routerA.push(Routes.DataPathThrough)}>数据传递</Button>
+        <Button onClick={() => routerA.push(Routes.DataPathThrough, { scroll: true })}>
+          数据传递
+        </Button>
       </div>
 
       <Icon
@@ -109,7 +109,7 @@ export default function HomePage() {
         className="w-[300]"
       />
 
-      <div className="h-[600px] w-full bg-blue-500" />
+      <div className="h-[1000px] w-full bg-blue-500" />
     </div>
   );
 }
