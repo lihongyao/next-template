@@ -7,7 +7,6 @@ import { useTransitionRouter } from 'next-view-transitions';
 
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
-import { ResponsiveImage } from '@/components/ui/ResponsiveImage';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
 import { ModalPageRoutes, Routes } from '@/libs/routes';
@@ -90,7 +89,7 @@ export default function HomePage() {
         >
           国际化
         </Button>
-        <Button onClick={() => routerA.push(Routes.DataPathThrough, { scroll: true })}>
+        <Button onClick={() => router.push(Routes.DataPathThrough, { scroll: true })}>
           数据传递
         </Button>
       </div>
@@ -102,12 +101,12 @@ export default function HomePage() {
         wrapperClass="size-12 bg-black rounded-full"
       />
 
-      <ResponsiveImage
+      {/* <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
         desktop="https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg"
         alt=""
         className="w-[300]"
-      />
+      /> */}
 
       <div className="h-[1000px] w-full bg-blue-500" />
     </div>

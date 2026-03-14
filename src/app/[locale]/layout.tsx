@@ -81,7 +81,7 @@ export default async function LocaleLayout({
           {/* PWA - 添加 manifest.json */}
           <link rel="manifest" href="/manifest.json" />
         </head>
-        <body style={{ background: '#f5f5f5' }}>
+        <body style={{ background: '#333333' }}>
           {/* lcp element */}
           <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
 

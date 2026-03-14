@@ -10,7 +10,7 @@ export default function SideNavLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   return (
     <div className="min-h-screen">
-      <header className="flex h-14 items-center justify-between border-b px-3">
+      <header className="flex h-14 items-center justify-between border-b bg-black px-3 text-white">
         <h1>Classic Layout</h1>
         <div>
           <Button
