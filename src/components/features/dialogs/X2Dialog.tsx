@@ -3,9 +3,9 @@
 
 import Button from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
-import { useRouter } from '@/i18n/navigation';
 import { Routes } from '@/libs/routes';
 import { useBrandConfig } from '@/providers/brand.provider';
+import { useRouter } from '@/router';
 
 export default function X2Dialog() {
   const brand = useBrandConfig();
@@ -32,7 +32,7 @@ export default function X2Dialog() {
         </Button>
         <Button
           onClick={() => {
-            dialog.close().then(() => router.push(Routes.Motion));
+            dialog.close().then(() => router.push(Routes.Cart));
           }}
         >
           跳转其他页面

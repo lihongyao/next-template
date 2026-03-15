@@ -5,14 +5,14 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
-import useAppRouter from '@/hooks/useAppRouter';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { ModalPageRoutes, Routes } from '@/libs/routes';
 import { useDevice } from '@/providers/device.provider';
+import { useRouter } from '@/router';
 
 export default function HomePage() {
   const { isMobile } = useDevice();
-  const router = useAppRouter();
+  const router = useRouter();
   // const routerA = useTransitionRouter();
   const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   useEffect(() => {

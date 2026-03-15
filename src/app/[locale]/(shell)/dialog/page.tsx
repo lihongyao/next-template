@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useMount } from 'ahooks';
 
+import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
@@ -20,7 +21,7 @@ type DialogConfig = {
   contentClassName?: string;
 };
 
-export default function Demo() {
+export default function DialogPage() {
   const [open, setOpen] = useState(false);
   const dialog = useDialog();
   const router = useRouter();
@@ -186,33 +187,39 @@ export default function Demo() {
   };
 
   return (
-    <div>
-      <div className="mb-4 h-[800px] bg-pink-300"></div>
-      <div className="flex flex-wrap gap-4 p-4">
-        <Button
-          onClick={() => {
-            router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), { scroll: false });
-          }}
-        >
-          路由弹框
-        </Button>
-        <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
-        <Button onClick={openX1}>Open X1</Button>
-        <Button onClick={openX2}>Open X2</Button>
-        <Button onClick={openX2AutoClose}>openX2AutoClose</Button>
-        <Button onClick={openQueue}>queue dialogs</Button>
-        <Button onClick={openStatic}>静态调用</Button>
-        <Button onClick={openMuiltipleSameDialog}>延迟弹相同弹框</Button>
-        <Button
-          onClick={() => {
-            router.back();
-            dialog.open('X2Dialog', {
-              closeOnPopstate: false,
-            });
-          }}
-        >
-          后退时是否自动关闭
-        </Button>
+    <div data-name="dialog-page">
+      <AppHeader title="弹框" />
+      <div className="p-4">
+        <div className="flex flex-wrap gap-4">
+          <Button
+            onClick={() => {
+              router.push(resolveRouteForCurrentDevice(ModalPageRoutes.gameList), {
+                scroll: false,
+              });
+            }}
+          >
+            路由弹框
+          </Button>
+          <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
+          <Button onClick={openX1}>Open X1</Button>
+          <Button onClick={openX2}>Open X2</Button>
+          <Button onClick={openX2AutoClose}>openX2AutoClose</Button>
+          <Button onClick={openQueue}>queue dialogs</Button>
+          <Button onClick={openStatic}>静态调用</Button>
+          <Button onClick={openMuiltipleSameDialog}>延迟弹相同弹框</Button>
+          <Button
+            onClick={() => {
+              router.back();
+              dialog.open('X2Dialog', {
+                closeOnPopstate: false,
+              });
+            }}
+          >
+            后退时是否自动关闭
+          </Button>
+        </div>
+
+        <div className="h-[1000px]"></div>
 
         {/* 组件调用(受控) */}
         <Dialog
@@ -245,7 +252,6 @@ export default function Demo() {
           </div>
         </Dialog>
       </div>
-      <div className="mt-4 h-[800px] bg-pink-300"></div>
     </div>
   );
 }

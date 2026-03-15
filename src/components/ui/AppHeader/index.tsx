@@ -1,6 +1,6 @@
 'use client';
 
-import useAppRouter from '@/hooks/useAppRouter';
+import { useRouter } from '@/router';
 
 import Button from '../Button';
 
@@ -9,11 +9,11 @@ interface AppHeaderProps {
   onBack?: () => void;
 }
 export default function AppHeader({ title, onBack }: AppHeaderProps) {
-  const router = useAppRouter();
+  const router = useRouter();
   // const router = useTransitionRouter();
   return (
     <div className="relative h-[56px]">
-      <div className="fixed top-0 left-0 flex h-[56px] w-full items-center justify-center bg-black transition-none">
+      <div className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-center bg-black transition-none">
         <div className="absolute top-1/2 left-3 -translate-y-1/2">
           <Button
             onClick={() => {

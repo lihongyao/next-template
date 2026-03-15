@@ -7,9 +7,9 @@ export default function ClientComp() {
   const point = 6000;
   return (
     <div className="flex w-full flex-col items-center gap-4">
-      <div>客户端组件</div>
+      <div className="text-white">客户端组件</div>
       <div>{process.env.NEXT_PUBLIC_API_BASE_URL}</div>
-      <div className="w-full space-y-2 bg-gray-200 p-4 text-black">
+      <div className="w-full space-y-2 bg-gray-200 p-4">
         {/* 1. 没有变量 */}
         <div>{t('title')}</div>
         <div>{t('profile.tips')}</div>

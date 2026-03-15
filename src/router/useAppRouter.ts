@@ -14,7 +14,6 @@ export default function useAppRouter() {
     },
 
     replace(href: string, options?: any) {
-      // replace 不应该产生 forward 动画
       setNextDirection('forward');
       router.replace(href, options);
     },
