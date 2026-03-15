@@ -10,6 +10,7 @@ export default function GameListSwiper() {
       <AppHeader title="游戏列表" />
       <div className="no-scrollbar flex-1 overflow-auto p-3">
         <CustomSwiper columns={isMobile ? 3 : 5} gap={6} lines={2} isOver />
+        <div className="mt-4 h-[1000px] bg-red-400"></div>
       </div>
     </div>
   );

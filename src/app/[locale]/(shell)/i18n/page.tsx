@@ -25,7 +25,7 @@ export default function i18nPage() {
         >
           详情
         </Button>
-        <div className="h-[600px] w-full bg-orange-500"></div>
+        <div className="h-[600px] w-full bg-orange-500">123123</div>
       </main>
     </div>
   );

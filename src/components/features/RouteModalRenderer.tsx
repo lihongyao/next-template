@@ -15,11 +15,11 @@ import {
 import { ModalComponents } from '@/app/[locale]/(modals)';
 import { ZIndex } from '@/constants';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
-import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { getH5PathForPcPath } from '@/libs/modal-page-routes-utils';
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
+import { usePathname, useRouter } from '@/router';
 
 /** h5 下 pathname 为 pc 格式时，按 ModalPageRoutes 转为 modal 路径用于渲染 */
 function getEffectivePathForModals(pathname: string, isMobile: boolean): string[] {
@@ -111,6 +111,8 @@ export default function RouteModalRenderer() {
     >
       {modalComponents.map((Modal, idx) => {
         const modalKey = modalKeys[idx];
+
+        // return <Modal key={modalKey} />;
 
         return (
           <motion.div

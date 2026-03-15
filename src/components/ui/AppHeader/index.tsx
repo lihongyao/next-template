@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import { ZIndex } from '@/constants';
 import { useRouter } from '@/router';
 
 import Button from '../Button';
@@ -10,26 +13,34 @@ interface AppHeaderProps {
 }
 export default function AppHeader({ title, onBack }: AppHeaderProps) {
   const router = useRouter();
-  // const router = useTransitionRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <div className="relative h-[56px]">
-      <div className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-center bg-black transition-none">
-        <div className="absolute top-1/2 left-3 -translate-y-1/2">
-          <Button
-            onClick={() => {
-              if (onBack) {
-                onBack();
-              } else {
-                router.back();
-              }
-            }}
-          >
-            返回
-          </Button>
-        </div>
-        <h1 className="font-semibold text-white">{title}</h1>
-        <div className="absolute top-1/2 right-3 -translate-y-1/2"></div>
+    <div
+      className="sticky inset-x-0 top-0 z-50 flex h-[56px] w-full items-center justify-center bg-black transition-none"
+      style={{
+        zIndex: ZIndex.Header,
+      }}
+    >
+      <div className="absolute top-1/2 left-3 -translate-y-1/2">
+        <Button
+          onClick={() => {
+            if (onBack) {
+              onBack();
+            } else {
+              router.back();
+            }
+          }}
+        >
+          返回
+        </Button>
       </div>
+      <h1 className="font-semibold text-white">{title}</h1>
+      <div className="absolute top-1/2 right-3 -translate-y-1/2"></div>
     </div>
   );
 }

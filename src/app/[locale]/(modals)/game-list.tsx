@@ -11,7 +11,7 @@ export default function GameList() {
   const router = useRouter();
   const { resolveRouteForCurrentDevice } = useModalRoutes();
   return (
-    <div data-name="game-list" className="flex h-screen w-screen flex-col bg-white">
+    <div data-name="game-list" className="flex h-dvh w-dvw flex-col bg-white">
       <AppHeader title="游戏列表" />
       <main className="no-scrollbar flex-1 overflow-auto p-3">
         <div className="grid grid-cols-3 gap-3">
