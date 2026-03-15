@@ -1,9 +1,18 @@
 'use client';
 
+import Button from '@/components/ui/Button';
+import { useRouter } from '@/i18n/navigation';
+import { Routes } from '@/libs/routes';
+
 export default function ErrorPage() {
+  const router = useRouter();
   return (
-    <div data-name="error-page">
-      <h1>出错了</h1>
+    <div
+      data-name="error-page"
+      className="flex h-screen w-screen flex-col items-center justify-center gap-2"
+    >
+      <h1 className="text-3xl text-orange-400">Something went wrong ～</h1>
+      <Button onClick={() => router.replace(Routes.Home)}>Home</Button>
     </div>
   );
 }

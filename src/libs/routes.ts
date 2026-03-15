@@ -1,11 +1,15 @@
 // src/lib/routes.ts
 
-// 页面路由
-export const PageRoutes = {
+// 标签栏路由
+export const TabRoutes = {
   Home: '/',
   Cart: '/cart',
   Order: '/order',
   Profile: '/profile',
+};
+
+// 页面路由
+export const PageRoutes = {
   Details: '/details',
   Dialog: '/dialog',
   DynamicComps: '/dynamic-comps',
@@ -34,11 +38,13 @@ export const ModalRoutes = {
 
 // 所有路由
 export const Routes = {
+  ...TabRoutes,
   ...PageRoutes,
   ...ModalRoutes,
 } as const;
 
 export type Route = (typeof Routes)[keyof typeof Routes];
+export type TabRoute = (typeof TabRoutes)[keyof typeof TabRoutes];
 export type ModalRoute = (typeof ModalRoutes)[keyof typeof ModalRoutes];
 export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
 
@@ -60,10 +66,10 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
  * @see useModalRoutes
  */
 export const ModalPageRoutes = {
-  profile: {
-    pc: Routes.Profile,
-    h5: Routes.ModalProfile,
-  },
+  // profile: {
+  //   pc: Routes.Profile,
+  //   h5: Routes.ModalProfile,
+  // },
   gameList: {
     pc: Routes.GameList,
     h5: Routes.ModalGameList,

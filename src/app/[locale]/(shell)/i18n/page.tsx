@@ -1,15 +1,17 @@
+'use client';
 // src/app/[locale]/(home)/page.tsx
-import { Link } from 'next-view-transitions';
-
+// import { Link } from 'next-view-transitions';
 import ClientComp from '@/components/features/ClientComp';
 import LanguageSwitcher from '@/components/features/LanguageSwitcher';
-import ServerComp from '@/components/features/ServerComp';
 import AppHeader from '@/components/ui/AppHeader';
-// import { Link } from '@/i18n/navigation';
+import Button from '@/components/ui/Button';
+import useAppRouter from '@/hooks/useAppRouter';
 import { Routes } from '@/libs/routes';
 
 export default function i18nPage() {
+  const router = useAppRouter();
   return (
+    // <PageWrapper>
     <div data-name="i18n-page">
       <AppHeader title="国际化" />
       <div className="h-[200px] w-full bg-orange-600"></div>
@@ -17,13 +19,19 @@ export default function i18nPage() {
         <LanguageSwitcher />
         <div className="flex flex-col items-start gap-4 sm:flex-row">
           <ClientComp />
-          <ServerComp />
+          {/* <ServerComp /> */}
         </div>
-        <Link href={Routes.Details} scroll={false}>
+        <Button
+          className="text-white"
+          onClick={() => {
+            router.push(Routes.Details);
+          }}
+        >
           详情
-        </Link>
+        </Button>
         <div className="h-[200px] w-full bg-orange-500"></div>
       </main>
     </div>
+    // {/* </PageWrapper> */}
   );
 }

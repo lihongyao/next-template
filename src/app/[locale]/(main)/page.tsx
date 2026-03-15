@@ -3,19 +3,17 @@
 
 import { useEffect } from 'react';
 
-import { useTransitionRouter } from 'next-view-transitions';
-
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
+import useAppRouter from '@/hooks/useAppRouter';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useRouter } from '@/i18n/navigation';
 import { ModalPageRoutes, Routes } from '@/libs/routes';
 import { useDevice } from '@/providers/device.provider';
 
 export default function HomePage() {
   const { isMobile } = useDevice();
-  const router = useRouter();
-  const routerA = useTransitionRouter();
+  const router = useAppRouter();
+  // const routerA = useTransitionRouter();
   const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   useEffect(() => {
     console.log('render home page...');
@@ -24,7 +22,7 @@ export default function HomePage() {
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="h-[200px] w-full bg-blue-500" />
       <div className="flex flex-wrap gap-2">
-        <Button
+        {/* <Button
           onClick={() =>
             router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), {
               scroll: false,
@@ -32,7 +30,7 @@ export default function HomePage() {
           }
         >
           路由弹窗(个人中心)
-        </Button>
+        </Button> */}
         <Button
           onClick={() => {
             router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false });
@@ -82,9 +80,7 @@ export default function HomePage() {
         </Button>
         <Button
           onClick={() => {
-            routerA.push(Routes.I18n, {
-              scroll: false,
-            });
+            router.push(Routes.I18n);
           }}
         >
           国际化
@@ -94,6 +90,7 @@ export default function HomePage() {
         </Button>
       </div>
 
+      <div className="text-[#187843]">1231232</div>
       <Icon
         name="globe"
         className="size-6"
@@ -101,6 +98,12 @@ export default function HomePage() {
         wrapperClass="size-12 bg-black rounded-full"
       />
 
+      <img
+        src={
+          'https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg'
+        }
+        alt=""
+      />
       {/* <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
         desktop="https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg"

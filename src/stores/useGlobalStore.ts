@@ -7,6 +7,8 @@ type GlobalStateProps = {
   isLogin: boolean;
   isSidebarOpen: boolean;
   count: number;
+  direction: 'forward' | 'backward';
+  setDirection: (direction: 'forward' | 'backward') => void;
   toggleSidebar: () => void;
   toggleLogin: () => void;
   increment: () => void;
@@ -19,6 +21,11 @@ export const useGlobalStore = create<GlobalStateProps>()(
       count: 0,
       isLogin: true,
       isSidebarOpen: true,
+      direction: 'forward',
+      setDirection: (direction: 'forward' | 'backward') =>
+        set((state) => {
+          state.direction = direction;
+        }),
       toggleSidebar: () =>
         set((state) => {
           state.isSidebarOpen = !state.isSidebarOpen;

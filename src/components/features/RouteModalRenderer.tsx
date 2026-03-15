@@ -13,6 +13,7 @@ import {
   modalContentVariantsMobile,
 } from '@/animations/modal-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
+import { ZIndex } from '@/constants';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
@@ -116,6 +117,7 @@ export default function RouteModalRenderer() {
             key={modalKey}
             data-name={`modal-${modalKey}`}
             className="fixed inset-0 z-auto flex items-center justify-center"
+            style={{ zIndex: ZIndex.Modal }}
           >
             <motion.div
               className="absolute size-full bg-black/70"

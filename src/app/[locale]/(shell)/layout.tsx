@@ -1,57 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname } from '@/i18n/navigation';
+import { useGlobalStore } from '@/stores/useGlobalStore';
 
 import FrozenRoute from './FrozenRoute';
 
-let count = 1;
-
-const tabContentAnimation = {
-  initial: { opacity: 0.5, x: '100%' },
-  animate: { opacity: 1, x: '0%' },
-  exit: { opacity: 0.5, scale: '100%' },
-};
-
-const tabContentTransition = {
-  duration: 0.2,
-  ease: 'linear',
-};
-
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
-  return children;
   const pathname = usePathname();
-
-  useEffect(() => {
-    count++;
-    console.log(history.length);
-  }, [pathname]);
-
+  const direction = useGlobalStore((s) => s.direction);
+  const [isAllow, setIsAllow] = useState(true);
+  useSwipeBack((value) => setIsAllow(!value), { enabled: true });
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="popLayout" initial={isAllow}>
       <motion.div
         key={pathname}
-        variants={tabContentAnimation}
-        transition={tabContentTransition}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        style={{
-          willChange: 'transform, opacity',
-          transformOrigin: 'center top',
-        }}
-
-        // initial={count % 2 === 0 ? { x: '100%' } : { x: '0%' }}
-        // animate={{ x: '0%' }}
-        // transition={{ type: 'tween', duration: 0.25, ease: 'linear' }}
-        // exit={count % 2 === 0 ? { x: '100%' } : { x: '0%' }}
-        // style={{
-        //   willChange: 'transform, opacity',
-        //   transformOrigin: 'center top',
-        // }}
+        initial={isAllow ? (direction === 'forward' ? { x: '100%' } : { x: '-100%' }) : undefined}
+        animate={isAllow ? { x: 0 } : undefined}
+        exit={isAllow ? (direction === 'forward' ? { x: '-100%' } : { x: '100%' }) : undefined}
+        // transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ type: 'tween', duration: 0.25, ease: 'linear' }}
+        style={{ willChange: 'transform, opacity' }}
       >
         <FrozenRoute>{children}</FrozenRoute>
       </motion.div>

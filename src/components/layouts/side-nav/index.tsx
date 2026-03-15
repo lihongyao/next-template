@@ -1,28 +1,13 @@
-'use client';
-import Button from '@/components/ui/Button';
-import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
+import AppTabBar from '@/components/features/AppTabBar';
 
-// src/components/layout/SideNavLayout.tsx
+import Header from './Header';
+
 export default function SideNavLayout({ children }: { children: React.ReactNode }) {
-  const { mergeRouteIntoCurrentPath } = useModalRoutes();
-  const router = useRouter();
   return (
-    <div className="min-h-screen">
-      <header className="flex h-14 items-center justify-between border-b bg-black px-3 text-white">
-        <h1>Classic Layout</h1>
-        <div>
-          <Button
-            onClick={() => {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false });
-            }}
-          >
-            登录
-          </Button>
-        </div>
-      </header>
-      <main className="m-4">{children}</main>
+    <div className="flex min-h-dvh flex-col">
+      <Header />
+      <main className="w-full max-w-[1200px] flex-1 sm:mx-auto">{children}</main>
+      <AppTabBar />
     </div>
   );
 }

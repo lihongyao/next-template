@@ -1,4 +1,4 @@
-export const ZInde = {
+export const ZIndex = {
   Header: 100,
   Footer: 200,
   Sidebar: 300,

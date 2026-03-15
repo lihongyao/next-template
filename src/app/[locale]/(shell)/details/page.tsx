@@ -4,7 +4,7 @@ export default function DetailsPage() {
   return (
     <div data-name="details-page">
       <AppHeader title="详情" />
-      <main className="p-3">This is Details Page.</main>
+      <main className="p-3 text-white">This is Details Page.</main>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from '@/i18n/navigation';
+import useAppRouter from '@/hooks/useAppRouter';
 
 import Button from '../Button';
 
@@ -9,7 +9,7 @@ interface AppHeaderProps {
   onBack?: () => void;
 }
 export default function AppHeader({ title, onBack }: AppHeaderProps) {
-  const router = useRouter();
+  const router = useAppRouter();
   // const router = useTransitionRouter();
   return (
     <div className="relative h-[56px]">

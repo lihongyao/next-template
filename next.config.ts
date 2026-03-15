@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
+  experimental: {
+    // https://github.com/RevoTale/next-scroll-restorer
+    scrollRestoration: true,
+  },
 };
 const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(nextConfig);
