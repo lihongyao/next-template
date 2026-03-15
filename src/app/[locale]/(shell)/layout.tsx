@@ -14,7 +14,9 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const direction = useGlobalStore((s) => s.direction);
   const [isAllow, setIsAllow] = useState(true);
+
   useSwipeBack((value) => setIsAllow(!value), { enabled: true });
+
   return (
     <AnimatePresence mode="popLayout" initial={isAllow}>
       <motion.div
@@ -24,7 +26,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
         exit={isAllow ? (direction === 'forward' ? { x: '-100%' } : { x: '100%' }) : undefined}
         // transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         transition={{ type: 'tween', duration: 0.25, ease: 'linear' }}
-        style={{ willChange: 'transform, opacity' }}
+        // style={{ willChange: 'transform' }}
       >
         <FrozenRoute>{children}</FrozenRoute>
       </motion.div>
