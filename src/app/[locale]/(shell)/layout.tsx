@@ -26,6 +26,7 @@ function FrozenRouter(props: { children: React.ReactNode }) {
 }
 
 export default function PageTransition({ children }: { children: React.ReactNode }) {
+  return children;
   const pathname = usePathname();
   const direction = useGlobalStore((s) => s.direction);
   const [swipeAllow, setSwipeAllow] = useState(true);

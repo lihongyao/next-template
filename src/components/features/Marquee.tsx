@@ -68,7 +68,7 @@ export default function Marquee() {
 
   return (
     // 溢出隐藏，可考虑给 overflow: hidden
-    <div ref={containerRef} className="relative flex w-full">
+    <div ref={containerRef} className="relative flex w-full overflow-hidden">
       <div
         className="animate-marquee flex shrink-0 items-center gap-3"
         style={

@@ -21,7 +21,7 @@ export default function Register() {
   return (
     <div
       data-name="Register"
-      className="flex h-dvh w-dvw flex-col items-center gap-4 bg-white px-3 sm:h-[600px] sm:w-[400px] sm:rounded-md"
+      className="flex h-dvh w-dvw flex-col items-center gap-4 bg-white px-3 pt-[50px] sm:h-[600px] sm:w-[400px] sm:rounded-md"
     >
       <h1 className="text-2xl font-bold">Register</h1>
       <div className="cursor-pointer hover:text-blue-500" onClick={closeModal}>

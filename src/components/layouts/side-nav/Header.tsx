@@ -13,7 +13,9 @@ export default function Header() {
     <>
       {/* <div className="__place-space h-[56px]" /> */}
       <header className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-between bg-black px-3 text-white">
-        <h1 onClick={() => router.push(Routes.Home)}>{appName}</h1>
+        <h1 className="cursor-pointer" onClick={() => router.push(Routes.Home)}>
+          {appName}
+        </h1>
         <div>
           <Button
             onClick={() =>
