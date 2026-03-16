@@ -2,12 +2,14 @@
 
 import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-import { getDeviceType } from '@/libs/device';
+import { getDeviceInfoWithUserAgent } from '@/libs/device';
 
 export type DeviceState = {
-  isMobile: boolean | null;
-  isTablet: boolean | null;
-  isDesktop: boolean | null;
+  isiOS: boolean;
+  isAndroid: boolean;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
 };
 
 const DeviceContext = createContext<DeviceState | null>(null);
@@ -19,7 +21,7 @@ export function DeviceProvider({
   userAgent: string;
   children: ReactNode;
 }) {
-  const result = getDeviceType(userAgent);
+  const result = getDeviceInfoWithUserAgent(userAgent);
 
   const [state, setState] = useState<DeviceState>({ ...result });
 
@@ -40,10 +42,14 @@ export function DeviceProvider({
           prev.isTablet === nextState.isTablet &&
           prev.isDesktop === nextState.isDesktop
         ) {
-          return prev; // 状态未变，跳过 re-render，避免多个 media query 同时触发时重复更新
+          // 状态未变，跳过 re-render，避免多个 media query 同时触发时重复更新
+          return prev;
         }
         console.log('响应式断点变化 >>> ', nextState);
-        return nextState;
+        return {
+          ...prev,
+          ...nextState,
+        };
       });
     };
 

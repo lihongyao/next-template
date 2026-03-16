@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { ZIndex } from '@/constants';
 import { useRouter } from '@/router';
 
@@ -13,11 +11,6 @@ interface AppHeaderProps {
 }
 export default function AppHeader({ title, onBack }: AppHeaderProps) {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div

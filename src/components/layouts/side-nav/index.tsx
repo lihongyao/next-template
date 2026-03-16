@@ -6,7 +6,9 @@ export default function SideNavLayout({ children }: { children: React.ReactNode 
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="w-full max-w-[1200px] flex-1 sm:mx-auto">{children}</main>
+      <main className="flex-1 px-3">
+        <div className="mx-auto w-full max-w-[1200px]">{children}</div>
+      </main>
       <AppTabBar />
     </div>
   );

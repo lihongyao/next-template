@@ -1,4 +1,5 @@
 // src/libs/viewTransition.ts
+import { getDeviceInfoWithUserAgent } from './device';
 
 const DURATION = 250;
 const EASING = 'linear';
@@ -18,12 +19,9 @@ const DISTANCE = 50;
 
 function installSwipeDetection() {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+  const { isiOS } = getDeviceInfoWithUserAgent(navigator.userAgent);
 
-  const isIOS =
-    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  if (!isIOS) return;
+  if (!isiOS) return;
 
   window.addEventListener(
     'touchstart',

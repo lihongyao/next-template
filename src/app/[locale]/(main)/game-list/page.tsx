@@ -10,9 +10,9 @@ export default function GamePage() {
   const router = useRouter();
   const { resolveRouteForCurrentDevice } = useModalRoutes();
   return (
-    <div data-name="game-list">
+    <div data-name="game-list" className="pt-3">
       <Button onClick={() => router.back()}>返回</Button>
-      <div className="mt-4 grid grid-cols-5 gap-2 md:grid-cols-7">
+      <div className="mt-4 grid grid-cols-5 gap-4 md:grid-cols-7">
         {games.map((item, index) => (
           <GameItem
             game={item}

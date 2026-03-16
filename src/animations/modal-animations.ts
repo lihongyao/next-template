@@ -5,17 +5,13 @@ import type { Variants } from 'framer-motion';
  * 供 RouteModalRenderer 使用，支持 Desktop / Mobile 两种展示方式
  */
 
-/** 动画曲线 */
-const EASE_ENTER = [0.32, 0.72, 0, 1] as const;
-const EASE_EXIT = [0.25, 1, 0.5, 1] as const;
-
 /** 遮罩层 - Desktop：淡入淡出 */
 export const modalBackdropVariantsDesktop: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
   exit: {
     opacity: 0,
-    transition: { type: 'tween', duration: 0.2, ease: EASE_EXIT },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
 };
 
@@ -25,12 +21,12 @@ export const modalBackdropVariantsMobile: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { type: 'tween', duration: 0.3, ease: EASE_ENTER },
+    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
   },
   exit: {
     opacity: 0,
     x: '100%',
-    transition: { type: 'tween', duration: 0.2, ease: EASE_EXIT },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
 };
 
@@ -41,13 +37,13 @@ export const modalContentVariantsDesktop: Variants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: 'tween', duration: 0.3, ease: EASE_ENTER },
+    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
   },
   exit: {
     opacity: 0,
     scale: 0.7,
     y: 20,
-    transition: { type: 'tween', duration: 0.25, ease: EASE_EXIT },
+    transition: { type: 'tween', duration: 0.25, ease: 'linear' },
   },
 };
 
@@ -56,10 +52,10 @@ export const modalContentVariantsMobile: Variants = {
   hidden: { x: '100%' },
   visible: {
     x: 0,
-    transition: { type: 'tween', duration: 0.3, ease: EASE_ENTER },
+    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
   },
   exit: {
     x: '100%',
-    transition: { type: 'tween', duration: 0.3, ease: EASE_EXIT },
+    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
   },
 };

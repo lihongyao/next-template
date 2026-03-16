@@ -1,4 +1,3 @@
-import PageTransition from '@/components/features/PageTransition';
 import { AppLayouts } from '@/components/layouts';
 import { getBrandConfigSSR } from '@/libs/brand';
 
@@ -10,9 +9,5 @@ export default async function ThemeLayout({
   const { layout } = await getBrandConfigSSR();
   const AppLayout = AppLayouts[layout];
 
-  return (
-    <AppLayout>
-      <PageTransition>{children}</PageTransition>
-    </AppLayout>
-  );
+  return <AppLayout>{children}</AppLayout>;
 }

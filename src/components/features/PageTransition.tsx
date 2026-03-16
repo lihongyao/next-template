@@ -24,12 +24,14 @@ function isTabRoute(path: string): boolean {
   });
 }
 
-/** 冻结 LayoutRouterContext，防止路由切换时布局提前更新 */
-function FrozenRouteWrapper({ children }: { children: React.ReactNode }) {
+// 阻止页面立即打开，先让退场动画走完，再显示新的页面内容
+function FrozenRouter(props: { children: React.ReactNode }) {
   const context = useContext(LayoutRouterContext ?? {});
   const frozen = useRef(context).current;
-  if (!frozen) return <>{children}</>;
-  return <LayoutRouterContext.Provider value={frozen}>{children}</LayoutRouterContext.Provider>;
+
+  return (
+    <LayoutRouterContext.Provider value={frozen}>{props.children}</LayoutRouterContext.Provider>
+  );
 }
 
 export default function PageTransition({
@@ -85,7 +87,7 @@ export default function PageTransition({
         exit={exit}
         transition={transition}
       >
-        <FrozenRouteWrapper>{children}</FrozenRouteWrapper>
+        <FrozenRouter>{children}</FrozenRouter>
       </motion.div>
     </AnimatePresence>
   );
