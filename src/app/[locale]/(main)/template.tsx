@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { useDevice } from '@/providers/device.provider';
 
 export default function Template({ children }: { children: React.ReactNode }) {
-  return children;
   const { isMobile } = useDevice();
   if (!isMobile) return children;
   return (
