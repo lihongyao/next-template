@@ -30,7 +30,6 @@ export const PageRoutes = {
 export const ModalRoutes = {
   ModalProfile: '/modal-profile',
   ModalLogin: '/modal-login',
-  ModalGameList: '/modal-game-list',
   ModalGameListSwiper: '/modal-game-list-swiper',
   ModalGameDetails: '/modal-game-details',
   ModalRegister: '/modal-register',
@@ -70,10 +69,10 @@ export const ModalPageRoutes = {
   //   pc: Routes.Profile,
   //   h5: Routes.ModalProfile,
   // },
-  gameList: {
-    pc: Routes.GameList,
-    h5: Routes.ModalGameList,
-  },
+  // gameList: {
+  //   pc: Routes.GameList,
+  //   h5: Routes.ModalGameList,
+  // },
   /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
   gameDetails: {
     pc: Routes.GameDetails,

@@ -10,7 +10,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <motion.main
       variants={{
-        hidden: { opacity: 0, scale: 0.95 },
+        hidden: { opacity: 0.4, scale: 0.995 },
         enter: { opacity: 1, scale: 1 },
       }}
       initial="hidden"

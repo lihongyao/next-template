@@ -8,7 +8,10 @@ export default function DetailsPage() {
       <AppHeader title="详情" />
       <main className="p-3 text-white">
         <p>This is Details Page.</p>
-        <Link href={Routes.Dialog}>弹框1</Link>
+        <div className="flex flex-col gap-3">
+          <Link href={Routes.Dialog}>弹框</Link>
+          <Link href={Routes.GameList}>游戏列表</Link>
+        </div>
       </main>
     </div>
   );
