@@ -1,11 +1,9 @@
 import { headers } from 'next/headers';
 
 import Marquee from '@/components/features/Marquee';
-import { getDeviceInfoWithUserAgent } from '@/libs/device';
 
 export default async function DemoPage() {
   const userAgent = (await headers()).get('user-agent') || '';
-  const { isMobile } = getDeviceInfoWithUserAgent(userAgent);
   return (
     <div
       data-name="Demo"
