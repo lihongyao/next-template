@@ -31,20 +31,7 @@ export default function HomePage() {
         >
           路由弹窗(个人中心)
         </Button> */}
-        <Button
-          onClick={() => {
-            router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), { scroll: false });
-          }}
-        >
-          登录
-        </Button>
-        <Button
-          onClick={() =>
-            router.push(mergeRouteIntoCurrentPath(Routes.ModalRegister), { scroll: false })
-          }
-        >
-          注册
-        </Button>
+
         <Button
           onClick={() => {
             const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);

@@ -10,12 +10,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <motion.main
       variants={{
-        hidden: { opacity: 0, x: 100 },
-        enter: { opacity: 1, x: 0 },
+        hidden: { opacity: 0, scale: 0.95 },
+        enter: { opacity: 1, scale: 1 },
       }}
       initial="hidden"
       animate="enter"
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.25, ease: 'linear' }}
     >
       {children}
     </motion.main>

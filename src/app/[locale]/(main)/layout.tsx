@@ -8,6 +8,5 @@ export default async function ThemeLayout({
 }>) {
   const { layout } = await getBrandConfigSSR();
   const AppLayout = AppLayouts[layout];
-
   return <AppLayout>{children}</AppLayout>;
 }

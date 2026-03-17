@@ -10,22 +10,28 @@ export default function Header() {
   const { appName } = useBrandConfig();
   const { mergeRouteIntoCurrentPath } = useModalRoutes();
   return (
-    <>
-      {/* <div className="__place-space h-[56px]" /> */}
-      <header className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-between bg-black px-3 text-white">
-        <h1 onClick={() => router.push(Routes.Home)}>{appName}</h1>
-        <div>
-          <Button
-            onClick={() =>
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), {
-                scroll: false,
-              })
-            }
-          >
-            登录
-          </Button>
-        </div>
-      </header>
-    </>
+    <header className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-between bg-[#161616] px-3 text-white">
+      <h1 onClick={() => router.push(Routes.Home)}>{appName}</h1>
+      <div className="flex items-center gap-3">
+        <Button
+          onClick={() =>
+            router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), {
+              scroll: false,
+            })
+          }
+        >
+          登录
+        </Button>
+        <Button
+          onClick={() =>
+            router.push(mergeRouteIntoCurrentPath(Routes.ModalRegister), {
+              scroll: false,
+            })
+          }
+        >
+          注册
+        </Button>
+      </div>
+    </header>
   );
 }

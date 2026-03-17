@@ -44,22 +44,27 @@ export default function PageTransition({
   const pathname = usePathname();
   const direction = useGlobalStore((s) => s.direction);
   const [swipeAllow, setSwipeAllow] = useState(true);
-  const prevPathnameRef = useRef(pathname);
+  const pathnameRef = useRef(pathname);
+  const prevPathnameRef = useRef<string | null>(null);
 
   useSwipeBack((value) => setSwipeAllow(!value), { enabled: true });
 
+  useEffect(() => {
+    if (pathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathnameRef.current;
+      pathnameRef.current = pathname;
+    }
+  }, [pathname]);
+
+  const prevPathname = prevPathnameRef.current ?? pathname;
   // modal 跳过动画；tab 页淡入淡出；其余左右滑动
   const currentIsModal = isModalRoute(pathname);
-  const prevWasModal = isModalRoute(prevPathnameRef.current);
+  const prevWasModal = isModalRoute(prevPathname);
   const currentIsTab = isTabRoute(pathname);
-  const prevWasTab = isTabRoute(prevPathnameRef.current);
+  const prevWasTab = isTabRoute(prevPathname);
   const skipAnimation = currentIsModal || (prevWasModal && !currentIsModal);
   const isAllow = !skipAnimation && swipeAllow;
   const useFade = tab || currentIsTab || (prevWasTab && currentIsTab);
-
-  useEffect(() => {
-    prevPathnameRef.current = pathname;
-  }, [pathname]);
 
   const transition = { type: 'tween' as const, duration: 0.25, ease: 'linear' as const };
   const initial = isAllow

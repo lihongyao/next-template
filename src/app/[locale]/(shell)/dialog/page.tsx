@@ -191,6 +191,7 @@ export default function DialogPage() {
       <AppHeader title="弹框" />
       <div className="p-4">
         <div className="flex flex-wrap gap-4">
+          <Button onClick={() => router.push(Routes.Home)}>首页</Button>
           <Button
             onClick={() => {
               router.push(resolveRouteForCurrentDevice(ModalPageRoutes.gameList), {
@@ -200,6 +201,7 @@ export default function DialogPage() {
           >
             路由弹框
           </Button>
+
           <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
           <Button onClick={openX1}>Open X1</Button>
           <Button onClick={openX2}>Open X2</Button>

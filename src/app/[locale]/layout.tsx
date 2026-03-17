@@ -81,7 +81,7 @@ export default async function LocaleLayout({
         {/* PWA - 添加 manifest.json */}
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body style={{ background: '#181818' }}>
+      <body style={{ background: '#252526' }}>
         {/* lcp element */}
         <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
         {/* 国际化 */}
@@ -94,7 +94,6 @@ export default async function LocaleLayout({
                   <ClientInitializer />
                   <RouteModalRenderer />
                   {children}
-                  {/* <ViewTransitions>{children}</ViewTransitions> */}
                 </ModalProvider>
               </DeviceProvider>
             </DialogProvider>
