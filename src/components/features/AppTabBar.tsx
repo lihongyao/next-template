@@ -26,7 +26,7 @@ export default memo(function AppTabBar() {
   return (
     <div
       data-name="app-tab-bar"
-      className="isMobile fixed bottom-0 left-0 w-full bg-[#161616]"
+      className="fixed bottom-0 left-0 w-full bg-[#161616]"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}

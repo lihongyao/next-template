@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useMount } from 'ahooks';
 
-import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
@@ -188,7 +187,6 @@ export default function DialogPage() {
 
   return (
     <div data-name="dialog-page">
-      <AppHeader title="弹框" />
       <div className="p-4">
         <div className="flex flex-wrap gap-4">
           <Button onClick={() => router.push(Routes.Home)}>首页</Button>

@@ -24,6 +24,7 @@ export const PageRoutes = {
   DataPathThrough: '/data-pass-through',
   GameList: '/game-list',
   GameDetails: '/game-list',
+  Goods: '/goods',
 } as const;
 
 // 弹窗路由
@@ -74,12 +75,12 @@ export const ModalPageRoutes = {
   //   h5: Routes.ModalGameList,
   // },
   /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
-  gameDetails: {
-    pc: Routes.GameDetails,
-    h5: Routes.ModalGameDetails,
-    onlySwitchWhenParamPresent: true,
-    parentKey: 'gameList',
-  },
+  // gameDetails: {
+  //   pc: Routes.GameDetails,
+  //   h5: Routes.ModalGameDetails,
+  //   onlySwitchWhenParamPresent: true,
+  //   parentKey: 'gameList',
+  // },
 } as const satisfies Record<
   string,
   {

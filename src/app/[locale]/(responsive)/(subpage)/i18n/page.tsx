@@ -3,7 +3,6 @@
 // import { Link } from 'next-view-transitions';
 import ClientComp from '@/components/features/ClientComp';
 import LanguageSwitcher from '@/components/features/LanguageSwitcher';
-import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Button';
 import { Routes } from '@/libs/routes';
 import { useRouter } from '@/router';
@@ -12,7 +11,6 @@ export default function i18nPage() {
   const router = useRouter();
   return (
     <div data-name="i18n-page">
-      <AppHeader title="国际化" />
       <div className="h-[200px] w-full bg-orange-600"></div>
       <main className="flex flex-col items-center gap-4 p-3">
         <LanguageSwitcher />
