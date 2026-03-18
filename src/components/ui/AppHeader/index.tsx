@@ -14,7 +14,7 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
 
   return (
     <div
-      className="sticky inset-x-0 top-0 z-50 flex h-[56px] w-full items-center justify-center bg-[#161616] transition-none"
+      className="isMobile sticky inset-x-0 top-0 z-50 flex h-[56px] w-full items-center justify-center bg-[#161616] transition-none"
       style={{
         zIndex: ZIndex.Header,
       }}

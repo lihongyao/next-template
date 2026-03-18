@@ -5,19 +5,52 @@ import { useLayoutEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { getMatchOrder } from '@/libs/modal-page-routes-utils';
-import { ModalPageRouteKey, ModalPageRoutes } from '@/libs/routes';
 import { useDevice } from '@/providers/device.provider';
+import { type ModalPageRouteKey, ModalPageRoutes } from '@/router/routes';
 
-const BASE_KEY = '__modal_base_path__';
+const BASE_STORAGE_PREFIX = '__mpc_pc_base__';
 
-/** pathname 是否匹配 route（精确或带子路径） */
-function matchRoute(pathname: string, route: string): boolean {
-  if (pathname.indexOf(route) === -1) return false;
-  return pathname === route || pathname.includes(route + '/') || pathname.endsWith(route);
+function baseStorageKey(routeKey: ModalPageRouteKey): string {
+  return `${BASE_STORAGE_PREFIX}${String(routeKey)}`;
 }
 
-/** PC/H5 视窗切换时在 modal 路由与独立页路由间切换，带 base 的 modal 会记 base 便于切回 */
+/**
+ * 返回 route 在 pathname 中作为「独立路径段」的起始下标。
+ * 例如 /i18n/modal-profile 里 /modal-profile 从 index 5 开始，前一个字符是 n，
+ * 不能再用「前一个字符必须是 /」判断；应按段名匹配（modal-profile）。
+ */
+function segmentIndex(pathname: string, route: string): number {
+  const seg = route.replace(/^\//, '').split('/').filter(Boolean);
+  if (seg.length !== 1) {
+    let i = pathname.indexOf(route);
+    while (i !== -1) {
+      const beforeOk = i === 0 || pathname[i - 1] === '/';
+      const afterOk = i + route.length === pathname.length || pathname[i + route.length] === '/';
+      if (beforeOk && afterOk) return i;
+      i = pathname.indexOf(route, i + 1);
+    }
+    return -1;
+  }
+  const name = seg[0];
+  const parts = pathname.split('/').filter(Boolean);
+  const k = parts.lastIndexOf(name);
+  if (k === -1) return -1;
+  const prefix = parts.slice(0, k);
+  if (prefix.length === 0) return 0;
+  return 1 + prefix.join('/').length;
+}
+
+function joinBasePc(base: string, pc: string): string {
+  const b = base.replace(/\/$/, '');
+  return `${b}${pc}`;
+}
+
+/**
+ * PC：弹窗路由可叠在任意页后，如 /order/modal-profile（与 resolveRouteForCurrentDevice + merge 一致）
+ * H5：独立页 /profile
+ *
+ * PC → H5：整段收拢为 h5 + 尾部参数，不再保留底层路径；若有底层路径则写入 localStorage，便于 H5 → PC 时恢复 /order/modal-profile
+ */
 export default function useModalPageAutoCollapse(): void {
   const pathname = usePathname();
   const router = useRouter();
@@ -25,71 +58,55 @@ export default function useModalPageAutoCollapse(): void {
   const { isMobile } = useDevice();
 
   useLayoutEffect(() => {
-    if (isMobile === null) return;
+    if (isMobile == null || typeof window === 'undefined') return;
 
-    let matchedKey: ModalPageRouteKey | '' = '';
-    let basePath = '';
-    let paramSegment = '';
+    const query = searchParams.toString();
+    const withQuery = (path: string) => (query ? `${path}?${query}` : path);
 
-    for (const key of getMatchOrder()) {
-      if (!(key in ModalPageRoutes)) continue;
-      const { pc, h5 } = ModalPageRoutes[key];
+    for (const key of Object.keys(ModalPageRoutes) as ModalPageRouteKey[]) {
+      const config = ModalPageRoutes[key];
+      const { pc, h5 } = config;
 
-      const h5Index = pathname.indexOf(h5);
-      if (h5Index !== -1 && matchRoute(pathname, h5)) {
-        const config = ModalPageRoutes[key];
-        const onlyWhenParam =
-          'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
-        const seg = pathname.slice(h5Index + h5.length);
-        if (onlyWhenParam && seg.length <= 1) continue;
-        matchedKey = key;
-        basePath = pathname.slice(0, h5Index);
-        paramSegment = seg;
-        break;
+      if (isMobile) {
+        const i = segmentIndex(pathname, pc);
+        if (i === -1) continue;
+        const tail = pathname.slice(i + pc.length);
+        const baseBeforeModal = i > 0 ? pathname.slice(0, i).replace(/\/$/, '') : '';
+        if (baseBeforeModal) {
+          try {
+            localStorage.setItem(baseStorageKey(key), baseBeforeModal);
+          } catch {
+            /* ignore */
+          }
+        } else {
+          try {
+            localStorage.removeItem(baseStorageKey(key));
+          } catch {
+            /* ignore */
+          }
+        }
+        const next = `${h5}${tail}`;
+        if (next !== pathname) router.replace(withQuery(next));
+        return;
       }
 
-      const pcIndex = pathname.indexOf(pc);
-      if (pcIndex !== -1 && matchRoute(pathname, pc)) {
-        const config = ModalPageRoutes[key];
-        const onlyWhenParam =
-          'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
-        const seg = pathname.slice(pcIndex + pc.length);
-        if (onlyWhenParam && seg.length <= 1) continue;
-        matchedKey = key;
-        basePath = pathname.slice(0, pcIndex);
-        paramSegment = seg;
-        break;
+      const i = segmentIndex(pathname, h5);
+      if (i === -1) continue;
+      const tail = pathname.slice(i + h5.length);
+      let storedBase = '';
+      try {
+        storedBase = localStorage.getItem(baseStorageKey(key)) ?? '';
+      } catch {
+        /* ignore */
       }
-    }
-
-    if (!matchedKey) {
-      localStorage.removeItem(BASE_KEY);
+      const next = storedBase ? joinBasePc(storedBase, pc) + tail : `${pc}${tail}`;
+      try {
+        localStorage.removeItem(baseStorageKey(key));
+      } catch {
+        /* ignore */
+      }
+      if (next !== pathname) router.replace(withQuery(next));
       return;
     }
-
-    const config = ModalPageRoutes[matchedKey];
-    const parentKey = 'parentKey' in config ? config.parentKey : undefined;
-    const parentConfig = parentKey ? ModalPageRoutes[parentKey] : undefined;
-
-    let targetPath: string;
-    if (isMobile) {
-      if (parentConfig) {
-        targetPath = parentConfig.h5 + config.h5 + paramSegment;
-      } else {
-        const finalBase = basePath || localStorage.getItem(BASE_KEY) || '';
-        targetPath = finalBase + config.h5 + paramSegment;
-        localStorage.setItem(BASE_KEY, finalBase);
-      }
-    } else {
-      targetPath = config.pc + paramSegment;
-      localStorage.setItem(BASE_KEY, basePath);
-    }
-    // h5 下从详情返回时，history 里可能是 pc 路径（如 /game-list），若 replace 成 h5 路径会命中 catch-all 导致 404。
-    // 故不替换，保持 pc 路径，由 RouteModalRenderer 根据 pathname+isMobile 渲染对应 modal。
-    if (isMobile && pathname === config.pc) return;
-
-    const queryString = searchParams.toString();
-    const targetUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
-    if (targetPath !== pathname) router.replace(targetUrl);
   }, [pathname, isMobile, router, searchParams]);
 }

@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname } from '@/i18n/navigation';
-import { ModalRoutes, TabRoutes } from '@/libs/routes';
+import { ModalRoutes, TabRoutes } from '@/router/routes';
 import { useGlobalStore } from '@/stores/useGlobalStore';
 
 function isModalRoute(path: string): boolean {

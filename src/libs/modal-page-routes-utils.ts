@@ -1,5 +1,5 @@
-import type { ModalPageRouteKey } from './routes';
-import { ModalPageRoutes } from './routes';
+import type { ModalPageRouteKey } from '../router/routes';
+import { ModalPageRoutes } from '../router/routes';
 
 /** 匹配顺序：有 parentKey 的子路由优先 */
 export const getMatchOrder = (): ModalPageRouteKey[] =>

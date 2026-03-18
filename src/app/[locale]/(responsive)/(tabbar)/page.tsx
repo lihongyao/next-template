@@ -6,9 +6,9 @@ import { useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { ModalPageRoutes, Routes } from '@/libs/routes';
 import { useDevice } from '@/providers/device.provider';
 import { useRouter } from '@/router';
+import { Routes } from '@/router/routes';
 
 export default function HomePage() {
   const { isMobile } = useDevice();
@@ -34,8 +34,8 @@ export default function HomePage() {
 
         <Button
           onClick={() => {
-            const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);
-            router.push(jumpToUrl, { scroll: false });
+            // const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);
+            // router.push(jumpToUrl, { scroll: false });
           }}
         >
           游戏列表
@@ -48,6 +48,9 @@ export default function HomePage() {
           }}
         >
           游戏列表（自定义Swiper）
+        </Button>
+        <Button onClick={() => router.push(Routes.DynamicComps, { scroll: false })}>
+          动态加载
         </Button>
         <Button
           onClick={() => {

@@ -8,7 +8,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname } from '@/i18n/navigation';
-import { ModalRoutes } from '@/libs/routes';
+import { useDevice } from '@/providers/device.provider';
+import { ModalRoutes } from '@/router/routes';
 import { useGlobalStore } from '@/stores/useGlobalStore';
 
 function isModalRoute(path: string): boolean {
@@ -26,6 +27,7 @@ function FrozenRouter(props: { children: React.ReactNode }) {
 }
 
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
+  const { isMobile } = useDevice();
   const pathname = usePathname();
   const direction = useGlobalStore((s) => s.direction);
   const [swipeAllow, setSwipeAllow] = useState(true);
@@ -42,6 +44,8 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     prevPathnameRef.current = pathname;
   }, [pathname]);
+
+  if (!isMobile) return children;
 
   const transition = { type: 'tween' as const, duration: 0.25, ease: 'linear' as const };
   const initial = isAllow ? (direction === 'forward' ? { x: '100%' } : { x: '-100%' }) : undefined;

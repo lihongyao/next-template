@@ -1,8 +1,8 @@
 'use client';
 
 import { usePathname } from '@/i18n/navigation';
-import { matchRoute } from '@/navigation/matchRoute';
 import { useDevice } from '@/providers/device.provider';
+import { matchRouteMeta } from '@/router';
 
 import DesktopShell from './desktop';
 import MobileLevel1 from './mobile/Level1';
@@ -10,7 +10,7 @@ import MobileLevel2 from './mobile/Level2';
 
 export default function ResponsiveShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const meta = matchRoute(pathname);
+  const meta = matchRouteMeta(pathname);
   const { isMobile } = useDevice();
 
   // ===== Desktop =====

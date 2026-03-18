@@ -1,29 +1,29 @@
 'use client';
 import GameItem from '@/components/features/GameItem';
-import Button from '@/components/ui/Button';
+import AppHeader from '@/components/ui/AppHeader';
 import { games } from '@/constants/data';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useRouter } from '@/i18n/navigation';
-import { ModalPageRoutes } from '@/libs/routes';
+import { useRouter } from '@/router';
+import { Routes } from '@/router/routes';
 
 export default function GamePage() {
   const router = useRouter();
   const { resolveRouteForCurrentDevice } = useModalRoutes();
   return (
-    <div data-name="game-list" className="pt-3">
-      <Button onClick={() => router.back()}>返回</Button>
-      <div className="mt-4 grid grid-cols-5 gap-4 md:grid-cols-7">
+    <div data-name="game-list">
+      <AppHeader title="游戏列表" />
+      <main className="grid grid-cols-3 gap-3 p-3 sm:grid-cols-5 md:grid-cols-7">
         {games.map((item, index) => (
           <GameItem
             game={item}
             key={index}
             onClick={() => {
-              const jumpUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
-              router.push(jumpUrl + '/' + index + 1);
+              // const jumpUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
+              router.push(`${Routes.GameList}/${index + 1}?title=游戏详情`);
             }}
           />
         ))}
-      </div>
+      </main>
     </div>
   );
 }

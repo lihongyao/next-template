@@ -1,5 +1,6 @@
 import ClientGuardFilters from '@/components/features/ClientGuardFilters';
 import { ClientOnly } from '@/components/features/ClientOnly';
+import AppHeader from '@/components/ui/AppHeader';
 import {
   isWidgetType,
   loadDynamicComponent,
@@ -45,20 +46,27 @@ export default async function DynamicCompsPage() {
   );
 
   console.log(renderData);
-  return renderData.map((item) => {
-    if (!item) return null;
+  return (
+    <div data-name="dynamic-comps">
+      <AppHeader title="动态加载" />
+      <main className="p-3">
+        {renderData.map((item) => {
+          if (!item) return null;
 
-    const entry = widgetRegistry[item.type];
+          const entry = widgetRegistry[item.type];
 
-    const ClientComp = loadDynamicComponent(entry.client, 'client');
-    const SuspenseComp = loadDynamicComponent(entry.suspense, 'suspense');
+          const ClientComp = loadDynamicComponent(entry.client, 'client');
+          const SuspenseComp = loadDynamicComponent(entry.suspense, 'suspense');
 
-    return (
-      <ClientOnly key={item.key} fallback={<SuspenseComp {...item.data} />}>
-        <ClientGuardFilters component={item.data.component}>
-          <ClientComp {...item.data} />
-        </ClientGuardFilters>
-      </ClientOnly>
-    );
-  });
+          return (
+            <ClientOnly key={item.key} fallback={<SuspenseComp {...item.data} />}>
+              <ClientGuardFilters component={item.data.component}>
+                <ClientComp {...item.data} />
+              </ClientGuardFilters>
+            </ClientOnly>
+          );
+        })}
+      </main>
+    </div>
+  );
 }

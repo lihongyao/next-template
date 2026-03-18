@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
+import { Routes } from '@/router/routes';
 
 export default function DashboardPage() {
   return (

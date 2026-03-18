@@ -4,7 +4,7 @@ import { memo } from 'react';
 
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/libs/class-helpers';
-import { type Route, Routes } from '@/libs/routes';
+import { type Route, Routes } from '@/router/routes';
 
 import Icon from '../ui/Icon';
 

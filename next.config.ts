@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 import brandConfig from './src/configs/brands';
-import { ModalRoutes } from './src/libs/routes';
+import { ModalRoutes } from './src/router/routes';
 
 const defaultLocale = brandConfig.defaultLocale;
 const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({

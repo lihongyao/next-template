@@ -1,3 +1,5 @@
+import AppHeader from '@/components/ui/AppHeader';
+
 export default async function GamePage({
   params,
   searchParams,
@@ -9,8 +11,11 @@ export default async function GamePage({
   const title = (await searchParams).title;
   return (
     <div data-name="game-details">
-      <p>ID: {id}</p>
-      <p>标题: {title}</p>
+      <AppHeader title={title} />
+      <main className="p-3">
+        <p>ID: {id}</p>
+        <p>标题: {title}</p>
+      </main>
     </div>
   );
 }

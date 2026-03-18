@@ -5,8 +5,8 @@ import { useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
 import { useModal } from '@/providers/modal.provider';
+import { Routes } from '@/router/routes';
 
 export default function ModalGame() {
   const { closeModal } = useModal();

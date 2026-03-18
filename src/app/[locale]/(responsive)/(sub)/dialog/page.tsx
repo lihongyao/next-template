@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useMount } from 'ahooks';
 
+import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { ModalPageRoutes, Routes } from '@/libs/routes';
+import { Routes } from '@/router/routes';
 
 type DialogConfig = {
   type: DialogType;
@@ -25,7 +26,7 @@ export default function DialogPage() {
   const dialog = useDialog();
   const router = useRouter();
   const isJumpToOtherPage = useRef(false);
-  const { resolveRouteForCurrentDevice } = useModalRoutes();
+  const { resolveRouteForCurrentDevice, mergeRouteIntoCurrentPath } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
@@ -187,14 +188,16 @@ export default function DialogPage() {
 
   return (
     <div data-name="dialog-page">
+      <AppHeader title="弹框" />
       <div className="p-4">
         <div className="flex flex-wrap gap-4">
           <Button onClick={() => router.push(Routes.Home)}>首页</Button>
           <Button
             onClick={() => {
-              router.push(resolveRouteForCurrentDevice(ModalPageRoutes.gameList), {
-                scroll: false,
-              });
+              router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin));
+              // router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), {
+              //   scroll: false,
+              // });
             }}
           >
             路由弹框

@@ -1,9 +1,9 @@
 'use client';
 import Button from '@/components/ui/Button';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { Routes } from '@/libs/routes';
 import { useBrandConfig } from '@/providers/brand.provider';
 import { useRouter } from '@/router';
+import { Routes } from '@/router/routes';
 
 export default function Header() {
   const router = useRouter();

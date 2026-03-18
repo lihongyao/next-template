@@ -5,7 +5,7 @@ import AppHeader from '@/components/ui/AppHeader';
 import { games } from '@/constants/data';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { ModalPageRoutes } from '@/libs/routes';
+import { ModalPageRoutes } from '@/router/routes';
 
 export default function GameList() {
   const router = useRouter();

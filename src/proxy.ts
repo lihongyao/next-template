@@ -3,7 +3,7 @@ import createMiddleware from 'next-intl/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { routing } from './i18n/routing';
-import { ModalRoute, ModalRoutes } from './libs/routes';
+import { ModalRoute, ModalRoutes } from './router/routes';
 
 const intlMiddleware = createMiddleware(routing);
 

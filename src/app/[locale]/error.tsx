@@ -2,7 +2,7 @@
 
 import Button from '@/components/ui/Button';
 import { useRouter } from '@/i18n/navigation';
-import { Routes } from '@/libs/routes';
+import { Routes } from '@/router/routes';
 
 export default function ErrorPage() {
   const router = useRouter();

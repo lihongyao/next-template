@@ -66,10 +66,10 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
  * @see useModalRoutes
  */
 export const ModalPageRoutes = {
-  // profile: {
-  //   pc: Routes.Profile,
-  //   h5: Routes.ModalProfile,
-  // },
+  profile: {
+    pc: Routes.ModalProfile,
+    h5: Routes.Profile,
+  },
   // gameList: {
   //   pc: Routes.GameList,
   //   h5: Routes.ModalGameList,
