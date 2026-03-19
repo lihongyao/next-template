@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter as useIntlRouter } from '@/i18n/navigation';
+import { markForward } from '@/libs/navigation-direction';
 import { useGlobalStore } from '@/stores/useGlobalStore';
 
 export default function useAppRouter() {
@@ -9,6 +10,7 @@ export default function useAppRouter() {
 
   return {
     push(href: string, options?: any) {
+      markForward(href);
       setNextDirection('forward');
       router.push(href, options);
     },
