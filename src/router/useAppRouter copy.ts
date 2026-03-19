@@ -5,40 +5,34 @@ import { useGlobalStore } from '@/stores/useGlobalStore';
 
 export default function useAppRouter() {
   const router = useIntlRouter();
-  const { setDirection: setNextDirection, setIsZD } = useGlobalStore((s) => s);
+  const { setDirection: setNextDirection } = useGlobalStore((s) => s);
 
   return {
     push(href: string, options?: any) {
-      setIsZD(true);
       setNextDirection('forward');
       router.push(href, options);
     },
 
     replace(href: string, options?: any) {
-      setIsZD(true);
       setNextDirection('forward');
       router.replace(href, options);
     },
 
     back() {
-      setIsZD(true);
       setNextDirection('backward');
       router.back();
     },
 
     forward() {
-      setIsZD(true);
       setNextDirection('forward');
       window.history.forward();
     },
 
     refresh() {
-      setIsZD(true);
       router.refresh();
     },
 
     prefetch(href: string) {
-      setIsZD(true);
       router.prefetch(href);
     },
   };

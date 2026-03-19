@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 type GlobalStateProps = {
+  isZD: boolean;
+  setIsZD: (isZD: boolean) => void;
   isLogin: boolean;
   isSidebarOpen: boolean;
   count: number;
@@ -19,6 +21,7 @@ export const useGlobalStore = create<GlobalStateProps>()(
   persist(
     immer((set) => ({
       count: 0,
+      isZD: true,
       isLogin: true,
       isSidebarOpen: true,
       direction: 'forward',
@@ -42,6 +45,7 @@ export const useGlobalStore = create<GlobalStateProps>()(
         set((state) => {
           state.count -= 1;
         }),
+      setIsZD: (isZD) => set({ isZD }),
     })),
     {
       // 存储名称
