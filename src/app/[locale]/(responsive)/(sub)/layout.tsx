@@ -4,7 +4,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
 import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
-import { useSearchParams } from 'next/navigation';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -13,7 +12,6 @@ import { usePathname } from '@/i18n/navigation';
 import { consumeDirection } from '@/libs/navigation-direction';
 import { useDevice } from '@/providers/device.provider';
 import { ModalRoutes } from '@/router/routes';
-import { useGlobalStore } from '@/stores/useGlobalStore';
 
 function isModalRoute(path: string): boolean {
   return Object.values(ModalRoutes).some((value) => path.includes(value));
@@ -32,13 +30,12 @@ function FrozenRouter(props: { children: React.ReactNode }) {
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   const { isMobile } = useDevice();
   const pathname = usePathname();
-  const direction = useGlobalStore((s) => s.direction);
   const [swipeAllow, setSwipeAllow] = useState(true);
   const prevPathnameRef = useRef(pathname);
 
   useSwipeBack((value) => setSwipeAllow(!value), { enabled: true });
 
-  // modal 跳过动画；tab 页淡入淡出；其余左右滑动
+  // modal 跳过动画，其余左右滑动
   const currentIsModal = isModalRoute(pathname);
   const prevWasModal = isModalRoute(prevPathnameRef.current);
   const skipAnimation = currentIsModal || (prevWasModal && !currentIsModal);
@@ -48,56 +45,27 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     prevPathnameRef.current = pathname;
   }, [pathname]);
 
-  const search = useSearchParams();
-  const url = pathname;
-  // const url = pathname + '?' + search.toString();
-  // const dir = resolveDirection(url);
-  // console.log('dir:', dir);
-  // const rawDir = resolveDirection(url);
-  // const dir = useStableDirection(rawDir);
-
-  const [dir, setDir] = useState<'forward' | 'back'>('forward');
-
-  // useEffect(() => {
-  //   const next = resolveDirection(url);
-  //   setDir(next);
-  // }, [url]);
-
-  useEffect(() => {
-    setDir(consumeDirection());
-  }, [url]);
+  // 方向必须同步读取，避免 useEffect 更新慢一拍导致首个 back/forward 方向错误
+  const dir = consumeDirection();
 
   if (!isMobile) return children;
 
   const transition = { type: 'tween' as const, duration: 0.25, ease: 'linear' as const };
-  // const initial = isAllow ? (dir === 'forward' ? { x: '100%' } : { x: '-100%' }) : undefined;
-  // const animate = isAllow ? { x: 0 } : undefined;
-  // const exit = isAllow ? (dir === 'forward' ? { x: '-100%' } : { x: '100%' }) : undefined;
   const variants = {
-    enter: (dir: string) => {
-      console.log('enter dir >>> ', dir, url);
-      return {
-        x: dir === 'forward' ? '100%' : '-100%',
-      };
-    },
+    enter: (dir: string) => ({ x: dir === 'forward' ? '100%' : '-100%' }),
     center: { x: 0 },
-    exit: (dir: string) => {
-      console.log('exit dir >>> ', dir, url);
-      return {
-        x: dir === 'forward' ? '-100%' : '100%',
-      };
-    },
+    exit: (dir: string) => ({ x: dir === 'forward' ? '-100%' : '100%' }),
   };
 
   return (
     <AnimatePresence mode="popLayout" initial={true} custom={dir}>
       <motion.div
-        key={url}
-        custom={dir}
+        key={pathname}
+        custom={isAllow ? dir : undefined}
         variants={variants}
-        initial="enter"
-        animate="center"
-        exit="exit"
+        initial={isAllow ? 'enter' : undefined}
+        animate={isAllow ? 'center' : undefined}
+        exit={isAllow ? 'exit' : undefined}
         transition={transition}
       >
         <FrozenRouter>{children}</FrozenRouter>

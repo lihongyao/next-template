@@ -8,8 +8,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname } from '@/i18n/navigation';
+import { consumeDirection } from '@/libs/navigation-direction';
 import { ModalRoutes, TabRoutes } from '@/router/routes';
-import { useGlobalStore } from '@/stores/useGlobalStore';
 
 function isModalRoute(path: string): boolean {
   return Object.values(ModalRoutes).some((value) => path.includes(value));
@@ -42,7 +42,7 @@ export default function PageTransition({
   tab?: boolean;
 }) {
   const pathname = usePathname();
-  const direction = useGlobalStore((s) => s.direction);
+  const direction = consumeDirection();
   const [swipeAllow, setSwipeAllow] = useState(true);
   const pathnameRef = useRef(pathname);
   const prevPathnameRef = useRef<string | null>(null);

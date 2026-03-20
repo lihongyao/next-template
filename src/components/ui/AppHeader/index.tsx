@@ -2,6 +2,7 @@
 
 import { ZIndex } from '@/constants';
 import { useRouter } from '@/router';
+import { Routes } from '@/router/routes';
 
 import Button from '../Button';
 
@@ -25,7 +26,10 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
             if (onBack) {
               onBack();
             } else {
-              router.back();
+              if (history.length > 2) {
+                router.back();
+              }
+              router.push(Routes.Home);
             }
           }}
         >
