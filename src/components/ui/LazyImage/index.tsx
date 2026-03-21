@@ -1,6 +1,6 @@
 'use client';
 
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/libs/class-helpers';
@@ -12,9 +12,8 @@ type LazyImgProps = {
   blurSrc?: string;
   alt?: string;
   className?: string;
-  /** 默认 lazy：进视口再加载；eager 立即加载 */
   loading?: 'lazy' | 'eager';
-  onClick?: (e: MouseEvent<HTMLImageElement> | KeyboardEvent<HTMLImageElement>) => void;
+  onClick?: (e: MouseEvent<HTMLImageElement>) => void;
 };
 
 export default function LazyImg({
@@ -91,17 +90,8 @@ export default function LazyImg({
       aria-hidden={!isFinal}
       loading={isFinal ? loading : undefined}
       decoding="async"
-      className={cn('size-full object-cover', className)}
+      className={cn('size-full object-cover text-xs text-red-800', className)}
       onClick={onClick}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') onClick(e as KeyboardEvent<HTMLImageElement>);
-            }
-          : undefined
-      }
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
       onLoad={isFinal ? handleNativeLoad : undefined}
     />
   );
