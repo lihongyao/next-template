@@ -1,50 +1,33 @@
 'use client';
 
-import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/libs/class-helpers';
 
 const imageCache = new Map<string, boolean>();
 
-const DEFAULT_PLACEHOLDER_ERR =
-  'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==';
-
 type LazyImgProps = {
   src?: string;
   blurSrc?: string;
-  errorSrc?: string;
   alt?: string;
   className?: string;
-  width?: number;
-  height?: number;
+  /** 默认 lazy：进视口再加载；eager 立即加载 */
   loading?: 'lazy' | 'eager';
-  sizes?: string;
-  style?: CSSProperties;
-  onError?: (value: boolean) => void;
-  onLoad?: (value: boolean) => void;
   onClick?: (e: MouseEvent<HTMLImageElement> | KeyboardEvent<HTMLImageElement>) => void;
 };
 
 export default function LazyImg({
   src,
   blurSrc,
-  errorSrc,
   alt,
   className,
-  width,
-  height,
   loading = 'lazy',
-  sizes,
-  style,
-  onError,
-  onLoad,
   onClick,
 }: LazyImgProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [shouldLoad, setShouldLoad] = useState(loading === 'eager');
-  const [hasError, setHasError] = useState(false);
-  const [displaySrc, setDisplaySrc] = useState<string | undefined>(blurSrc ?? undefined);
+  const [displaySrc, setDisplaySrc] = useState<string | undefined>(blurSrc);
 
   useEffect(() => {
     if (loading !== 'lazy' || !src || shouldLoad) return;
@@ -64,29 +47,25 @@ export default function LazyImg({
     return () => observer.disconnect();
   }, [loading, src, shouldLoad]);
 
-  const realSrc = hasError ? errorSrc || DEFAULT_PLACEHOLDER_ERR : src;
-
   useEffect(() => {
-    if (!shouldLoad || !realSrc) return;
+    if (!shouldLoad || !src) return;
 
-    if (imageCache.has(src ?? '')) {
-      setDisplaySrc(realSrc);
+    if (imageCache.has(src)) {
+      setDisplaySrc(src);
       return;
     }
 
     if (blurSrc) {
       setDisplaySrc(blurSrc);
       const img = new Image();
-      img.src = realSrc;
+      img.src = src;
       img.onload = () => {
-        if (src) imageCache.set(src, true);
-        setDisplaySrc(realSrc);
-        onLoad?.(false);
+        imageCache.set(src, true);
+        setDisplaySrc(src);
       };
       img.onerror = () => {
-        setHasError(true);
-        onError?.(true);
-        setDisplaySrc(errorSrc || DEFAULT_PLACEHOLDER_ERR);
+        imageCache.set(src, true);
+        setDisplaySrc(src);
       };
       return () => {
         img.src = '';
@@ -95,35 +74,24 @@ export default function LazyImg({
       };
     }
 
-    setDisplaySrc(realSrc);
-  }, [shouldLoad, realSrc, src, blurSrc, errorSrc, onLoad, onError]);
+    setDisplaySrc(src);
+  }, [shouldLoad, src, blurSrc]);
 
-  const handleLoad = () => {
+  const isFinal = displaySrc === src;
+
+  const handleNativeLoad = () => {
     if (src) imageCache.set(src, true);
-    onLoad?.(false);
   };
 
-  const handleError = () => {
-    setHasError(true);
-    onError?.(true);
-    setDisplaySrc(errorSrc || DEFAULT_PLACEHOLDER_ERR);
-  };
-
-  const isRealSrc = displaySrc === realSrc;
-  // if (!shouldLoad) return <div ref={imgRef} className="h-full w-full" />;
   return (
     <img
       ref={imgRef}
-      src={displaySrc ?? DEFAULT_PLACEHOLDER_ERR}
-      alt={isRealSrc ? (alt ?? '') : ''}
-      aria-hidden={!isRealSrc}
-      width={width}
-      height={height}
-      sizes={isRealSrc ? sizes : undefined}
-      loading={isRealSrc ? loading : undefined}
+      src={displaySrc}
+      alt={isFinal ? (alt ?? '') : ''}
+      aria-hidden={!isFinal}
+      loading={isFinal ? loading : undefined}
       decoding="async"
       className={cn('size-full object-cover', className)}
-      style={style}
       onClick={onClick}
       onKeyDown={
         onClick
@@ -134,8 +102,7 @@ export default function LazyImg({
       }
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onLoad={isRealSrc ? handleLoad : undefined}
-      onError={isRealSrc ? handleError : undefined}
+      onLoad={isFinal ? handleNativeLoad : undefined}
     />
   );
 }
