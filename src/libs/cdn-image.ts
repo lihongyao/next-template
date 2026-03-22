@@ -1,161 +1,124 @@
-// src/lib/cdn-image.ts
 /**
- * 🔥 使用 Cloudflare CDN 对图片进行统一处理
- * @see https://developers.cloudflare.com/images/transform-images/transform-via-url
+ * 🔥 Cloudflare CDN Image URL Builder
+ * 保持现有路径结构：
+ * classic/blue/afun/xxx.png
+ *
+ * Docs:
+ * https://developers.cloudflare.com/images/transform-images/transform-via-url
  */
 
-// === 类型定义 ===
-interface CdnImageParts {
-  /** 域名，例如 https://img.engames.com */
-  origin: string;
-  /** CDN 固定前缀，例如 /cdn-cgi/image */
-  prefix: string;
-  /** 图片处理选项，例如 /format=auto,q=80,dpr=2,w=100 */
-  options: string;
-  /** 源图片路径，例如 /afunbet/1757677181247956857.jpeg */
-  path: string;
-}
+// ==============================
+// 常量
+// ==============================
 
-interface CdnImageOptions {
-  format?: string;
+const CDN_ORIGIN = 'https://img.engames.com';
+const CDN_PREFIX = '/cdn-cgi/image';
+
+/**
+ * 你的资源站路径前缀
+ * 例如：
+ * https://img.engames.com/s_static_x/{seriesName}/xxx.png
+ */
+const STATIC_PREFIX = '/s_static_x';
+
+// ⚠️ 这里替换为你的真实变量来源
+const seriesName = 'default';
+
+// ==============================
+// 类型
+// ==============================
+
+interface ImageTransformOptions {
   q?: number;
-  dpr?: number;
   w?: number | string;
   h?: number | string;
   fit?: string;
-  [key: string]: string | number | undefined;
 }
-// === 常量定义 ===
-const CDN_PREFIX = '/cdn-cgi/image';
-const ResConfig = {
-  rootAddress: 'https://img.engames.com',
-};
 
-/**
- * 获取 CDN 图片地址（SSR / CSR 通用）
- * @param path 图片路径(svn相对路径 or 完整地址)
- * @param options 选项参数
- * - options.userAgent 服务端渲染时传入 ua，用于判断设备类型
- * - options.imageOptions 图片处理选项，参数优化时会用到，理论上，只需要给宽度即可，高度会自适应
- * @returns
- */
-export function getCdnImageUrl(
-  path: string,
-  options?: {
-    userAgent?: string | null;
-    imageOptions?: {
-      q?: number;
-      w?: number | string;
-      h?: number | string;
-    };
-  },
-) {
-  if (!path?.trim()) return '';
+interface GetImageOptions {
+  /** SSR 时传入 UA */
+  userAgent?: string | null;
+  imageOptions?: ImageTransformOptions;
+}
 
-  const { userAgent = '', imageOptions = {} } = options || {};
+// ==============================
+// DPR 计算（带缓存）
+// ==============================
 
-  const isHttp = path.startsWith('http');
-  const seriesName = process.env.NEXT_PUBLIC_SERIES;
+let cachedDpr: number | null = null;
+
+function getDeviceDpr(userAgent?: string | null): number {
+  if (cachedDpr !== null) return cachedDpr;
 
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : userAgent || '';
 
-  const isIOS = /iPhone|iPad|iPod/i.test(ua);
-  const isAndroid = /Android/i.test(ua);
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    cachedDpr = 3;
+  } else if (/Android/i.test(ua)) {
+    cachedDpr = 2;
+  } else {
+    cachedDpr = 1;
+  }
 
-  // DPR 策略：iOS 3x / Android 2x / Desktop 1x
-  const dpr = isIOS ? 3 : isAndroid ? 2 : 1;
+  return cachedDpr;
+}
 
-  // 构建基础 URL
-  // FIXME: 临时处理
-  const baseUrl = isHttp
-    ? path
-    : `${ResConfig.rootAddress}/cdn-cgi/image/format=auto/s_static_x/${seriesName}/${path}`;
+// ==============================
+// Cloudflare 参数构建
+// ==============================
 
-  const parts = parseCdnImageUrl(baseUrl);
-  if (!parts) return baseUrl;
+function buildTransformParams(dpr: number, options: ImageTransformOptions = {}) {
+  const { q = 80, w = 'auto', h = 'auto', fit } = options;
 
-  const { q = 80, w = 'auto', h = 'auto' } = imageOptions;
-
-  const finalW = isIOS || isAndroid ? w : 'auto';
-  const finalH = isIOS || isAndroid ? h : 'auto';
-
-  return updateCdnImageOptions(baseUrl, {
+  const params = {
     format: 'auto',
     q,
     dpr,
-    w: finalW,
-    h: finalH,
-  });
+    w,
+    h,
+    fit,
+  };
+
+  return Object.entries(params)
+    .filter(([, v]) => v != null)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(',');
 }
 
-// === 工具函数 ===
-function parseCdnImageUrl(url: string): CdnImageParts | null {
-  if (!url.includes(CDN_PREFIX)) return null;
+// ==============================
+// 主函数
+// ==============================
 
-  const u = new URL(url);
-  const pathname = u.pathname;
+/**
+ * 获取 CDN 图片 URL（SSR / CSR 通用）
+ *
+ * @example
+ * getCdnImageUrl("classic/blue/afun/banner.png", {
+ *   imageOptions: { w: 600 }
+ * })
+ */
+export function getCdnImageUrl(path: string, options?: GetImageOptions): string {
+  if (!path?.trim()) return '';
 
-  const rest = pathname.slice(CDN_PREFIX.length);
-  const segments = rest.split('/').filter(Boolean);
+  const { userAgent = null, imageOptions } = options || {};
 
-  let options = '';
-  let path = '';
+  // ===== DPR =====
+  const dpr = getDeviceDpr(userAgent);
 
-  // 约定：options 只能占用一个 segment，用逗号分隔
-  if (/^[^/]+=/.test(segments[0] ?? '')) {
-    options = `/${segments[0]}`;
-    path = `/${segments.slice(1).join('/')}`;
+  // ===== transform 参数 =====
+  const params = buildTransformParams(dpr, imageOptions);
+
+  // ===== 源路径 =====
+  let sourcePath: string;
+
+  if (path.startsWith('http')) {
+    // 外部完整地址
+    sourcePath = new URL(path).pathname;
   } else {
-    path = `/${segments.join('/')}`;
+    // 你的现有资源格式
+    sourcePath = `${STATIC_PREFIX}/${seriesName}/${path}`;
   }
 
-  return {
-    origin: u.origin,
-    prefix: CDN_PREFIX,
-    options,
-    path,
-  };
-}
-
-function parseOptions(raw: string): CdnImageOptions {
-  if (!raw) return {};
-
-  return raw
-    .replace(/^\//, '')
-    .split(',')
-    .filter(Boolean)
-    .reduce((acc, cur) => {
-      const [key, value] = cur.split('=');
-      if (!key || value == null) return acc;
-
-      // 数值参数自动转 number
-      if (/^\d+(\.\d+)?$/.test(value)) {
-        acc[key] = Number(value);
-      } else {
-        acc[key] = value;
-      }
-
-      return acc;
-    }, {} as CdnImageOptions);
-}
-
-export function updateCdnImageOptions(url: string, newOptions: CdnImageOptions): string {
-  const parts = parseCdnImageUrl(url);
-  if (!parts) return url;
-
-  const current = parseOptions(parts.options);
-  const merged = { ...current, ...newOptions };
-
-  parts.options =
-    '/' +
-    Object.entries(merged)
-      .filter(([, v]) => v != null)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(',');
-
-  return buildCdnImageUrl(parts);
-}
-
-function buildCdnImageUrl(parts: CdnImageParts): string {
-  return `${parts.origin}${parts.prefix}${parts.options}${parts.path}`;
+  // ===== 最终 URL =====
+  return `${CDN_ORIGIN}${CDN_PREFIX}/${params}${sourcePath}`;
 }

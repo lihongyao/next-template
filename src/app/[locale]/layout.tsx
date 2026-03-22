@@ -8,13 +8,13 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
-import { lcpB64 } from '@/assets/images/lcp-b64';
-import '@/assets/styles/generated/brand.css';
 import ClientInitializer from '@/components/features/ClientInitializer';
 import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRestorer';
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
+import '@/generated/brand.css';
+import { lcpB64 } from '@/generated/lcp-b64';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
 import { BrandConfigProvider } from '@/providers/brand.provider';

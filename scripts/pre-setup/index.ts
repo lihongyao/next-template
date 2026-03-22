@@ -12,9 +12,9 @@ const __dirname = path.dirname(__filename);
 const SCRIPT_NAME = 'scripts/pre-setup/index.ts';
 const ROOT = path.resolve(__dirname, '../../');
 
-console.log('pre-setup app:', app);
-console.log('pre-setup env:', env);
-console.log('pre-setup ...');
+console.log('app:', app);
+console.log('env:', env);
+console.log('正在处理预构建内容 ...');
 console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND);
 
 (async function main() {
@@ -24,6 +24,7 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
     setupBrandCssImports(brandConfig);
     setupLcpElement();
     setupEnv();
+    setupImageManifest();
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -62,7 +63,7 @@ export { default } from './${app}';`;
 
   fs.writeFileSync(brandsIndexPath, fileContent, 'utf-8');
 
-  console.log('[pre-setup] 已写入 src/configs/brands/index.ts -> export from %s', app);
+  console.log('✅ 品牌配置已设置 >>> src/configs/brands/index.ts -> export from %s', app);
 }
 
 function setupBrandCssImports(brandConfig: BrandConfig) {
@@ -79,20 +80,19 @@ function setupBrandCssImports(brandConfig: BrandConfig) {
 * 生成时间: ${generatedAt}
 */
 
-import "../core/index.css";
-import "../themes/${brandConfig.theme}.css";
-import "../skins/${brandConfig.skin}.css";
-${isOverridesExist ? `import "../overrides/${app}.css";` : ''}
+import "../assets/styles/core/index.css";
+import "../assets/styles/themes/${brandConfig.theme}.css";
+import "../assets/styles/skins/${brandConfig.skin}.css";
+${isOverridesExist ? `import "../assets/styles/overrides/${app}.css";` : ''}
 `;
 
-  const stylesRoot = path.resolve(ROOT, 'src/assets/styles');
-  const generatedDir = path.resolve(stylesRoot, 'generated');
+  const generatedDir = path.resolve(ROOT, 'src/generated');
 
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir, { recursive: true });
 
   const brandCssFilePath = path.resolve(generatedDir, 'brand.css.ts');
   fs.writeFileSync(brandCssFilePath, brandCssContent, 'utf8');
-  console.log('[pre-setup] 已写入 src/assets/styles/generated/brand.css.ts');
+  console.log('✅ 品牌样式已设置 >>> src/generated/brand.css.ts');
 }
 
 /**
@@ -100,11 +100,11 @@ ${isOverridesExist ? `import "../overrides/${app}.css";` : ''}
  */
 function setupLcpElement() {
   const logoPath = path.resolve(ROOT, `public/images/brands/${app}/logo.png`);
-  const logoOutputPath = path.resolve(ROOT, 'src/assets/images/lcp-b64.ts');
+  const logoOutputPath = path.resolve(ROOT, 'src/generated/lcp-b64.ts');
   const base64 = fs.readFileSync(logoPath, 'base64');
   const fileContent = `export const lcpB64 = "data:image/png;base64,${base64}";\n`;
   fs.writeFileSync(logoOutputPath, fileContent);
-  console.log('lcp-b64.ts generated');
+  console.log('✅ LCP 元素已解析 >>> src/generated/lcp-b64.ts');
 }
 
 /**
@@ -122,5 +122,84 @@ NEXT_PUBLIC_APP_VERSION=${version}
 
   fs.writeFileSync(envOutputFile, envContent, 'utf8');
 
-  console.log('[pre-setup] 已写入 .env');
+  console.log('✅ 环境变量已写入 >>> .env');
+}
+
+/**
+ * 设置 image-manifest
+ */
+function setupImageManifest() {
+  const IMAGE_ROOT = path.join(ROOT, 'public/images/cdn-imgs');
+  const OUTPUT = path.join(ROOT, 'src/generated/image-manifest.ts');
+
+  type SparseManifest = Record<
+    string, // theme-skin
+    Record<
+      string, // brand
+      string[] // 品牌覆盖文件
+    >
+  >;
+
+  const manifest: SparseManifest = {};
+
+  // ===== UTIL =====
+  function walkFiles(dir: string, base = dir): string[] {
+    if (!fs.existsSync(dir)) return [];
+
+    const result: string[] = [];
+    for (const entry of fs.readdirSync(dir).sort()) {
+      if (entry.startsWith('.') || entry === 'Thumbs.db') continue;
+      const full = path.join(dir, entry);
+      const stat = fs.statSync(full);
+
+      if (stat.isDirectory()) {
+        result.push(...walkFiles(full, base));
+      } else if (stat.isFile()) {
+        result.push(path.relative(base, full).replace(/\\/g, '/'));
+      }
+    }
+    return result;
+  }
+
+  // ===== BUILD SPARSE MANIFEST =====
+  for (const themeSkin of fs.readdirSync(IMAGE_ROOT).sort()) {
+    if (themeSkin === 'general') continue;
+
+    const skinPath = path.join(IMAGE_ROOT, themeSkin);
+    if (!fs.statSync(skinPath).isDirectory()) continue;
+
+    manifest[themeSkin] = {};
+
+    const brands = fs
+      .readdirSync(skinPath)
+      .sort()
+      .filter((b) => b !== 'common' && !b.startsWith('.'));
+
+    for (const brand of brands) {
+      const brandPath = path.join(skinPath, brand);
+      const brandFiles = walkFiles(brandPath);
+
+      // 只存品牌实际覆盖的文件，不包含 common
+      if (brandFiles.length > 0) {
+        manifest[themeSkin][brand] = brandFiles.sort();
+      } else {
+        manifest[themeSkin][brand] = [];
+      }
+    }
+  }
+
+  // ===== ENSURE OUTPUT DIR =====
+  const GENERATED_DIR = path.dirname(OUTPUT);
+  if (!fs.existsSync(GENERATED_DIR)) {
+    fs.mkdirSync(GENERATED_DIR, { recursive: true });
+  }
+
+  // ===== WRITE =====
+  const output = `// === 自动生成，请勿手动修改 ===
+export const imageManifest = ${JSON.stringify(manifest, null, 2)} as const;
+`;
+
+  fs.writeFileSync(OUTPUT, output);
+
+  console.log('✅ 已生成图片 manifest 文件 >>> src/generated/image-manifest.ts');
 }

@@ -18,6 +18,8 @@ export type Locale = {
 
 // -- 品牌配置
 export type BrandConfig = {
+  /** 应用 ID */
+  appId: string;
   /** 应用名称 */
   appName: string;
   /** 主题 */

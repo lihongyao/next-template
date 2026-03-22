@@ -3,8 +3,9 @@ import type { BrandConfig } from './types';
 
 export default {
   appName: 'A-FUN',
-  theme: 'classic',
+  theme: 'modern',
   skin: 'green',
+  appId: 'afun',
   layout: 'side-nav',
   overrides: true,
   locales: [

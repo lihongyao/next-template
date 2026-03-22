@@ -44,7 +44,5 @@ pnpm-lock.yaml
 
 # 脚本生成的品牌入口，勿提交
 src/configs/brands/index.ts
-# 脚本生成的品牌样式，勿提交
-src/assets/styles/generated/
-# 脚本生成的 LCP 元素（base64）
-lcp-b64.ts
+# 脚本生成
+src/generated/

@@ -4,6 +4,7 @@ import type { BrandConfig } from './types';
 export default {
   appName: 'B-Fun',
   theme: 'modern',
+  appId: 'bfun',
   layout: 'top-nav',
   skin: 'green',
   overrides: false,
@@ -13,5 +14,5 @@ export default {
     { code: 'pt', label: '🇧🇷 Português', value: 3 },
     { code: 'es', label: '🇪🇸 Español', value: 4 },
   ],
-  defaultLocale: 'en',
+  defaultLocale: 'en-US',
 } satisfies BrandConfig;
