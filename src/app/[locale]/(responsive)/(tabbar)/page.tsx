@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
+import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
@@ -21,7 +22,7 @@ export default function HomePage() {
   }, []);
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="h-[200px] w-full bg-blue-500" />
+      <Carousel loop />
       <div className="flex flex-wrap gap-2">
         {/* <Button
           onClick={() =>

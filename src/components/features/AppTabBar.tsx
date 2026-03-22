@@ -26,12 +26,12 @@ export default memo(function AppTabBar() {
   return (
     <div
       data-name="app-tab-bar"
-      className="fixed bottom-0 left-0 w-full bg-[#161616]"
+      className="fixed bottom-3 left-0 w-full px-3"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      <div className="flex h-[65px] w-full items-center justify-around">
+      <div className="flex h-[65px] w-full items-center justify-around rounded-full bg-[#161616]">
         {tabBarConfig.map((item) => (
           <Link className="flex flex-col gap-1" href={item.path} key={item.path} scroll={false}>
             <Icon
