@@ -39,5 +39,17 @@ export const useModalRoutes = () => {
     return params;
   };
 
-  return { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice, getModalParams };
+  /** 替换最后一段路径 */
+  const replaceLastPath = (newSeg: string) => {
+    const segs = pathname.split('/');
+    segs[segs.length - 1] = newSeg.replace(/^\//, '');
+    return segs.join('/');
+  };
+
+  return {
+    mergeRouteIntoCurrentPath,
+    resolveRouteForCurrentDevice,
+    getModalParams,
+    replaceLastPath,
+  };
 };
