@@ -1,6 +1,6 @@
 import { UAParser } from 'ua-parser-js';
 
-export function getDeviceInfoWithUserAgent(userAgent: string) {
+export function parseDeviceFromUA(userAgent: string) {
   const uaParser = new UAParser();
   uaParser.setUA(userAgent);
   const result = uaParser.getResult();

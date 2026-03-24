@@ -1,8 +1,8 @@
 'use client';
 
-import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { type ReactNode, createContext, useContext, useLayoutEffect, useState } from 'react';
 
-import { getDeviceInfoWithUserAgent } from '@/libs/device';
+import { parseDeviceFromUA } from '@/libs/device';
 
 export type DeviceState = {
   isiOS: boolean;
@@ -21,11 +21,11 @@ export function DeviceProvider({
   userAgent: string;
   children: ReactNode;
 }) {
-  const result = getDeviceInfoWithUserAgent(userAgent);
+  const [state, setState] = useState<DeviceState>(() => ({
+    ...parseDeviceFromUA(userAgent),
+  }));
 
-  const [state, setState] = useState<DeviceState>({ ...result });
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mobile = window.matchMedia('(max-width: 767px)');
     const tablet = window.matchMedia('(min-width: 768px) and (max-width: 1023px)');
     const desktop = window.matchMedia('(min-width: 1024px)');
@@ -42,14 +42,9 @@ export function DeviceProvider({
           prev.isTablet === nextState.isTablet &&
           prev.isDesktop === nextState.isDesktop
         ) {
-          // 状态未变，跳过 re-render，避免多个 media query 同时触发时重复更新
           return prev;
         }
-        console.log('响应式断点变化 >>> ', nextState);
-        return {
-          ...prev,
-          ...nextState,
-        };
+        return { ...prev, ...nextState };
       });
     };
 
