@@ -35,9 +35,9 @@ export default function DialogPage() {
   const openX1 = () => {
     dialog.open('X1Dialog', {
       props: { message: 'Hello X1!', count: 3.14 },
-      contentClassName: 'w-[80%]',
-      onAfterClose: (reason) => {
-        console.log('reason：', reason);
+      contentClassName: 'w-[80%] max-w-[400px]',
+      onAfterClose: (event) => {
+        console.log('onAfterClose >>>', event);
         console.log('X1 closed');
       },
     });
@@ -54,8 +54,8 @@ export default function DialogPage() {
   const openX2AutoClose = () => {
     const x = dialog.open('X2Dialog', {
       autoDestroy: 2,
-      onAfterClose() {
-        console.log('X2 closed');
+      onAfterClose(event) {
+        console.log('X2 closed >>>', event);
       },
     });
     setTimeout(() => {
@@ -68,10 +68,10 @@ export default function DialogPage() {
   const openQueue = async () => {
     await dialog.queue('X1Dialog', {
       props: { message: 'Hello X1!', count: 30 },
-      onAfterClose: () => console.log('X1 closed'),
+      onAfterClose: (event) => console.log('X1 closed >>>', event),
     });
     await dialog.queue('X2Dialog', {
-      onAfterClose: () => console.log('X2 closed'),
+      onAfterClose: (event) => console.log('X2 closed >>>', event),
     });
   };
 
@@ -85,7 +85,7 @@ export default function DialogPage() {
           <Button onClick={() => Dialog.close()}>关闭</Button>
         </div>
       ),
-      onAfterClose: () => console.log('static open dialog closed'),
+      onAfterClose: (event) => console.log('static open dialog closed >>>', event),
     });
   };
 
@@ -99,7 +99,7 @@ export default function DialogPage() {
           autoDestroy: item.autoDestroy,
           maskClassName: item.maskClassName,
           contentClassName: item.contentClassName,
-          onAfterClose: () => console.log(`${item.type} closed`),
+          onAfterClose: (event) => console.log(`${item.type} closed >>>`, event),
         });
       }
     }, 0);
@@ -128,26 +128,26 @@ export default function DialogPage() {
         count: 100,
         message: '哈哈哈哈',
       },
-      onAfterClose() {
-        console.log('X1 closed');
+      onAfterClose(event) {
+        console.log('X1 closed >>>', event);
       },
     });
 
-    setTimeout(() => {
-      dialog.open('X1Dialog', {
-        multiple: false,
-        onAfterClose() {
-          console.log('X1 closed!');
-        },
-        props: (prev) => {
-          console.log(prev);
-          return {
-            message: '嘿嘿嘿嘿',
-            count: (prev?.count ?? 0) + 100,
-          };
-        },
-      });
-    }, 2000);
+    // setTimeout(() => {
+    //   dialog.open('X1Dialog', {
+    //     multiple: false,
+    //     onAfterClose() {
+    //       console.log('X1 closed!');
+    //     },
+    //     props: (prev) => {
+    //       console.log(prev);
+    //       return {
+    //         message: '嘿嘿嘿嘿',
+    //         count: (prev?.count ?? 0) + 100,
+    //       };
+    //     },
+    //   });
+    // }, 2000);
 
     // setTimeout(() => {
     //   dialog.open("X1Dialog", {
@@ -163,16 +163,16 @@ export default function DialogPage() {
     // }, 1000);
 
     setTimeout(() => {
-      // dialog.updateProps("X1Dialog", {
+      // dialog.updateProps('X1Dialog', {
       //   count: 300,
-      // })
-      // dialog.updateProps("X1Dialog", (prev) => {
-      //   console.log(prev);
-      //   return {
-      //     message: "啦啦啦啦",
-      //     count: (prev?.count ?? 0) + 100,
-      //   };
       // });
+      dialog.updateProps('X1Dialog', (prev) => {
+        console.log(prev);
+        return {
+          message: '啦啦啦啦',
+          count: (prev?.count ?? 0) + 100,
+        };
+      });
     }, 2000);
 
     // setTimeout(() => {
@@ -232,8 +232,8 @@ export default function DialogPage() {
             setOpen(false);
           }}
           maskClosable={true}
-          onAfterClose={() => {
-            console.log('onAfterClose');
+          onAfterClose={(event) => {
+            console.log('onAfterClose >>>', event);
             if (isJumpToOtherPage.current) {
               router.push(Routes.Home);
             }

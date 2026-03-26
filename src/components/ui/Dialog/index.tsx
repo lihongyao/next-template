@@ -19,6 +19,7 @@ import { createPortal } from 'react-dom';
 import { type Root, createRoot } from 'react-dom/client';
 
 import { dialogRegistry } from '@/components/features/dialogs';
+import { ZIndex } from '@/constants';
 import { cn } from '@/libs/class-helpers';
 
 import './animate.css';
@@ -30,9 +31,15 @@ export type DialogExitAnimation = 'fade-out' | 'zoom-out' | 'slide-up-out' | 'sl
 
 /** Dialog 关闭原因 */
 export type DialogCloseReason = 'manual' | 'mask' | 'autoDestroy' | 'popstate';
+export type DialogAfterCloseEvent = {
+  reason: DialogCloseReason;
+  stayDurationMs: number;
+};
 
 /** 全局可见 Dialog 集合，用于 body scroll 管理 */
 const visibleDialogs = new Set<string>();
+
+const createDialogId = () => `DIALOG_${Math.random().toString(36).slice(2).toUpperCase()}`;
 
 /** 锁住 body 滚动 */
 const lockBodyScroll = () => {
@@ -48,6 +55,10 @@ const unlockBodyScroll = () => {
 interface DialogRef {
   setIsExiting: (reason?: DialogCloseReason) => void;
 }
+
+type StartCloseOptions = {
+  viaControlledOnClose?: boolean;
+};
 
 // === 全局 Dialog 基础 ===
 
@@ -73,11 +84,15 @@ interface DialogProps {
   exitAnimation?: DialogExitAnimation;
   /** 是否允许同一类型 Dialog 同时打开多个实例 */
   multiple?: boolean;
+  /** 弹窗标识（useDialog.open 场景建议直接用 type） */
+  dialogId?: string;
+  /** 兼容旧参数：等价于 dialogId */
+  dataName?: string;
 
   /** 用户意图关闭（仅受控模式触发） */
   onClose?: () => void;
   /** 弹窗完全关闭后触发（任何模式） */
-  onAfterClose?: (reason: DialogCloseReason) => void;
+  onAfterClose?: (event: DialogAfterCloseEvent) => void;
 
   /** 路由前进/后退时是否自动关闭，默认true */
   closeOnPopstate?: boolean;
@@ -96,9 +111,11 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   const {
     open,
     children,
-    zIndex = 4000,
+    zIndex = ZIndex.Dialog,
     maskClosable = true,
     autoDestroy,
+    dialogId,
+    dataName,
     maskClassName,
     contentClassName,
     enterAnimation = 'zoom-in',
@@ -119,18 +136,34 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   const [isExiting, setIsExiting] = useState(false);
 
   // refs
-  const dialogId = useRef(`DIALOG_${Math.random().toString(36).slice(2).toUpperCase()}`);
+  const instanceId = useRef(createDialogId());
+  const resolvedDialogId = dialogId ?? dataName ?? instanceId.current;
   const autoDestroyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const afterCloseResolveRef = useRef<(() => void) | null>(null);
   const closeReasonRef = useRef<DialogCloseReason>('manual');
   const isAnimatingRef = useRef(false);
+  const openStartedAtRef = useRef<number | null>(Date.now());
+
+  const startClose = (
+    reason: DialogCloseReason = 'manual',
+    { viaControlledOnClose = false }: StartCloseOptions = {},
+  ) => {
+    if (isAnimatingRef.current) return false;
+    closeReasonRef.current = reason;
+
+    if (isControlled && viaControlledOnClose) {
+      onClose?.();
+      return true;
+    }
+
+    isAnimatingRef.current = true;
+    setIsExiting(true);
+    return true;
+  };
 
   useImperativeHandle(ref, () => ({
     setIsExiting: (reason: DialogCloseReason = 'manual') => {
-      if (isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
-      closeReasonRef.current = reason;
-      setIsExiting(true);
+      startClose(reason);
     },
   }));
 
@@ -141,6 +174,9 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   useEffect(() => {
     if (mounted && visible && !isExiting) {
       isAnimatingRef.current = true;
+      if (openStartedAtRef.current === null) {
+        openStartedAtRef.current = Date.now();
+      }
     }
   }, [mounted]);
 
@@ -152,18 +188,6 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     _setAfterClosePromise?.(p);
   }, [_setAfterClosePromise]);
 
-  // 用户触发关闭意图（遮罩/closeDialog）- 动画中忽略重复触发
-  const requestClose = (reason: DialogCloseReason = 'manual') => {
-    if (isAnimatingRef.current) return;
-    closeReasonRef.current = reason;
-    if (isControlled) {
-      onClose?.(); // 父组件 setOpen(false)，由 useEffect 负责 setIsExiting
-    } else {
-      isAnimatingRef.current = true;
-      setIsExiting(true);
-    }
-  };
-
   // 响应受控组件 open 状态变化（动画中忽略重复的 open/close 切换）
   useEffect(() => {
     if (!isControlled) return;
@@ -174,10 +198,8 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
       setIsExiting(false);
       closeReasonRef.current = 'manual'; // 重置 reason
     } else if (visible) {
-      if (isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
-      // 受控模式下，open 变为 false 时，reason 保持为 "manual"（由外部控制）
-      setIsExiting(true);
+      // 受控模式下，open 变为 false 时，沿用最近一次 close reason
+      startClose(closeReasonRef.current);
     }
   }, [open, isControlled, visible]);
 
@@ -185,14 +207,19 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   useEffect(() => {
     if (!autoDestroy || !visible) return;
     autoDestroyTimer.current = setTimeout(() => {
-      closeReasonRef.current = 'autoDestroy';
-      setIsExiting(true);
+      startClose('autoDestroy');
     }, autoDestroy * 1000);
     return () => {
       if (autoDestroyTimer.current) clearTimeout(autoDestroyTimer.current);
       autoDestroyTimer.current = null;
     };
   }, [autoDestroy, visible]);
+
+  // 用户触发关闭意图（遮罩/closeDialog）- 动画中忽略重复触发
+  const requestClose = (reason: DialogCloseReason = 'manual') => {
+    // 受控模式下，通知父组件改 open；非受控模式直接触发退出动画
+    startClose(reason, { viaControlledOnClose: true });
+  };
 
   // 点击遮罩关闭
   const handleMaskClick = () => {
@@ -213,22 +240,27 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     setIsExiting(false);
     isAnimatingRef.current = false;
 
-    visibleDialogs.delete(dialogId.current);
+    visibleDialogs.delete(instanceId.current);
     unlockBodyScroll();
 
     const reason = closeReasonRef.current;
-    onAfterClose?.(reason);
+    const endAt = Date.now();
+    const stayDurationMs =
+      openStartedAtRef.current === null ? 0 : Math.max(0, endAt - openStartedAtRef.current);
+    const eventPayload: DialogAfterCloseEvent = { reason, stayDurationMs };
+    openStartedAtRef.current = null;
+    onAfterClose?.(eventPayload);
     afterCloseResolveRef.current?.();
   };
 
   // 管理全局可见 Dialog 集合，锁滚动
   useEffect(() => {
     if (visible && !isExiting) {
-      visibleDialogs.add(dialogId.current);
+      visibleDialogs.add(instanceId.current);
       lockBodyScroll();
     }
     return () => {
-      visibleDialogs.delete(dialogId.current);
+      visibleDialogs.delete(instanceId.current);
       unlockBodyScroll();
     };
   }, [visible, isExiting]);
@@ -238,8 +270,7 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
     // 如果关闭功能被禁用，或者由 Provider 管理，则跳过
     if (!closeOnPopstate || _managedByProvider) return;
     const handlePopstate = () => {
-      closeReasonRef.current = 'popstate';
-      setIsExiting(true);
+      startClose('popstate');
     };
     window.addEventListener('popstate', handlePopstate);
     return () => window.removeEventListener('popstate', handlePopstate);
@@ -248,7 +279,7 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
   if (!mounted || !visible) return null;
 
   const content = (
-    <div data-name="dialog-root" className="fixed inset-0" style={{ zIndex }}>
+    <div data-name={resolvedDialogId} className="dialog-root fixed inset-0" style={{ zIndex }}>
       {/* 遮罩 */}
       <div
         className={cn(
@@ -293,16 +324,16 @@ type DialogEntry = {
   promise?: Promise<void>;
 };
 
-let dialogZIndex = 4000;
+let dialogZIndex = ZIndex.Dialog;
 const dialogMap = new Map<string, DialogEntry>();
 
 Dialog.open = (options: DialogStaticOptions) => {
-  const key = `DIALOG_${Math.random().toString(36).slice(2).toUpperCase()}`;
+  const key = createDialogId();
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
 
-  let resolveFn: () => void;
+  let resolveFn: (() => void) | null = null;
   const promise = new Promise<void>((resolve) => {
     resolveFn = resolve;
   });
@@ -320,12 +351,13 @@ Dialog.open = (options: DialogStaticOptions) => {
       maskClassName={options.maskClassName}
       zIndex={options.zIndex ?? dialogZIndex++}
       _managedByProvider
+      dialogId={options.dialogId ?? options.dataName}
       _setAfterClosePromise={(p) => p.then(() => resolveFn?.())}
-      onAfterClose={(reason) => {
+      onAfterClose={(event) => {
         root.unmount();
         container.remove();
         dialogMap.delete(key);
-        options.onAfterClose?.(reason);
+        options.onAfterClose?.(event);
       }}
     >
       {options.content}
@@ -389,7 +421,7 @@ export type DialogInstance<K extends DialogType = DialogType> = {
   requestClose: () => void;
   updateProps: (updater: PropsOf<K> | ((prev: PropsOf<K> | null) => PropsOf<K>)) => void;
   /** 内部字段：存储最新的 onAfterClose 回调 */
-  _onAfterClose?: (reason: DialogCloseReason) => void;
+  _onAfterClose?: (event: DialogAfterCloseEvent) => void;
   /** 内部字段：动画结束 promise */
   _afterClosePromise?: Promise<void>;
   /** 内部字段：Dialog ref，用于直接控制关闭 */
@@ -443,7 +475,7 @@ export const getGlobalDialog = () => {
 export const DialogProvider = ({ children }: { children: ReactNode }) => {
   const [dialogs, setDialogs] = useState<DialogInstance[]>([]);
   const dialogsRef = useRef<DialogInstance[]>([]);
-  const zIndexBaseRef = useRef(4000);
+  const zIndexBaseRef = useRef(ZIndex.Dialog);
 
   // 更新 dialogs 数组
   const updateDialogs = useCallback(
@@ -496,10 +528,10 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
     const Component = dialogRegistry[type];
     if (!Component) throw new Error(`Dialog "${type}" is not registered`);
 
-    const dialogKey = `DIALOG_${Math.random().toString(36).slice(2).toUpperCase()}`;
+    const dialogKey = createDialogId();
 
     const instance: DialogInstance<typeof type> & {
-      _onAfterClose?: (reason: DialogCloseReason) => void;
+      _onAfterClose?: (event: DialogAfterCloseEvent) => void;
     } = {
       key: dialogKey,
       type,
@@ -527,14 +559,15 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
         ref={dialogRef}
         key={dialogKey}
         {...dialogProps}
+        dialogId={dialogProps.dialogId ?? dialogProps.dataName ?? String(type)}
         closeOnPopstate={closeOnPopstate}
         _managedByProvider
         _setAfterClosePromise={(p) => {
           instance._afterClosePromise = p;
         }}
-        onAfterClose={(reason) => {
+        onAfterClose={(event) => {
           updateDialogs((prev) => prev.filter((d) => d.key !== dialogKey));
-          instance._onAfterClose?.(reason);
+          instance._onAfterClose?.(event);
         }}
       >
         {element}
@@ -550,8 +583,8 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
           const prevProps = d.props as PropsOf<typeof type>;
           const nextProps =
             typeof updater === 'function'
-              ? (updater as (p: PropsOf<typeof type>) => void)(prevProps)
-              : Object.assign({}, prevProps, updater);
+              ? (updater as (p: PropsOf<typeof type> | null) => PropsOf<typeof type>)(prevProps)
+              : Object.assign({}, prevProps as object, updater as object);
 
           if (!React.isValidElement(d.content)) return { ...d, props: nextProps };
 
@@ -588,8 +621,8 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
     return new Promise<void>((resolve) => {
       open(type, {
         ...options,
-        onAfterClose(reason) {
-          options?.onAfterClose?.(reason);
+        onAfterClose(event) {
+          options?.onAfterClose?.(event);
           resolve();
         },
       });

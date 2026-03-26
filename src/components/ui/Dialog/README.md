@@ -106,7 +106,7 @@ interface DialogProps {
   /** 用户意图关闭（仅受控模式触发） */
   onClose?: () => void;
   /** 弹窗完全关闭后触发（任何模式） */
-  onAfterClose?: (reason: DialogCloseReason) => void;
+  onAfterClose?: (event: DialogAfterCloseEvent) => void;
 
   /** 路由前进/后退时是否自动关闭，默认true */
   closeOnPopstate?: boolean;
@@ -144,7 +144,16 @@ type DialogCloseReason =
   | 'popstate'; // 路由返回
 ```
 
-> 提示：所有关闭方式都会最终进入 `onAfterClose(reason)`，方便统一处理埋点、回收逻辑。
+## DialogAfterCloseEvent
+
+```ts
+type DialogAfterCloseEvent = {
+  reason: DialogCloseReason;
+  stayDurationMs: number;
+};
+```
+
+> 提示：所有关闭方式都会最终进入 `onAfterClose(event)`，方便统一处理埋点、回收逻辑。
 
 ## DialogEnterAnimation / DialogExitAnimation
 
@@ -181,7 +190,9 @@ export default function Page() {
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        onAfterClose={() => console.log('关闭完成')}
+        onAfterClose={({ reason, stayDurationMs }) =>
+          console.log('关闭完成', reason, stayDurationMs)
+        }
       >
         <div className="rounded bg-white p-6">
           <p>内容</p>
@@ -196,7 +207,7 @@ export default function Page() {
 **非受控模式：** 不传 `open` 时，组件内部管理状态，首次渲染即显示，关闭后 unmount：
 
 ```tsx
-<Dialog onAfterClose={(reason) => console.log(reason)}>
+<Dialog onAfterClose={({ reason, stayDurationMs }) => console.log(reason, stayDurationMs)}>
   <div className="rounded bg-white p-6">内容</div>
 </Dialog>
 ```
@@ -225,8 +236,8 @@ const { key, close } = Dialog.open({
   ),
   maskClosable: false,
   autoDestroy: 3, // 3 秒后自动关闭
-  onAfterClose(reason) {
-    console.log('关闭原因:', reason);
+  onAfterClose({ reason, stayDurationMs }) {
+    console.log('关闭原因:', reason, '停留时长:', stayDurationMs);
   },
 });
 ```

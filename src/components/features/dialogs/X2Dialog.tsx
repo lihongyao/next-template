@@ -22,8 +22,8 @@ export default function X2Dialog() {
         <Button
           onClick={() => {
             dialog.open('X3Dialog', {
-              onAfterClose() {
-                console.log('X3 after closed');
+              onAfterClose(event) {
+                console.log('X3 closed >>>', event);
               },
             });
           }}

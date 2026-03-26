@@ -32,8 +32,8 @@ export default function X1Dialog({ message, count }: X1DialogProps) {
           onClick={() => {
             dialog.open('X2Dialog', {
               closeOnPopstate: false,
-              onAfterClose() {
-                console.log('X2 closed');
+              onAfterClose(event) {
+                console.log('X2 closed >>>', event);
               },
             });
           }}
