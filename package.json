@@ -49,6 +49,7 @@
     "react-qr-code": "^2.0.18",
     "swiper": "^12.1.2",
     "tailwind-merge": "^3.5.0",
+    "thinkingdata-browser": "^2.4.0",
     "ua-parser-js": "^2.0.9",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
