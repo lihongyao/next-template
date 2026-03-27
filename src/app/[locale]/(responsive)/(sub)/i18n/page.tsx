@@ -1,6 +1,5 @@
 'use client';
 // src/app/[locale]/(home)/page.tsx
-// import { Link } from 'next-view-transitions';
 import ClientComp from '@/components/features/ClientComp';
 import LanguageSwitcher from '@/components/features/LanguageSwitcher';
 import AppHeader from '@/components/ui/AppHeader';

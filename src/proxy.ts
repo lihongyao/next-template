@@ -15,7 +15,6 @@ const locales = routing.locales;
 export function proxy(request: NextRequest) {
   const rewriteTarget = modalRewriteUrl(request);
   if (rewriteTarget) {
-    // Next.js 16 用 NextResponse.rewrite() 做重写，不再使用 x-middleware-rewrite header
     return NextResponse.rewrite(rewriteTarget);
   }
   return intlMiddleware(request);
