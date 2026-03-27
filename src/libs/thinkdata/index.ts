@@ -13,10 +13,12 @@ export interface ThinkDataInstallConfig {
   serverUrl: string;
   showLog?: boolean;
   autoTrack?: {
-    pageShow: boolean; // 开启页面展示事件，事件名ta_page_show
-    pageHide: boolean; // 开启页面隐藏事件，事件名ta_page_hide
-    pageView: boolean; // 开启单页面浏览事件，事件名ta_pageview
+    pageShow?: boolean; // 开启页面展示事件，事件名ta_page_show
+    pageHide?: boolean; // 开启页面隐藏事件，事件名ta_page_hide
+    pageView?: boolean; // 开启单页面浏览事件，事件名ta_pageview
   };
+  // 禁用预设属性，如 ['#os', '#ua']
+  disablePresetProperties?: string[];
 }
 
 type QueuedEvent =
