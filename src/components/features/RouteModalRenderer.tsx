@@ -119,7 +119,7 @@ export default function RouteModalRenderer() {
             key={modalKey}
             data-name={`modal-${modalKey}`}
             className="fixed inset-0 z-auto flex items-center justify-center"
-            style={{ zIndex: ZIndex.Modal }}
+            style={{ zIndex: ZIndex.Dialog }}
           >
             <motion.div
               className="absolute size-full bg-black/70"
