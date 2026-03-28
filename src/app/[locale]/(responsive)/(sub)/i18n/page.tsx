@@ -16,14 +16,24 @@ export default function i18nPage() {
       <main className="flex flex-col items-center gap-4 p-3">
         <LanguageSwitcher />
         <ClientComp />
-        <Button
-          className="text-white"
-          onClick={() => {
-            router.push(Routes.Details);
-          }}
-        >
-          详情
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button
+            className="text-white"
+            onClick={() => {
+              router.push(Routes.Details);
+            }}
+          >
+            详情
+          </Button>
+          <Button
+            className="text-white"
+            onClick={() => {
+              router.push(Routes.News);
+            }}
+          >
+            新闻
+          </Button>
+        </div>
         <div className="h-[600px] w-full bg-orange-500">123123</div>
       </main>
     </div>

@@ -25,6 +25,7 @@ export const PageRoutes = {
   GameList: '/game-list',
   GameDetails: '/game-list',
   Goods: '/goods',
+  News: '/news',
 } as const;
 
 // 弹窗路由
@@ -34,6 +35,7 @@ export const ModalRoutes = {
   ModalGameListSwiper: '/modal-game-list-swiper',
   ModalGameDetails: '/modal-game-details',
   ModalRegister: '/modal-register',
+  ModalNewsDetails: '/modal-news-details',
 } as const;
 
 // 所有路由
@@ -69,6 +71,10 @@ export const ModalPageRoutes = {
   profile: {
     pc: Routes.ModalProfile,
     h5: Routes.Profile,
+  },
+  'news-details': {
+    pc: Routes.ModalNewsDetails,
+    h5: Routes.News,
   },
   // gameList: {
   //   pc: Routes.GameList,
