@@ -75,11 +75,12 @@ export const ModalPageRoutes = {
   'news-details': {
     pc: Routes.ModalNewsDetails,
     h5: Routes.News,
+    onlySwitchWhenParamPresent: true,
   },
-  // gameList: {
-  //   pc: Routes.GameList,
-  //   h5: Routes.ModalGameList,
-  // },
+  'game-list': {
+    pc: Routes.GameList,
+    h5: Routes.ModalGameListSwiper,
+  },
   /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
   // gameDetails: {
   //   pc: Routes.GameDetails,

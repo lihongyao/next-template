@@ -10,7 +10,7 @@ import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
 import { useDevice } from '@/providers/device.provider';
 import { useRouter } from '@/router';
-import { Routes } from '@/router/routes';
+import { ModalPageRoutes, Routes } from '@/router/routes';
 
 export default function HomePage() {
   const { isMobile } = useDevice();
@@ -36,8 +36,8 @@ export default function HomePage() {
 
         <Button
           onClick={() => {
-            // const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameList);
-            // router.push(jumpToUrl, { scroll: false });
+            const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes['game-list']);
+            router.push(jumpToUrl, { scroll: false });
           }}
         >
           游戏列表

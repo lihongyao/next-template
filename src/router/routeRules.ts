@@ -1,8 +1,11 @@
 import { Routes } from '@/router/routes';
 
 export type RouteMeta = {
-  mobileLevel: number;
-  desktopLevel: number;
+  /** 移动端等级，1 表示一级页面，2 表示二级页面 */
+  mobileLevel: 1 | 2;
+  /** 桌面端等级，1 表示一级页面，2 表示二级页面 */
+  desktopLevel: 1 | 2;
+  /** 是否需要保持组件状态 */
   keepAlive?: boolean;
 };
 
@@ -11,6 +14,7 @@ export const routeRules: Array<{
   meta: RouteMeta;
 }> = [
   { path: Routes.Home, meta: { mobileLevel: 1, desktopLevel: 1, keepAlive: true } },
+
   { path: Routes.GameList, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.GameList + '/:id', meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.Cart, meta: { mobileLevel: 1, desktopLevel: 1 } },

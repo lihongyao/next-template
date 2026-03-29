@@ -45,6 +45,10 @@ function joinBasePc(base: string, pc: string): string {
   return `${b}${pc}`;
 }
 
+function hasParamTail(tail: string): boolean {
+  return tail.replace(/^\/+/, '').length > 0;
+}
+
 /**
  * PC：弹窗路由可叠在任意页后，如 /order/modal-profile（与 resolveRouteForCurrentDevice + merge 一致）
  * H5：独立页 /profile
@@ -66,24 +70,19 @@ export default function useModalPageAutoCollapse(): void {
     for (const key of Object.keys(ModalPageRoutes) as ModalPageRouteKey[]) {
       const config = ModalPageRoutes[key];
       const { pc, h5 } = config;
+      const onlyWhenParam =
+        'onlySwitchWhenParamPresent' in config && config.onlySwitchWhenParamPresent;
 
       if (isMobile) {
         const i = segmentIndex(pathname, pc);
         if (i === -1) continue;
         const tail = pathname.slice(i + pc.length);
+        if (onlyWhenParam && !hasParamTail(tail)) continue;
         const baseBeforeModal = i > 0 ? pathname.slice(0, i).replace(/\/$/, '') : '';
         if (baseBeforeModal) {
-          try {
-            localStorage.setItem(baseStorageKey(key), baseBeforeModal);
-          } catch {
-            /* ignore */
-          }
+          localStorage.setItem(baseStorageKey(key), baseBeforeModal);
         } else {
-          try {
-            localStorage.removeItem(baseStorageKey(key));
-          } catch {
-            /* ignore */
-          }
+          localStorage.removeItem(baseStorageKey(key));
         }
         const next = `${h5}${tail}`;
         if (next !== pathname) router.replace(withQuery(next));
@@ -93,18 +92,18 @@ export default function useModalPageAutoCollapse(): void {
       const i = segmentIndex(pathname, h5);
       if (i === -1) continue;
       const tail = pathname.slice(i + h5.length);
-      let storedBase = '';
-      try {
-        storedBase = localStorage.getItem(baseStorageKey(key)) ?? '';
-      } catch {
-        /* ignore */
-      }
-      const next = storedBase ? joinBasePc(storedBase, pc) + tail : `${pc}${tail}`;
-      try {
-        localStorage.removeItem(baseStorageKey(key));
-      } catch {
-        /* ignore */
-      }
+      if (onlyWhenParam && !hasParamTail(tail)) continue;
+      // 已经是目标形态（如 /news/modal-news-details/2），避免重复拼接导致循环 replace
+      if (tail === pc || tail.startsWith(`${pc}/`)) return;
+      const storedBase = localStorage.getItem(baseStorageKey(key)) ?? '';
+      // 详情型路由（onlyWhenParam）在首次 H5->PC 且无 base 时，默认挂在 h5 列表路径下
+      // 例如：/news/2 -> /news/modal-news-details/2
+      const next = storedBase
+        ? joinBasePc(storedBase, pc) + tail
+        : onlyWhenParam
+          ? `${h5}${pc}${tail}`
+          : `${pc}${tail}`;
+      localStorage.removeItem(baseStorageKey(key));
       if (next !== pathname) router.replace(withQuery(next));
       return;
     }

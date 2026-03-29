@@ -52,20 +52,23 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
 
   const transition = { type: 'tween' as const, duration: 0.25, ease: 'linear' as const };
   const variants = {
-    enter: (dir: string) => ({ x: dir === 'forward' ? '100%' : '-100%' }),
+    enter: (custom: { dir: 'forward' | 'back'; allow: boolean }) =>
+      custom.allow ? { x: custom.dir === 'forward' ? '100%' : '-100%' } : { x: 0 },
     center: { x: 0 },
-    exit: (dir: string) => ({ x: dir === 'forward' ? '-100%' : '100%' }),
+    exit: (custom: { dir: 'forward' | 'back'; allow: boolean }) =>
+      custom.allow ? { x: custom.dir === 'forward' ? '-100%' : '100%' } : { x: 0 },
   };
+  const transitionCustom = { dir, allow: isAllow };
 
   return (
-    <AnimatePresence mode="popLayout" initial={true} custom={dir}>
+    <AnimatePresence mode="popLayout" initial={true} custom={transitionCustom}>
       <motion.div
         key={pathname}
-        custom={isAllow ? dir : undefined}
+        custom={transitionCustom}
         variants={variants}
-        initial={isAllow ? 'enter' : undefined}
-        animate={isAllow ? 'center' : undefined}
-        exit={isAllow ? 'exit' : undefined}
+        initial="enter"
+        animate="center"
+        exit="exit"
         transition={transition}
       >
         <FrozenRouter>{children}</FrozenRouter>
