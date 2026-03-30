@@ -37,7 +37,7 @@ export default function HomePage() {
         <Button
           onClick={() => {
             const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes['game-list']);
-            router.push(jumpToUrl, { scroll: false });
+            router.push(jumpToUrl);
           }}
         >
           游戏列表
@@ -45,27 +45,23 @@ export default function HomePage() {
         <Button
           onClick={() => {
             if (isMobile) {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper), { scroll: false });
+              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper));
             }
           }}
         >
           游戏列表（自定义Swiper）
         </Button>
-        <Button onClick={() => router.push(Routes.DynamicComps, { scroll: false })}>
-          动态加载
-        </Button>
+        <Button onClick={() => router.push(Routes.DynamicComps)}>动态加载</Button>
         <Button
           onClick={() => {
-            router.push(Routes.Details, {
-              scroll: false,
-            });
+            router.push(Routes.Details);
           }}
         >
           详情
         </Button>
         <Button
           onClick={() => {
-            router.push(Routes.Dialog, { scroll: false });
+            router.push(Routes.Dialog);
           }}
         >
           普通弹窗
@@ -77,9 +73,7 @@ export default function HomePage() {
         >
           国际化
         </Button>
-        <Button onClick={() => router.push(Routes.DataPathThrough, { scroll: true })}>
-          数据传递
-        </Button>
+        <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
       </div>
 
       <div className="text-[#187843]">1231232</div>
