@@ -1,7 +1,12 @@
 // src/components/ui/Icon/index.tsx
 import type React from 'react';
 
-import iconMap from '@/assets/svg/generated';
+import {
+  SVG_COMPONENT_MAP,
+  SVG_ICON_KIND_MAP,
+  SVG_SPRITE_FILE,
+  SVG_SPRITE_ID_MAP,
+} from '@/assets/svg/generated';
 import { cn } from '@/libs/class-helpers';
 
 import type { SvgPathName } from './svgPath_all';
@@ -19,10 +24,13 @@ export default function Icon(props: IconProps) {
   const { name, src, color, style, className, wrapperClass, alt, onClick, ...rest } = props;
 
   const svgName = (name || (src?.startsWith('http') ? '' : src) || '') as SvgPathName;
-  let Comp = null;
-  if (svgName) {
-    Comp = iconMap[svgName];
-  }
+  const componentMap = SVG_COMPONENT_MAP as Partial<
+    Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
+  >;
+  const spriteIdMap = SVG_SPRITE_ID_MAP as Partial<Record<SvgPathName, string>>;
+  const iconKind = svgName ? SVG_ICON_KIND_MAP[svgName] : undefined;
+  const Comp = svgName ? componentMap[svgName] : undefined;
+  const spriteId = svgName ? spriteIdMap[svgName] : undefined;
 
   const a11yProps = alt
     ? { role: 'img', 'aria-label': alt }
@@ -34,7 +42,7 @@ export default function Icon(props: IconProps) {
       className={cn('flex items-center justify-center text-[0px]', wrapperClass)}
       onClick={onClick}
     >
-      {Comp && (
+      {iconKind === 'svgr' && Comp && (
         <Comp
           {...rest}
           {...a11yProps}
@@ -45,7 +53,22 @@ export default function Icon(props: IconProps) {
           }}
         />
       )}
-      {src && !Comp && <img src={src} className={cn('shrink-0', className)} alt={alt || 'icon'} />}
+      {iconKind === 'sprite' && spriteId && (
+        <svg
+          {...rest}
+          {...a11yProps}
+          className={className}
+          style={{
+            ...(color ? { color } : null),
+            ...style,
+          }}
+        >
+          <use href={`${SVG_SPRITE_FILE}#${spriteId}`} />
+        </svg>
+      )}
+      {src && !iconKind && (
+        <img src={src} className={cn('shrink-0', className)} alt={alt || 'icon'} />
+      )}
     </div>
   );
 }

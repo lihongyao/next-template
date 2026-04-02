@@ -77,6 +77,8 @@
     "oxlint": "^1.55.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "svg-sprite": "^2.0.4",
+    "svgo": "^4.0.1",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

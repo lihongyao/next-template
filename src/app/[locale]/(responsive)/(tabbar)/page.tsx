@@ -77,12 +77,59 @@ export default function HomePage() {
       </div>
 
       <div className="text-[#187843]">1231232</div>
-      <Icon
-        name="globe"
-        className="size-6"
-        color="white"
-        wrapperClass="size-12 bg-black rounded-full"
-      />
+      <div className="w-full max-w-[560px] rounded-xl border border-white/10 bg-black/30 p-4">
+        <div className="mb-3 text-sm text-white">Icon 混合渲染示例（sprites + svgr）</div>
+        <div className="flex flex-wrap gap-3">
+          <Icon
+            name="home"
+            className="size-6"
+            color="red"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
+          <Icon
+            name="cart"
+            className="size-6"
+            color="#ff7300"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
+          <Icon
+            name="order"
+            className="size-6"
+            color="#2DEE88"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
+          <Icon
+            name="profile"
+            className="size-6"
+            color="#FC0048"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
+          <Icon
+            name="globe"
+            className="size-6"
+            color="white"
+            wrapperClass="size-10 rounded-md bg-black"
+          />
+          <Icon
+            name="file"
+            className="size-6"
+            color="#FFC271"
+            wrapperClass="size-10 rounded-md bg-black"
+          />
+          <Icon
+            name="next"
+            className="size-6"
+            color="#31ED87"
+            wrapperClass="size-10 rounded-md bg-black"
+          />
+          <Icon
+            name="window"
+            className="size-6"
+            color="#8C928F"
+            wrapperClass="size-10 rounded-md bg-black"
+          />
+        </div>
+      </div>
 
       <img
         src={
