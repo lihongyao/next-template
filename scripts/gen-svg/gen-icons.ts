@@ -19,6 +19,7 @@ export async function generateSvgrComponents(): Promise<string[]> {
   const prettierConfig = (await prettier.resolveConfig(ROOT_DIR)) ?? {};
 
   await fs.mkdir(SVG_GENERATED_DIR, { recursive: true });
+  // 每次全量重建，避免残留已经删除的图标组件。
   await cleanGeneratedTsxFiles(SVG_GENERATED_DIR);
 
   for (const name of iconNames) {
@@ -27,6 +28,7 @@ export async function generateSvgrComponents(): Promise<string[]> {
     const componentName = componentNameFromOriginal(name);
     const tsxPath = path.join(SVG_GENERATED_DIR, `${safeBase}.tsx`);
     const rawSvg = await fs.readFile(filePath, 'utf8');
+    // 先统一颜色策略，再交给 svgr 做组件转换。
     const normalizedSvg = optimizeSvgContent(rawSvg, filePath);
 
     const tsxCode = await transform(
@@ -39,9 +41,16 @@ export async function generateSvgrComponents(): Promise<string[]> {
         plugins: [svgo, jsx],
         svgoConfig: {
           plugins: [
-            'preset-default',
-            { name: 'removeViewBox', active: false },
-            { name: 'removeDimensions', active: true },
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  // viewBox 必须保留，否则 Icon 在不同尺寸下会失真。
+                  removeViewBox: false,
+                },
+              },
+            },
+            'removeDimensions',
           ],
         },
         jsxRuntime: 'automatic',

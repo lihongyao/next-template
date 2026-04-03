@@ -11,6 +11,7 @@ const SVGO_CONFIG: Config = {
 };
 
 function shouldKeepPaintValue(rawValue: string): boolean {
+  // 这些值要保留：none/currentColor/变量/渐变引用，避免影响到多色图标或主题变量。
   const value = rawValue.trim().toLowerCase();
   if (!value) return true;
   if (value === 'none') return true;
@@ -30,6 +31,7 @@ function normalizeFillAndStroke(svg: string): string {
 }
 
 export function optimizeSvgContent(content: string, filePath: string): string {
+  // 先做颜色归一，再走 svgo 常规压缩。
   const normalized = normalizeFillAndStroke(content);
   const optimized = optimize(normalized, {
     path: filePath,

@@ -3,6 +3,7 @@ import { generateSvgTypesAndRegistry } from './gen-svg-types.js';
 import { generateSpriteSvg } from './generate-sprite.js';
 
 async function main() {
+  // 顺序不要改：先拿到 sprite 文件名，再写入 registry，Icon 才能引用到最新 hash 路径。
   console.log('⌛️ 开始生成 SVG 资源...');
 
   const spriteBuildResult = await generateSpriteSvg();

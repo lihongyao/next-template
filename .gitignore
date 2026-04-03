@@ -46,3 +46,6 @@ pnpm-lock.yaml
 src/configs/brands/index.ts
 # 脚本生成
 src/generated/
+src/assets/svg/generated/
+sprite-preview.html
+sprite.*.svg

@@ -15,6 +15,7 @@ function assertNoDuplicatedNames(spriteNames: string[], svgrNames: string[]) {
   const spriteSet = new Set(spriteNames);
   const duplicated = svgrNames.filter((name) => spriteSet.has(name)).sort();
   if (duplicated.length > 0) {
+    // 同名会导致 name 无法判断走 sprite 还是 svgr，直接中断更安全。
     throw new Error(
       `sprites 与 svgrs 存在同名图标，无法确定渲染来源：${duplicated.join(', ')}。请重命名后重试。`,
     );
@@ -84,6 +85,7 @@ ${allNames
 export const SVG_SPRITE_FILE = '${input.publicSpriteFile}';
 `;
 
+  // registry 由脚本统一产出，UI 层只读这个文件，不在业务代码里手写映射。
   await fs.writeFile(
     ICON_REGISTRY_OUTPUT_FILE,
     await prettier.format(registryOutput, { ...prettierConfig, parser: 'typescript' }),

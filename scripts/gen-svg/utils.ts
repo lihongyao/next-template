@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 export function safeFileBase(originalBase: string): string {
+  // 文件名要能直接当 ts 文件名和 import 变量的一部分用。
   const normalized = originalBase.replace(/\\/g, '/');
   let safeName = normalized.replace(/[^a-zA-Z0-9_]/g, '_');
   if (/^\d/.test(safeName)) safeName = `_${safeName}`;
@@ -9,6 +10,7 @@ export function safeFileBase(originalBase: string): string {
 }
 
 export function componentNameFromOriginal(originalBase: string): string {
+  // 组件名按 PascalCase 生成，保持和 SVGR 产物命名一致。
   const normalized = originalBase.replace(/\\/g, '/');
   const name = normalized.split('/').pop() ?? normalized;
   const parts = name
@@ -24,6 +26,7 @@ export function componentNameFromOriginal(originalBase: string): string {
 }
 
 export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
+  // 这里容错处理一下目录不存在的情况，首次初始化时不至于直接报错退出。
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
   return entries
     .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.svg'))
@@ -32,6 +35,7 @@ export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
 }
 
 export async function cleanGeneratedTsxFiles(dir: string): Promise<void> {
+  // 只清理脚本生成的 tsx，避免误删其它手写文件。
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
   await Promise.all(
     entries
