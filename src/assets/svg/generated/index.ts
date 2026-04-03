@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-04-02T20:01:09.327Z
+// 生成时间: 2026-04-03T19:19:20.824Z
 import type React from 'react';
 
 import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';

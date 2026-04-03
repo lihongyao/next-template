@@ -3,7 +3,7 @@ import { generateSvgTypesAndRegistry } from './gen-svg-types.js';
 import { generateSpriteSvg } from './generate-sprite.js';
 
 async function main() {
-  console.log('🚀 开始生成 SVG 资源...');
+  console.log('⌛️ 开始生成 SVG 资源...');
 
   const spriteBuildResult = await generateSpriteSvg();
   console.log(

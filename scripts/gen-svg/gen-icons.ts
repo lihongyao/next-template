@@ -45,14 +45,6 @@ export async function generateSvgrComponents(): Promise<string[]> {
           ],
         },
         jsxRuntime: 'automatic',
-        replaceAttrValues: {
-          '#000': 'currentColor',
-          '#000000': 'currentColor',
-          '#fff': 'currentColor',
-          '#ffffff': 'currentColor',
-          black: 'currentColor',
-          white: 'currentColor',
-        },
       },
       { componentName },
     );
