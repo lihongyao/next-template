@@ -5,7 +5,6 @@ import AppHeader from '@/components/ui/AppHeader';
 import { games } from '@/constants/data';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/i18n/navigation';
-import { ModalPageRoutes } from '@/router/routes';
 
 export default function GameList() {
   const router = useRouter();
@@ -23,8 +22,8 @@ export default function GameList() {
               game={item}
               key={index}
               onClick={() => {
-                const jumpUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
-                router.push(jumpUrl + '/' + index + 1);
+                // const jumpUrl = resolveRouteForCurrentDevice(ModalPageRoutes.gameDetails);
+                // router.push(jumpUrl + '/' + index + 1);
               }}
             />
           ))}

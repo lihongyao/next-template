@@ -19,7 +19,9 @@ export function getImgUrl(path: string, general = false, version?: string): stri
   const root = 'images/cdn-imgs';
 
   // ===== 查 Sparse Manifest =====
-  const skinData = imageManifest[themeSkin] as unknown as Record<string, string[]> | undefined;
+  const skinData = imageManifest[themeSkin as keyof typeof imageManifest] as unknown as
+    | Record<string, string[]>
+    | undefined;
   const brandFiles = skinData?.[brand] || [];
 
   let resolvedPath: string;

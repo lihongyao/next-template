@@ -13,6 +13,7 @@ import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRest
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
+import { CURRENT_VERSION } from '@/constants';
 import '@/generated/brand.css';
 import { lcpB64 } from '@/generated/lcp-b64';
 import { routing } from '@/i18n/routing';
@@ -41,7 +42,7 @@ export default async function LocaleLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
 
@@ -68,7 +69,8 @@ export default async function LocaleLayout({
       className="no-scrollbar"
       data-theme={brandConfig.theme}
       data-skin={brandConfig.skin}
-      data-version={process.env.NEXT_PUBLIC_APP_VERSION}
+      // data-version={process.env.NEXT_PUBLIC_APP_VERSION}
+      data-version={CURRENT_VERSION}
     >
       <head>
         {/* Theme color - 谷歌浏览器工具栏主题色（safari取页面颜色，一般是body） */}
@@ -81,6 +83,7 @@ export default async function LocaleLayout({
         {/* PWA - 添加 manifest.json */}
         <link rel="manifest" href="/manifest.json" />
       </head>
+
       <body style={{ background: '#252526' }}>
         {/* lcp element */}
         <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />

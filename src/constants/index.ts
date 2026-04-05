@@ -20,3 +20,6 @@ export const ZIndex = {
   Message: 2200, // 消息
   Toast: 2300, // 提示
 } as const;
+
+// 当前版本号
+export const CURRENT_VERSION = process.env.NEXT_PUBLIC_APP_VERSION!; // 从 next.config.ts 中获取

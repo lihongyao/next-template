@@ -3,12 +3,14 @@
 import { useMount } from 'ahooks';
 
 import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
+import { useVersionCheck } from '@/hooks/useVersionCheck';
 import { initNavigation } from '@/libs/navigation-direction';
 
 // import { installViewTransitionPatch } from '@/libs/animate';
 
 export default function ClientInitializer() {
   useModalPageAutoCollapse();
+  useVersionCheck();
 
   useMount(() => {
     console.log('__ClientInitializer__');
