@@ -10,7 +10,7 @@ export function useVersionCheck() {
   const router = useRouter();
   useEffect(() => {
     let timer: number | null = null;
-    let interval = 5_000; // 初始 1 分钟
+    let interval = 60_000; // 初始 1 分钟
 
     async function checkVersion() {
       // 页面可见才检测，避免内存泄露
