@@ -14,29 +14,35 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 }));
 
 function getAppVersion() {
-  const app = process.env.app ?? 'x';
+  const app = process.env.app;
+  if (!app) {
+    throw new Error('app is not set');
+  }
   try {
-    // 只取当前 commit 上的 tag
+    // 获取当前 commit 上的 tags
     const tags = execSync('git tag --points-at HEAD', { encoding: 'utf8' })
       .split('\n')
       .map((t) => t.trim())
       .filter(Boolean);
-    // 只匹配当前应用
+    // 获取当前应用的版本号，格式为：release/${app}_${timestamp}，如 release/afun_20260405_1500
     const match = tags.find((tag) => tag.startsWith(`release/${app}_`));
     if (!match) {
       throw new Error(`No tag found for ${app}`);
     }
+    // 获取当前 commit 的 hash
     const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    // 返回版本号，格式为：release/${app}_${timestamp}_${hash}，如 release/afun_20260405_1500_12345678
     return `${match}_${hash}`;
   } catch {
-    // 没 git 时 fallback
-    return Date.now().toString();
+    // 无 git 时 fallback，格式为：${timestamp}，如 v_afun_20260405_1500
+    return `v_${app}_${Date.now().toString()}`;
   }
 }
 
 const appVersion = getAppVersion();
 
 const nextConfig: NextConfig = {
+  // 生成 build id
   generateBuildId() {
     return appVersion;
   },
@@ -47,6 +53,7 @@ const nextConfig: NextConfig = {
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
+  // 环境变量
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
   },

@@ -69,7 +69,6 @@ export default async function LocaleLayout({
       className="no-scrollbar"
       data-theme={brandConfig.theme}
       data-skin={brandConfig.skin}
-      // data-version={process.env.NEXT_PUBLIC_APP_VERSION}
       data-version={CURRENT_VERSION}
     >
       <head>

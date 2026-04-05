@@ -23,7 +23,6 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
     setupBrandConfig();
     setupBrandCssImports(brandConfig);
     setupLcpElement();
-    setupEnv();
     setupImageManifest();
   } catch (e) {
     console.error(e);
@@ -105,24 +104,6 @@ function setupLcpElement() {
   const fileContent = `export const lcpB64 = "data:image/png;base64,${base64}";\n`;
   fs.writeFileSync(logoOutputPath, fileContent);
   console.log('✅ LCP 元素已解析 >>> src/generated/lcp-b64.ts');
-}
-
-/**
- * 设置 APP 版本
- */
-function setupEnv() {
-  const envOutputFile = path.resolve(ROOT, '.env');
-
-  const timestamp = new Date().getTime();
-  const timestampStr = new Date(timestamp).toISOString().slice(0, 19).replace('T', '_');
-  const version = `v_${app}_${timestampStr}`;
-  const envContent = `# === 自动生成，请勿手动修改 ===
-NEXT_PUBLIC_APP_VERSION=${version}
-`;
-
-  fs.writeFileSync(envOutputFile, envContent, 'utf8');
-
-  console.log('✅ 环境变量已写入 >>> .env');
 }
 
 /**
