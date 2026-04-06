@@ -81,6 +81,12 @@ export default function HomePage() {
         <div className="mb-3 text-sm text-white">Icon 混合渲染示例（sprites + svgr）</div>
         <div className="flex flex-wrap gap-3">
           <Icon
+            name="arrow_long_left"
+            className="size-6"
+            color="orange"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
+          <Icon
             name="home"
             className="size-6"
             color="red"
