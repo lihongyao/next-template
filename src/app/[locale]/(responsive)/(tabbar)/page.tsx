@@ -1,11 +1,11 @@
 // src/app/[locale]/(home)/page.tsx
 'use client';
-
 import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
+import LiquidGlass from '@/components/ui/LiquidGlass';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
 import { useDevice } from '@/providers/device.provider';
@@ -153,6 +153,10 @@ export default function HomePage() {
       /> */}
 
       <div className="h-[1000px] w-full bg-blue-500" />
+
+      <LiquidGlass>
+        <span className="font-medium text-white">Click Me</span>
+      </LiquidGlass>
     </div>
   );
 }
