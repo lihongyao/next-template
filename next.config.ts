@@ -13,6 +13,33 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
   destination: `/${defaultLocale}`,
 }));
 
+const appVersion = getAppVersion();
+
+const nextConfig: NextConfig = {
+  // 生成 build id
+  generateBuildId: () => appVersion,
+  /* config options here */
+  reactCompiler: true,
+  reactStrictMode: false,
+  // 在路由匹配前把 /modal-xxx 等重写到 /{defaultLocale}，避免被 [locale] 误匹配成 locale
+  rewrites: async () => ({
+    beforeFiles: modalRewrites,
+  }),
+  // 环境变量
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+  },
+  experimental: {
+    // https://github.com/RevoTale/next-scroll-restorer
+    scrollRestoration: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+};
+const withNextIntl = createNextIntlPlugin();
+export default withNextIntl(nextConfig);
+
 function getAppVersion() {
   const app = process.env.app;
   if (!app) {
@@ -35,35 +62,14 @@ function getAppVersion() {
     return `${match}_${hash}`;
   } catch {
     // 无 git 时 fallback，格式为：${timestamp}，如 v_afun_20260405_1500
-    return `v_${app}_${Date.now().toString()}`;
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+    return `v_${app}_${timestamp}`;
   }
 }
-
-const appVersion = getAppVersion();
-
-const nextConfig: NextConfig = {
-  // 生成 build id
-  generateBuildId() {
-    return appVersion;
-  },
-  /* config options here */
-  reactCompiler: true,
-  reactStrictMode: false,
-  // 在路由匹配前把 /modal-xxx 等重写到 /{defaultLocale}，避免被 [locale] 误匹配成 locale
-  rewrites: async () => ({
-    beforeFiles: modalRewrites,
-  }),
-  // 环境变量
-  env: {
-    NEXT_PUBLIC_APP_VERSION: appVersion,
-  },
-  experimental: {
-    // https://github.com/RevoTale/next-scroll-restorer
-    scrollRestoration: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-};
-const withNextIntl = createNextIntlPlugin();
-export default withNextIntl(nextConfig);
