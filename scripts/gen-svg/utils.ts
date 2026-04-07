@@ -26,7 +26,6 @@ export function componentNameFromOriginal(originalBase: string): string {
 }
 
 export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
-  // 这里容错处理一下目录不存在的情况，首次初始化时不至于直接报错退出。
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
   return entries
     .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.svg'))
