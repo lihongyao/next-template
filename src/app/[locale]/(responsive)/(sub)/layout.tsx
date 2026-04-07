@@ -1,15 +1,18 @@
 // src/app/[locale]/(responsive)/(sub)/layout.tsx
 'use client';
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 
 import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { usePathname } from '@/i18n/navigation';
-import { consumeDirection } from '@/libs/navigation-direction';
+import {
+  consumeDirection,
+  consumeSkipNextTransition,
+  shouldSkipNextTransition,
+} from '@/libs/navigation-direction';
 import { useDevice } from '@/providers/device.provider';
 import { ModalRoutes } from '@/router/routes';
 
@@ -30,16 +33,25 @@ function FrozenRouter(props: { children: React.ReactNode }) {
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   const { isMobile } = useDevice();
   const pathname = usePathname();
-  const [swipeAllow, setSwipeAllow] = useState(true);
   const prevPathnameRef = useRef(pathname);
+  const pathRef = useRef(pathname);
+  const skipForCurrentPathRef = useRef(false);
 
-  useSwipeBack((value) => setSwipeAllow(!value), { enabled: true });
+  if (pathRef.current !== pathname) {
+    pathRef.current = pathname;
+    const shouldSkip = shouldSkipNextTransition();
+    skipForCurrentPathRef.current = shouldSkip;
+    if (shouldSkip) {
+      consumeSkipNextTransition();
+    }
+  }
 
   // modal 跳过动画，其余左右滑动
   const currentIsModal = isModalRoute(pathname);
   const prevWasModal = isModalRoute(prevPathnameRef.current);
-  const skipAnimation = currentIsModal || (prevWasModal && !currentIsModal);
-  const isAllow = !skipAnimation && swipeAllow;
+  const skipForUaTransition = skipForCurrentPathRef.current;
+  const skipAnimation = currentIsModal || (prevWasModal && !currentIsModal) || skipForUaTransition;
+  const isAllow = !skipAnimation;
 
   useEffect(() => {
     prevPathnameRef.current = pathname;
@@ -49,6 +61,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   const dir = consumeDirection();
 
   if (!isMobile) return children;
+  if (skipForUaTransition) return children;
 
   const transition = { type: 'tween' as const, duration: 0.25, ease: 'linear' as const };
   const variants = {

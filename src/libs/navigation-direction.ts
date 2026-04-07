@@ -21,6 +21,7 @@ let hasNavigationApi = false;
 let enableUrlStackFallback = false;
 let urlStack: string[] = [];
 let urlIndex = 0;
+let skipNextTransition = false;
 
 // Safari 在部分场景下索引信号不稳定，保留兜底分支
 function isSafariLikeBrowser(): boolean {
@@ -79,6 +80,15 @@ function tryResolveDirectionByUrlStack(nextUrl: string): boolean {
   return true;
 }
 
+function markSkipNextTransitionIfUaVisualTransition(event: unknown) {
+  const navigationType = (event as { navigationType?: unknown })?.navigationType;
+  if (navigationType !== undefined && navigationType !== 'traverse') return;
+  const uaTransition = (event as { hasUAVisualTransition?: unknown })?.hasUAVisualTransition;
+  if (uaTransition === true) {
+    skipNextTransition = true;
+  }
+}
+
 export function initNavigation() {
   if (initialized) return;
   initialized = true;
@@ -117,6 +127,7 @@ export function initNavigation() {
 
   // 浏览器按钮：先走 history idx，拿不到再走 url 栈兜底
   window.addEventListener('popstate', (event) => {
+    markSkipNextTransitionIfUaVisualTransition(event);
     const nextIdx = readHistoryIdx(event.state) ?? readHistoryIdx(window.history.state);
     if (nextIdx !== null) {
       setDirectionByNumericIndex(nextIdx, currentHistoryIdx);
@@ -138,6 +149,7 @@ export function initNavigation() {
  */
 export function markForward(_url?: string) {
   pendingDirection = 'forward';
+  skipNextTransition = false;
   if (_url) {
     const nextUrl = normalizeUrl(_url);
     // push 语义：截断“前进分支”后再入栈
@@ -152,11 +164,13 @@ export function markForward(_url?: string) {
 
 export function markBack() {
   pendingDirection = 'back';
+  skipNextTransition = false;
   queueMicrotask(syncKnownIndices);
 }
 
 export function markReplace(url: string) {
   pendingDirection = 'forward';
+  skipNextTransition = false;
   const nextUrl = normalizeUrl(url);
   // replace 不扩栈，只替换当前指针位置
   urlStack[urlIndex] = nextUrl;
@@ -168,4 +182,12 @@ export function markReplace(url: string) {
  */
 export function consumeDirection(): Direction {
   return pendingDirection;
+}
+
+export function shouldSkipNextTransition(): boolean {
+  return skipNextTransition;
+}
+
+export function consumeSkipNextTransition(): void {
+  skipNextTransition = false;
 }
