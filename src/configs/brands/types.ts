@@ -32,8 +32,6 @@ export type BrandConfig = {
   locales: Locale[];
   /** 默认语言 */
   defaultLocale: string;
-  /** 是否启用覆盖 */
-  overrides?: boolean;
   /** 扩展字段 */
   [key: string]: unknown;
 };
