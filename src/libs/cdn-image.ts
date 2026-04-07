@@ -8,8 +8,6 @@
  */
 
 // ==============================
-// 常量
-// ==============================
 
 const CDN_ORIGIN = 'https://img.engames.com';
 const CDN_PREFIX = '/cdn-cgi/image';
@@ -17,16 +15,12 @@ const CDN_PREFIX = '/cdn-cgi/image';
 /**
  * 你的资源站路径前缀
  * 例如：
- * https://img.engames.com/s_static_x/{seriesName}/xxx.png
+ * https://img.engames.com/assets/{seriesName}/xxx.png
  */
-const STATIC_PREFIX = '/s_static_x';
+const STATIC_PREFIX = '/assets';
 
 // ⚠️ 这里替换为你的真实变量来源
 const seriesName = 'default';
-
-// ==============================
-// 类型
-// ==============================
 
 interface ImageTransformOptions {
   q?: number;
@@ -36,14 +30,13 @@ interface ImageTransformOptions {
 }
 
 interface GetImageOptions {
-  /** SSR 时传入 UA */
+  /** 服务端渲染时传入 ua，用于判断设备类型 */
   userAgent?: string | null;
+  /** 版本，示例 20260101_0000 */
+  version?: string;
+  /** 图片处理选项，参数优化时会用到，理论上，只需要给宽度即可，高度会自适应 */
   imageOptions?: ImageTransformOptions;
 }
-
-// ==============================
-// DPR 计算（带缓存）
-// ==============================
 
 let cachedDpr: number | null = null;
 
@@ -63,10 +56,6 @@ function getDeviceDpr(userAgent?: string | null): number {
   return cachedDpr;
 }
 
-// ==============================
-// Cloudflare 参数构建
-// ==============================
-
 function buildTransformParams(dpr: number, options: ImageTransformOptions = {}) {
   const { q = 80, w = 'auto', h = 'auto', fit } = options;
 
@@ -85,10 +74,6 @@ function buildTransformParams(dpr: number, options: ImageTransformOptions = {}) 
     .join(',');
 }
 
-// ==============================
-// 主函数
-// ==============================
-
 /**
  * 获取 CDN 图片 URL（SSR / CSR 通用）
  *
@@ -102,23 +87,21 @@ export function getCdnImageUrl(path: string, options?: GetImageOptions): string 
 
   const { userAgent = null, imageOptions } = options || {};
 
-  // ===== DPR =====
+  // 1. DPR
   const dpr = getDeviceDpr(userAgent);
 
-  // ===== transform 参数 =====
+  // 2. transform 参数
   const params = buildTransformParams(dpr, imageOptions);
 
-  // ===== 源路径 =====
+  // 3. 源路径
   let sourcePath: string;
 
   if (path.startsWith('http')) {
-    // 外部完整地址
     sourcePath = new URL(path).pathname;
   } else {
-    // 你的现有资源格式
     sourcePath = `${STATIC_PREFIX}/${seriesName}/${path}`;
   }
 
-  // ===== 最终 URL =====
+  // 4. 最终 URL
   return `${CDN_ORIGIN}${CDN_PREFIX}/${params}${sourcePath}`;
 }
