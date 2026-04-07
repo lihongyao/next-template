@@ -7,7 +7,6 @@ export default {
   skin: 'green',
   appId: 'afun',
   layout: 'side-nav',
-  overrides: true,
   locales: [
     { code: 'zh-CN', label: '🇨🇳 简体中文', value: 1 },
     { code: 'en-US', label: '🇺🇸 English', value: 2 },

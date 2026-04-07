@@ -7,7 +7,6 @@ export default {
   appId: 'bfun',
   layout: 'top-nav',
   skin: 'green',
-  overrides: false,
   locales: [
     { code: 'zh-CN', label: '🇨🇳 简体中文', value: 1 },
     { code: 'en-US', label: '🇺🇸 English', value: 2 },
