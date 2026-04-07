@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { CURRENT_VERSION } from '@/constants';
 
-export function useVersionCheck() {
+export function useCheckAppVersion() {
   const router = useRouter();
   useEffect(() => {
     let timer: number | null = null;

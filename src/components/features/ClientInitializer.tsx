@@ -2,8 +2,8 @@
 
 import { useMount } from 'ahooks';
 
+import { useCheckAppVersion } from '@/hooks/useCheckAppVersion';
 import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
-import { useVersionCheck } from '@/hooks/useVersionCheck';
 import { initNavigation } from '@/libs/navigation-direction';
 
 // import { installViewTransitionPatch } from '@/libs/animate';
@@ -12,7 +12,7 @@ export default function ClientInitializer() {
   // PC/H5 路由弹窗 & 页面响应式自动切换
   useModalPageAutoCollapse();
   // 版本升级监听
-  useVersionCheck();
+  useCheckAppVersion();
 
   useMount(() => {
     console.log('__ClientInitializer__');
