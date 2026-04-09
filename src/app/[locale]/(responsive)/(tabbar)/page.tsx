@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
+import DragView from '@/components/ui/DragView';
 import Icon from '@/components/ui/Icon';
 import LiquidGlass from '@/components/ui/LiquidGlass';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
@@ -154,9 +155,13 @@ export default function HomePage() {
 
       <div className="h-[1000px] w-full bg-blue-500" />
 
-      <LiquidGlass>
-        <span className="font-medium text-white">Click Me</span>
-      </LiquidGlass>
+      <DragView>
+        <LiquidGlass>
+          <div className="h-[100px] w-[200px] rounded-full">
+            <span className="font-medium text-white">Click Me</span>
+          </div>
+        </LiquidGlass>
+      </DragView>
     </div>
   );
 }
