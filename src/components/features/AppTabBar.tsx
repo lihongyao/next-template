@@ -24,14 +24,16 @@ export default memo(function AppTabBar() {
   ];
   const pathname = usePathname();
   return (
+    // bottom-0 才会被 iOS safari 底部工具栏吸取颜色
     <div
       data-name="app-tab-bar"
-      className="fixed bottom-3 left-0 w-full px-3"
+      className="fixed bottom-0 left-0 w-full"
       style={{
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        // paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom))',
       }}
     >
-      <div className="flex h-[65px] w-full items-center justify-around rounded-full bg-[#161616]">
+      <div className="relative z-20 flex h-[65px] w-full items-center justify-around overflow-hidden rounded-t-3xl bg-[#161616]">
         {tabBarConfig.map((item) => (
           <Link className="flex flex-col gap-1" href={item.path} key={item.path} scroll={false}>
             <Icon
