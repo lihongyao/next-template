@@ -67,8 +67,11 @@ export default function RouteModalRenderer() {
     const nextQuery = params.toString();
     const newPathSegments = [...pathSegments];
     newPathSegments.pop();
-    const nextPath = `/${newPathSegments.join('/')}` || `/${routing.defaultLocale}`;
-    router.replace(nextQuery ? `${nextPath}?${nextQuery}` : nextPath, { scroll: false });
+    const nextPath = newPathSegments.length
+      ? `/${newPathSegments.join('/')}`
+      : `/${routing.defaultLocale}`;
+    const url = nextQuery ? `${nextPath}?${nextQuery}` : nextPath;
+    router.replace(url, { scroll: false });
   }, [modalComponents.length, router, pathSegments, searchParamsString]);
 
   useEffect(() => {

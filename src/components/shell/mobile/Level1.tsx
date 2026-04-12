@@ -8,7 +8,7 @@ import Header from '../components/Header';
 export default function Level1({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="pb-[100px] text-white">
+    <div className="text-white">
       <Header />
       <KeepAlive cacheKey={pathname}>{children}</KeepAlive>
       <AppTabBar />

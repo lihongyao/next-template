@@ -1,3 +1,7 @@
+'use client';
+
+export const __placeholder = true;
+
 // 'use client';
 
 // import { useLayoutEffect } from 'react';
