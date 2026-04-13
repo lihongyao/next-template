@@ -38,7 +38,7 @@ export default function HomePage() {
         <Button
           onClick={() => {
             const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes['game-list']);
-            router.push(jumpToUrl);
+            router.push(jumpToUrl, { scroll: false });
           }}
         >
           游戏列表
@@ -46,7 +46,9 @@ export default function HomePage() {
         <Button
           onClick={() => {
             if (isMobile) {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper));
+              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper), {
+                scroll: false,
+              });
             }
           }}
         >
