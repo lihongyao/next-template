@@ -1,52 +1,118 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-import { games } from '@/constants/data';
 import { cn } from '@/libs/class-helpers';
 
-import Button from '../Button';
-import LazyImg from '../LazyImage';
+export interface CustomSwiperState {
+  currentPage: number;
+  totalPages: number;
+  enablePrev: boolean;
+  enableNext: boolean;
+}
 
-interface CustomSwiperProps {
-  /** 列数 */
+export interface CustomSwiperRef {
+  prev: () => void;
+  next: () => void;
+  goTo: (page: number) => void;
+  getState: () => CustomSwiperState;
+}
+
+interface CustomSwiperProps<T> {
+  items: T[];
+  renderItem: (
+    item: T,
+    index: number,
+    meta: { isVisible: boolean; page: number },
+  ) => React.ReactNode;
+  getItemKey?: (item: T, index: number) => React.Key;
   columns?: number;
-  /** 行数 */
   lines?: number;
   /** 列间距（建议列间距小于容器 padding，比如容器组有间距是12px，列间距建议为6或者8） */
   gap?: number;
-  /** 是否溢出容器显示 */
-  isOver?: boolean;
+  /** 溢出模式 */
+  overflowMode?: 'normal' | 'peek';
+  /** peek 模式下用于抵消外层横向 padding 的值（单位 px） */
+  peekPaddingX?: number;
+  className?: string;
+  itemClassName?: string;
+  lazy?: boolean;
+  lazyRootMargin?: string;
+  onStateChange?: (state: CustomSwiperState) => void;
 }
 
-export default function CustomSwiper({
-  columns = 3,
-  gap = 6,
-  lines = 1,
-  isOver,
-}: CustomSwiperProps) {
+function clamp(num: number, min: number, max: number) {
+  if (num < min) return min;
+  if (num > max) return max;
+  return num;
+}
+
+function CustomSwiperInner<T>(
+  {
+    items,
+    renderItem,
+    getItemKey,
+    columns = 3,
+    lines = 1,
+    gap = 6,
+    overflowMode = 'normal',
+    className,
+    itemClassName,
+    lazy = true,
+    lazyRootMargin = '0px 20%',
+    peekPaddingX = 12,
+    onStateChange,
+  }: CustomSwiperProps<T>,
+  ref: React.ForwardedRef<CustomSwiperRef>,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const elementToIndex = useRef(new Map<HTMLDivElement, number>());
   const isTouchScroll = useRef(false);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const itemsPerPage = columns * lines;
+  const totalPages = Math.ceil(items.length / itemsPerPage);
 
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = columns * lines;
-  const totalPages = Math.ceil(games.length / itemsPerPage);
-
-  /** 进入过视口的 item 下标，只增不减，用于懒加载内容 */
   const [visibleIndices, setVisibleIndices] = useState<Set<number>>(() => {
     const set = new Set<number>();
-    for (let i = 0; i < Math.min(itemsPerPage, games.length); i++) set.add(i);
+    for (let i = 0; i < Math.min(itemsPerPage, items.length); i++) set.add(i);
     return set;
   });
 
-  const [enablePrev, setEnablePrev] = useState(currentPage > 0);
-  const [enableNext, setEnableNext] = useState(currentPage < totalPages - 1);
+  const enablePrev = currentPage > 0;
+  const enableNext = currentPage < totalPages - 1;
+  const usePeekMode = overflowMode === 'peek';
+
+  const swiperState = useMemo<CustomSwiperState>(
+    () => ({ currentPage, totalPages, enablePrev, enableNext }),
+    [currentPage, totalPages, enablePrev, enableNext],
+  );
 
   useEffect(() => {
+    onStateChange?.(swiperState);
+  }, [onStateChange, swiperState]);
+
+  useEffect(() => {
+    setCurrentPage((prev) => {
+      if (totalPages === 0) return 0;
+      return clamp(prev, 0, totalPages - 1);
+    });
+  }, [totalPages]);
+
+  useEffect(() => {
+    if (!lazy) return;
     const container = containerRef.current;
-    if (!container || games.length === 0) return;
+    if (!container || items.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -62,136 +128,153 @@ export default function CustomSwiper({
       },
       {
         root: container,
-        rootMargin: '100% 0px',
+        rootMargin: lazyRootMargin,
         threshold: 0,
       },
     );
 
     const refs = itemRefs.current;
-    for (let i = 0; i < games.length; i++) {
+    for (let i = 0; i < items.length; i++) {
       const el = refs[i];
       if (el) observer.observe(el);
     }
-    return () => observer.disconnect();
-  }, [games.length]);
 
-  const syncCurrentPage = () => {
-    // 只在触摸滚动时同步
+    return () => observer.disconnect();
+  }, [items.length, lazy, lazyRootMargin]);
+
+  const syncCurrentPage = useCallback(() => {
     if (!isTouchScroll.current) return;
     isTouchScroll.current = false;
-    // 边界判断
+
     const container = containerRef.current;
     if (!container || totalPages === 0) return;
-    // 计算当前页
+
     const paddingLeft = parseInt(getComputedStyle(container).paddingLeft);
     const paddingRight = parseInt(getComputedStyle(container).paddingRight);
     const containerRect = container.getBoundingClientRect();
     const containerPadding = paddingLeft + paddingRight;
-    const containerWidth = isOver ? containerRect.width - containerPadding : containerRect.width;
+    const containerWidth = usePeekMode
+      ? containerRect.width - containerPadding
+      : containerRect.width;
     const scrollLeft = container.scrollLeft;
-    const maxScrollLeft = container.scrollWidth - containerWidth - containerPadding;
-    const currentPage =
-      scrollLeft >= maxScrollLeft ? totalPages - 1 : Math.floor(scrollLeft / containerWidth);
+    const maxScrollLeft = Math.max(0, container.scrollWidth - containerWidth - containerPadding);
+    const nextPage =
+      scrollLeft >= maxScrollLeft
+        ? totalPages - 1
+        : clamp(Math.floor(scrollLeft / containerWidth), 0, totalPages - 1);
 
-    setCurrentPage(currentPage);
-    setEnablePrev(scrollLeft > 0);
-    setEnableNext(scrollLeft < maxScrollLeft);
-  };
+    setCurrentPage(nextPage);
+  }, [totalPages, usePeekMode]);
 
-  const scrollToPage = (page: number) => {
-    const index = page * itemsPerPage;
-    const el = itemRefs.current[index];
+  const scrollToPage = useCallback(
+    (page: number) => {
+      if (totalPages === 0) return;
+      const safePage = clamp(page, 0, totalPages - 1);
+      const start = safePage * itemsPerPage;
+      const end = Math.min(start + itemsPerPage, items.length);
 
-    if (!el) return;
+      // 点击翻页时提前标记目标页，避免切换后短暂白块。
+      setVisibleIndices((prev) => {
+        const next = new Set(prev);
+        for (let i = start; i < end; i++) next.add(i);
+        return next;
+      });
 
-    el.scrollIntoView({
-      behavior: 'smooth',
-      inline: 'start',
-      block: 'nearest',
-    });
+      const el = itemRefs.current[start];
+      if (el) {
+        el.scrollIntoView({
+          behavior: 'smooth',
+          inline: 'start',
+          block: 'nearest',
+        });
+      }
+      setCurrentPage(safePage);
+    },
+    [items.length, itemsPerPage, totalPages],
+  );
 
-    setCurrentPage(page);
-    setEnablePrev(page > 0);
-    setEnableNext(page < totalPages - 1);
-  };
-
-  const handleNext = () => {
-    if (!enableNext) return;
-    const next = Math.min(currentPage + 1, totalPages - 1);
-    scrollToPage(next);
-  };
-
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (!enablePrev) return;
-    const prev = Math.max(currentPage - 1, 0);
-    scrollToPage(prev);
+    scrollToPage(Math.max(currentPage - 1, 0));
+  }, [currentPage, enablePrev, scrollToPage]);
+
+  const handleNext = useCallback(() => {
+    if (!enableNext) return;
+    scrollToPage(Math.min(currentPage + 1, totalPages - 1));
+  }, [currentPage, enableNext, scrollToPage, totalPages]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      prev: handlePrev,
+      next: handleNext,
+      goTo: scrollToPage,
+      getState: () => swiperState,
+    }),
+    [handleNext, handlePrev, scrollToPage, swiperState],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    };
+  }, []);
+
+  const handleScroll = () => {
+    isTouchScroll.current = true;
+    if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(syncCurrentPage, 80);
   };
 
   return (
-    <div data-name="custom-swiper">
-      <header className="mb-3 flex items-center justify-between">
-        <h1 className="text-white">
-          游戏列表 - {currentPage + 1}/{totalPages}
-        </h1>
-
-        <div className="flex items-center gap-2">
-          <Button
-            className={cn(!enablePrev && 'cursor-not-allowed opacity-35')}
-            onClick={handlePrev}
-            disabled={!enablePrev}
-          >
-            上一页
-          </Button>
-
-          <Button
-            className={cn(!enableNext && 'cursor-not-allowed opacity-35')}
-            onClick={handleNext}
-            disabled={!enableNext}
-          >
-            下一页
-          </Button>
-        </div>
-      </header>
-
+    <div data-name="custom-swiper" className={className}>
       {/* no-scrollbar -mx-3 grid snap-x snap-mandatory scroll-pl-3 grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth px-3 */}
       <div
         ref={containerRef}
         className={cn(
-          `no-scrollbar grid snap-x snap-mandatory grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth`,
+          'no-scrollbar grid snap-x snap-mandatory grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth',
           // ⚠️ 具体情况需要根据外出容器的 padding 决定
           // 比如页面间距是 px-3，那么这里就是 “-mx-3 scroll-pl-3 px-3”
           // 比如页面间距是 px-6，那么这里就是 “-mx-6 scroll-pl-6 px-6”
-          isOver ? '-mx-3 scroll-pl-3 px-3' : '',
+          // 通过 peekPaddingX 动态抵消外层横向 padding。
+          usePeekMode ? '-mx-3 scroll-pl-3 px-3' : '',
         )}
         style={{
           gap,
           gridAutoColumns: `calc((100% - ${gap * (columns - 1)}px) / ${columns})`,
           gridTemplateRows: `repeat(${lines}, auto)`,
+          // ...(usePeekMode
+          //   ? {
+          //       marginLeft: -peekPaddingX,
+          //       marginRight: -peekPaddingX,
+          //       paddingLeft: peekPaddingX,
+          //       paddingRight: peekPaddingX,
+          //       scrollPaddingLeft: peekPaddingX,
+          //       // scrollPaddingRight: peekPaddingX,
+          //     }
+          //   : undefined),
         }}
         onTouchStart={() => (isTouchScroll.current = true)}
         onWheel={() => (isTouchScroll.current = true)}
+        onScroll={handleScroll}
         onScrollEnd={syncCurrentPage}
       >
-        {games.map((item, index) => {
-          const isVisible = visibleIndices.has(index);
+        {items.map((item, index) => {
+          const isVisible = !lazy || visibleIndices.has(index);
           return (
             <div
-              key={index}
+              key={getItemKey ? getItemKey(item, index) : index}
               ref={(el) => {
                 if (el) {
                   itemRefs.current[index] = el;
                   elementToIndex.current.set(el, index);
+                } else {
+                  itemRefs.current[index] = null;
                 }
               }}
-              className="aspect-[200/267] shrink-0 snap-start overflow-hidden rounded-md bg-gray-800"
+              className={cn('shrink-0 snap-start', itemClassName)}
             >
-              {isVisible && (
-                <LazyImg
-                  className="h-full w-full object-cover"
-                  src={item.src}
-                  blurSrc={item.blurSrc}
-                />
-              )}
+              {renderItem(item, index, { isVisible, page: Math.floor(index / itemsPerPage) })}
             </div>
           );
         })}
@@ -199,3 +282,9 @@ export default function CustomSwiper({
     </div>
   );
 }
+
+const CustomSwiper = forwardRef(CustomSwiperInner) as <T>(
+  props: CustomSwiperProps<T> & { ref?: React.Ref<CustomSwiperRef> },
+) => React.ReactElement;
+
+export default CustomSwiper;

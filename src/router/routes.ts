@@ -82,12 +82,12 @@ export const ModalPageRoutes = {
     h5: Routes.ModalGameListSwiper,
   },
   /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
-  // gameDetails: {
-  //   pc: Routes.GameDetails,
-  //   h5: Routes.ModalGameDetails,
-  //   onlySwitchWhenParamPresent: true,
-  //   parentKey: 'gameList',
-  // },
+  gameDetails: {
+    pc: Routes.GameDetails,
+    h5: Routes.ModalGameDetails,
+    onlySwitchWhenParamPresent: true,
+    parentKey: 'gameList',
+  },
 } as const satisfies Record<
   string,
   {
