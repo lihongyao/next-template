@@ -20,7 +20,7 @@ export default function Header() {
     >
       <Link href={Routes.Home}>
         <Image
-          src={'/logo/logo.png'}
+          src={'/res/afun/logo.png'}
           height={30}
           width={60}
           alt="logo"

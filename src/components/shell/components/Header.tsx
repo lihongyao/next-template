@@ -21,7 +21,7 @@ export default function Header() {
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
         <Link href={Routes.Home}>
           <Image
-            src={'/logo/logo.png'}
+            src={'/res/afun/logo.png'}
             height={30}
             width={30}
             alt="logo"
