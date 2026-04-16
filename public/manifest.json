@@ -4,7 +4,7 @@
   "description": "Next.js Template",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/logo/favicon.ico",
       "sizes": "16x16",
       "type": "image/x-icon"
     }

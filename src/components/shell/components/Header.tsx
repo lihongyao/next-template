@@ -1,7 +1,10 @@
 'use client';
+import Image from 'next/image';
+
 import Button from '@/components/ui/Button';
 import { ZIndex } from '@/constants';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
+import { Link } from '@/i18n/navigation';
 import { useBrandConfig } from '@/providers/brand.provider';
 import { useRouter } from '@/router';
 import { ModalPageRoutes, Routes } from '@/router/routes';
@@ -16,7 +19,15 @@ export default function Header() {
       style={{ zIndex: ZIndex.Header }}
     >
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
-        <h1 onClick={() => router.push(Routes.Home)}>{appName}</h1>
+        <Link href={Routes.Home}>
+          <Image
+            src={'/logo/logo.png'}
+            height={30}
+            width={30}
+            alt="logo"
+            className="h-[30px] w-auto"
+          />
+        </Link>
         <div className="flex items-center gap-3">
           <Button
             className="isTabletOrDesktop"

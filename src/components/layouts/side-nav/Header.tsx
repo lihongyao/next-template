@@ -1,7 +1,10 @@
 'use client';
+import Image from 'next/image';
+
 import Button from '@/components/ui/Button';
 import { ZIndex } from '@/constants';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
+import { Link } from '@/i18n/navigation';
 import { useBrandConfig } from '@/providers/brand.provider';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
@@ -15,7 +18,15 @@ export default function Header() {
       className="sticky top-0 left-0 flex h-[56px] w-full items-center justify-between bg-[#161616] px-3 text-white"
       style={{ zIndex: ZIndex.Header }}
     >
-      <h1 onClick={() => router.push(Routes.Home)}>{appName}</h1>
+      <Link href={Routes.Home}>
+        <Image
+          src={'/logo/logo.png'}
+          height={30}
+          width={60}
+          alt="logo"
+          className="h-[30px] w-auto"
+        />
+      </Link>
       <div className="flex items-center gap-3">
         <Button
           onClick={() =>
