@@ -14,11 +14,13 @@ import { cn } from '@/libs/class-helpers';
 
 export default function GameListSwiper() {
   const swiperRef = useRef<CustomSwiperRef>(null);
+  const columns = 3;
+  const lines = 2;
   const [swiperState, setSwiperState] = useState<CustomSwiperState>({
     currentPage: 0,
-    totalPages: Math.ceil(games.length / (3 * 2)),
+    totalPages: Math.ceil(games.length / (columns * lines)),
     enablePrev: false,
-    enableNext: games.length > 3 * 2,
+    enableNext: games.length > columns * lines,
   });
 
   return (
@@ -55,9 +57,9 @@ export default function GameListSwiper() {
         <CustomSwiper
           ref={swiperRef}
           items={games}
-          columns={3}
+          columns={columns}
           gap={8}
-          lines={2}
+          lines={lines}
           overflowMode="peek"
           onStateChange={setSwiperState}
           // peekPaddingX={24}
