@@ -12,40 +12,65 @@ import {
 
 import { cn } from '@/libs/class-helpers';
 
+/**
+ * 自定义 swiper state
+ */
 export interface CustomSwiperState {
+  // 当前页
   currentPage: number;
+  // 总页数
   totalPages: number;
+  // 是否允许上一页
   enablePrev: boolean;
+  // 是否允许下一页
   enableNext: boolean;
 }
 
+/**
+ * 自定义 swiper ref
+ */
 export interface CustomSwiperRef {
+  // 上一页
   prev: () => void;
+  // 下一页
   next: () => void;
+  // 跳转到指定页
   goTo: (page: number) => void;
+  // 获取当前状态
   getState: () => CustomSwiperState;
 }
 
+/**
+ * 自定义 swiper props
+ */
 interface CustomSwiperProps<T> {
+  // 数据源
   items: T[];
+  // 渲染函数
   renderItem: (
     item: T,
     index: number,
     meta: { isVisible: boolean; page: number },
   ) => React.ReactNode;
-  getItemKey?: (item: T, index: number) => React.Key;
+  // 列数
   columns?: number;
+  // 行数
   lines?: number;
-  /** 列间距（建议列间距小于容器 padding，比如容器组有间距是12px，列间距建议为6或者8） */
+  // 列间距（建议列间距小于容器 padding，比如容器间距是12px，列间距建议为6或者8）
   gap?: number;
-  /** 溢出模式 */
+  // 溢出模式 normal - 默认不溢出，peek - 溢出一点点
   overflowMode?: 'normal' | 'peek';
-  /** peek 模式下用于抵消外层横向 padding 的值（单位 px） */
+  // peek 模式下用于抵消外层横向 padding 的值（单位 px），如果外层 padding 左右是 12，那么这里就传 12
   peekPaddingX?: number;
+  // 类名
   className?: string;
+  // item 类名
   itemClassName?: string;
+  // 是否懒加载
   lazy?: boolean;
+  // 懒加载距离
   lazyRootMargin?: string;
+  // 懒加载回调
   onStateChange?: (state: CustomSwiperState) => void;
 }
 
@@ -59,15 +84,14 @@ function CustomSwiperInner<T>(
   {
     items,
     renderItem,
-    getItemKey,
     columns = 3,
     lines = 1,
-    gap = 6,
+    gap = 8,
     overflowMode = 'normal',
     className,
     itemClassName,
     lazy = true,
-    lazyRootMargin = '0px 20%',
+    lazyRootMargin = '20%',
     peekPaddingX = 12,
     onStateChange,
   }: CustomSwiperProps<T>,
@@ -91,7 +115,7 @@ function CustomSwiperInner<T>(
 
   const enablePrev = currentPage > 0;
   const enableNext = currentPage < totalPages - 1;
-  const usePeekMode = overflowMode === 'peek';
+  const usePeek = overflowMode === 'peek';
 
   const swiperState = useMemo<CustomSwiperState>(
     () => ({ currentPage, totalPages, enablePrev, enableNext }),
@@ -109,6 +133,8 @@ function CustomSwiperInner<T>(
     });
   }, [totalPages]);
 
+  // lazy：用 IntersectionObserver 看每个格子是否和横向滚动区有交集，有则记入 visibleIndices，
+  // renderItem 里的 isVisible 据此决定要不要渲染重内容。只增不减，滑过去露过面的格子保持为已可见。
   useEffect(() => {
     if (!lazy) return;
     const container = containerRef.current;
@@ -120,9 +146,11 @@ function CustomSwiperInner<T>(
           const next = new Set(prev);
           for (const entry of entries) {
             if (!entry.isIntersecting) continue;
+            // entry.target 是格子 DOM，从 map 取回 items 下标
             const index = elementToIndex.current.get(entry.target as HTMLDivElement);
             if (index !== undefined) next.add(index);
           }
+          // 没新下标时沿用 prev，少一次无意义重渲染
           return next.size === prev.size ? prev : next;
         });
       },
@@ -149,13 +177,11 @@ function CustomSwiperInner<T>(
     const container = containerRef.current;
     if (!container || totalPages === 0) return;
 
-    const paddingLeft = parseInt(getComputedStyle(container).paddingLeft);
-    const paddingRight = parseInt(getComputedStyle(container).paddingRight);
+    const paddingLeft = parseInt(getComputedStyle(container).paddingLeft, 10);
+    const paddingRight = parseInt(getComputedStyle(container).paddingRight, 10);
     const containerRect = container.getBoundingClientRect();
     const containerPadding = paddingLeft + paddingRight;
-    const containerWidth = usePeekMode
-      ? containerRect.width - containerPadding
-      : containerRect.width;
+    const containerWidth = usePeek ? containerRect.width - containerPadding : containerRect.width;
     const scrollLeft = container.scrollLeft;
     const maxScrollLeft = Math.max(0, container.scrollWidth - containerWidth - containerPadding);
     const nextPage =
@@ -164,7 +190,7 @@ function CustomSwiperInner<T>(
         : clamp(Math.floor(scrollLeft / containerWidth), 0, totalPages - 1);
 
     setCurrentPage(nextPage);
-  }, [totalPages, usePeekMode]);
+  }, [totalPages, usePeek]);
 
   const scrollToPage = useCallback(
     (page: number) => {
@@ -233,29 +259,30 @@ function CustomSwiperInner<T>(
         ref={containerRef}
         className={cn(
           'no-scrollbar grid snap-x snap-mandatory grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth',
-          // ⚠️ 具体情况需要根据外出容器的 padding 决定
-          // 比如页面间距是 px-3，那么这里就是 “-mx-3 scroll-pl-3 px-3”
-          // 比如页面间距是 px-6，那么这里就是 “-mx-6 scroll-pl-6 px-6”
+          // 具体情况需要根据外层容器的 padding 决定（也就是页面间距）：
+          // 1. 如果页面间距是 px-3，那么这里就是 -mx-3 scroll-pl-3 px-3
+          // 2. 如果页面间距是 px-6，那么这里就是 -mx-6 scroll-pl-6 px-6
           // 通过 peekPaddingX 动态抵消外层横向 padding。
-          usePeekMode ? '-mx-3 scroll-pl-3 px-3' : '',
+          // usePeek ? "-mx-3 scroll-pl-3 px-3" : "",
         )}
         style={{
           gap,
           gridAutoColumns: `calc((100% - ${gap * (columns - 1)}px) / ${columns})`,
           gridTemplateRows: `repeat(${lines}, auto)`,
-          // ...(usePeekMode
-          //   ? {
-          //       marginLeft: -peekPaddingX,
-          //       marginRight: -peekPaddingX,
-          //       paddingLeft: peekPaddingX,
-          //       paddingRight: peekPaddingX,
-          //       scrollPaddingLeft: peekPaddingX,
-          //       // scrollPaddingRight: peekPaddingX,
-          //     }
-          //   : undefined),
+          ...(usePeek
+            ? {
+                marginInline: -peekPaddingX,
+                scrollPaddingLeft: peekPaddingX,
+                paddingInline: peekPaddingX,
+              }
+            : undefined),
         }}
-        onTouchStart={() => (isTouchScroll.current = true)}
-        onWheel={() => (isTouchScroll.current = true)}
+        onTouchStart={() => {
+          isTouchScroll.current = true;
+        }}
+        onWheel={() => {
+          isTouchScroll.current = true;
+        }}
         onScroll={handleScroll}
         onScrollEnd={syncCurrentPage}
       >
@@ -263,7 +290,7 @@ function CustomSwiperInner<T>(
           const isVisible = !lazy || visibleIndices.has(index);
           return (
             <div
-              key={getItemKey ? getItemKey(item, index) : index}
+              key={index}
               ref={(el) => {
                 if (el) {
                   itemRefs.current[index] = el;
