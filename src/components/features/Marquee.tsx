@@ -91,7 +91,7 @@ export default function Marquee() {
                 <LazyImg
                   className="h-full w-full rounded-lg bg-amber-950 object-cover"
                   src={game.src}
-                  blurSrc={game.blurSrc}
+                  placeholderSrc={game.placeholderSrc}
                   alt=""
                   loading="eager"
                 />

@@ -9,7 +9,8 @@ const imageCache = new Map<string, boolean>();
 
 type LazyImgProps = {
   src?: string;
-  blurSrc?: string;
+  placeholderSrc?: string;
+  errorSrc?: string;
   alt?: string;
   className?: string;
   loading?: 'lazy' | 'eager';
@@ -18,7 +19,8 @@ type LazyImgProps = {
 
 export default function LazyImg({
   src,
-  blurSrc,
+  placeholderSrc,
+  errorSrc,
   alt,
   className,
   loading = 'lazy',
@@ -26,7 +28,14 @@ export default function LazyImg({
 }: LazyImgProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [shouldLoad, setShouldLoad] = useState(loading === 'eager');
-  const [displaySrc, setDisplaySrc] = useState<string | undefined>(blurSrc);
+  const [hasError, setHasError] = useState(false);
+  const [displaySrc, setDisplaySrc] = useState<string | undefined>(placeholderSrc);
+
+  const realSrc = hasError ? errorSrc : src;
+
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
 
   useEffect(() => {
     if (loading !== 'lazy' || !src || shouldLoad) return;
@@ -54,17 +63,23 @@ export default function LazyImg({
       return;
     }
 
-    if (blurSrc) {
-      setDisplaySrc(blurSrc);
+    if (placeholderSrc) {
+      if (hasError && !errorSrc) {
+        setDisplaySrc(undefined);
+        return;
+      }
+      setDisplaySrc(placeholderSrc);
       const img = new Image();
-      img.src = src;
+      img.src = realSrc ?? '';
       img.onload = () => {
-        imageCache.set(src, true);
-        setDisplaySrc(src);
+        if (src && realSrc === src) {
+          imageCache.set(src, true);
+        }
+        setDisplaySrc(realSrc);
       };
       img.onerror = () => {
-        imageCache.set(src, true);
-        setDisplaySrc(src);
+        setHasError(true);
+        setDisplaySrc(errorSrc);
       };
       return () => {
         img.src = '';
@@ -73,13 +88,18 @@ export default function LazyImg({
       };
     }
 
-    setDisplaySrc(src);
-  }, [shouldLoad, src, blurSrc]);
+    setDisplaySrc(realSrc);
+  }, [shouldLoad, realSrc, src, placeholderSrc, errorSrc, hasError]);
 
-  const isFinal = displaySrc === src;
+  const isFinal = displaySrc === realSrc;
 
   const handleNativeLoad = () => {
-    if (src) imageCache.set(src, true);
+    if (src && !hasError) imageCache.set(src, true);
+  };
+
+  const handleError = () => {
+    setHasError(true);
+    setDisplaySrc(errorSrc);
   };
 
   return (
@@ -91,8 +111,10 @@ export default function LazyImg({
       loading={isFinal ? loading : undefined}
       decoding="async"
       className={cn('size-full object-cover text-xs text-red-800', className)}
+      data-src={src}
       onClick={onClick}
       onLoad={isFinal ? handleNativeLoad : undefined}
+      onError={isFinal ? handleError : undefined}
     />
   );
 }

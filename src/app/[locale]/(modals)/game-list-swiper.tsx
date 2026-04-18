@@ -74,7 +74,7 @@ export default function GameListSwiper() {
                 <LazyImg
                   className="h-full w-full object-cover"
                   src={item.src}
-                  blurSrc={item.blurSrc}
+                  placeholderSrc={item.placeholderSrc}
                 />
               )}
             </div>

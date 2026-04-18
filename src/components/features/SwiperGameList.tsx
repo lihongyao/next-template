@@ -53,7 +53,7 @@ export default function SwiperGameList() {
               <LazyImg
                 className="h-full w-full"
                 loading="lazy"
-                blurSrc={item.blurSrc}
+                placeholderSrc={item.placeholderSrc}
                 src={item.src}
                 alt=""
               />

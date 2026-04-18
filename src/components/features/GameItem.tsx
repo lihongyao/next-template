@@ -2,7 +2,7 @@ import LazyImg from '../ui/LazyImage';
 
 interface GameItemProps {
   game: {
-    blurSrc: string;
+    placeholderSrc: string;
     src: string;
   };
   onClick?: () => void;
@@ -10,7 +10,12 @@ interface GameItemProps {
 export default function GameItem({ game, onClick }: GameItemProps) {
   return (
     <div className="aspect-[200/267] overflow-hidden rounded-md" onClick={onClick}>
-      <LazyImg src={game.src} className="h-full w-full bg-gray-200" blurSrc={game.blurSrc} alt="" />
+      <LazyImg
+        src={game.src}
+        className="h-full w-full bg-gray-200"
+        placeholderSrc={game.placeholderSrc}
+        alt=""
+      />
     </div>
   );
 }
