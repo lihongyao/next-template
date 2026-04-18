@@ -75,6 +75,7 @@ export default function GameListSwiper() {
                   className="h-full w-full object-cover"
                   src={item.src}
                   placeholderSrc={item.placeholderSrc}
+                  errorSrc={'/img-error.png'}
                 />
               )}
             </div>

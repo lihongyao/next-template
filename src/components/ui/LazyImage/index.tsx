@@ -7,6 +7,9 @@ import { cn } from '@/libs/class-helpers';
 
 const imageCache = new Map<string, boolean>();
 
+const TRANSPARENT_PIXEL =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 type LazyImgProps = {
   src?: string;
   placeholderSrc?: string;
@@ -31,7 +34,10 @@ export default function LazyImg({
   const [hasError, setHasError] = useState(false);
   const [displaySrc, setDisplaySrc] = useState<string | undefined>(placeholderSrc);
 
-  const realSrc = hasError ? errorSrc : src;
+  const useDefaultErrorImage = errorSrc === undefined || errorSrc === '';
+  const resolvedErrorSrc = useDefaultErrorImage ? TRANSPARENT_PIXEL : errorSrc;
+
+  const realSrc = hasError ? resolvedErrorSrc : src;
 
   useEffect(() => {
     setHasError(false);
@@ -49,7 +55,7 @@ export default function LazyImg({
           observer.disconnect();
         }
       },
-      { rootMargin: '50px', threshold: 0.1 },
+      { rootMargin: '50px', threshold: 0 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -64,8 +70,8 @@ export default function LazyImg({
     }
 
     if (placeholderSrc) {
-      if (hasError && !errorSrc) {
-        setDisplaySrc(undefined);
+      if (hasError && useDefaultErrorImage) {
+        setDisplaySrc(resolvedErrorSrc);
         return;
       }
       setDisplaySrc(placeholderSrc);
@@ -79,7 +85,7 @@ export default function LazyImg({
       };
       img.onerror = () => {
         setHasError(true);
-        setDisplaySrc(errorSrc);
+        setDisplaySrc(resolvedErrorSrc);
       };
       return () => {
         img.src = '';
@@ -91,7 +97,8 @@ export default function LazyImg({
     setDisplaySrc(realSrc);
   }, [shouldLoad, realSrc, src, placeholderSrc, errorSrc, hasError]);
 
-  const isFinal = displaySrc === realSrc;
+  const isErrorWithoutFallback = hasError && useDefaultErrorImage;
+  const isFinal = displaySrc === realSrc && !isErrorWithoutFallback;
 
   const handleNativeLoad = () => {
     if (src && !hasError) imageCache.set(src, true);
@@ -99,7 +106,7 @@ export default function LazyImg({
 
   const handleError = () => {
     setHasError(true);
-    setDisplaySrc(errorSrc);
+    setDisplaySrc(resolvedErrorSrc);
   };
 
   return (
@@ -110,7 +117,11 @@ export default function LazyImg({
       aria-hidden={!isFinal}
       loading={isFinal ? loading : undefined}
       decoding="async"
-      className={cn('size-full object-cover text-xs text-red-800', className)}
+      className={cn(
+        'size-full object-cover text-xs text-red-800',
+        isErrorWithoutFallback && 'border-0 bg-transparent',
+        className,
+      )}
       data-src={src}
       onClick={onClick}
       onLoad={isFinal ? handleNativeLoad : undefined}

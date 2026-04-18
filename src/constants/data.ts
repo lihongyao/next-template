@@ -1,6 +1,6 @@
 export const games = [
   {
-    src: 'https://imgxcut.com/game/image/22221af8810972.png?_v=4,dpr=4,width=200',
+    src: 'https://imgxcut.com/game/image/1af8810972.png?_v=4,dpr=4,width=200',
     placeholderSrc: 'https://imgxcut.com/game/image/1af8810972.png?,_v=4,width=100,blur=50',
   },
   {
