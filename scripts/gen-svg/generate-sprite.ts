@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   PUBLIC_DIR,
   PUBLIC_SPRITE_PREFIX,
+  PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE,
   ROOT_DIR,
   SPRITE_PREVIEW_OUTPUT_FILE,
   SVG_SOURCE_SPRITES_DIR,
@@ -106,7 +107,7 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
     await fs.writeFile(publicSpritePath, emptySprite, 'utf8');
     const previewHtml = createPreviewHtml([], publicSpriteFile);
     await fs.writeFile(SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
-    // await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
+    await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
     return { spriteNames: [], publicSpriteFile };
   }
 
