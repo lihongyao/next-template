@@ -13,7 +13,7 @@ const ModalNewsDetails = dynamic(() => import('@/app/[locale]/(modals)/news-deta
 export const ModalComponents: Record<string, ComponentType> = {
   'modal-register': ModalRegister,
   'modal-profile': ModalProfile,
-  'modal-login': ModalLogin,
+  login: ModalLogin,
   'modal-game-list': ModalGameList,
   'modal-game-list-swiper': ModalGameListSwiper,
   'modal-game-details': ModalGameDetails,

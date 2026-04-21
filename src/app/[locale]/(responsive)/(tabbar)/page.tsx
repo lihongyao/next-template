@@ -4,9 +4,7 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
-import DragView from '@/components/ui/DragView';
 import Icon from '@/components/ui/Icon';
-import LiquidGlass from '@/components/ui/LiquidGlass';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
 import { useDevice } from '@/providers/device.provider';
@@ -34,7 +32,13 @@ export default function HomePage() {
         >
           路由弹窗(个人中心)
         </Button> */}
-
+        <Button
+          onClick={() => {
+            router.push(Routes.Dashboard);
+          }}
+        >
+          Dashboard
+        </Button>
         <Button
           onClick={() => {
             const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes['game-list']);
@@ -156,14 +160,6 @@ export default function HomePage() {
       /> */}
 
       <div className="h-[1000px] w-full bg-blue-500" />
-
-      <DragView>
-        <LiquidGlass>
-          <div className="h-[100px] w-[200px] rounded-full">
-            <span className="font-medium text-white">Click Me</span>
-          </div>
-        </LiquidGlass>
-      </DragView>
     </div>
   );
 }

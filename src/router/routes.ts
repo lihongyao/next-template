@@ -10,6 +10,7 @@ export const TabRoutes = {
 
 // 页面路由
 export const PageRoutes = {
+  Dashboard: '/dashboard',
   Details: '/details',
   Dialog: '/dialog',
   DynamicComps: '/dynamic-comps',
@@ -31,7 +32,7 @@ export const PageRoutes = {
 // 弹窗路由
 export const ModalRoutes = {
   ModalProfile: '/modal-profile',
-  ModalLogin: '/modal-login',
+  ModalLogin: '/login',
   ModalGameListSwiper: '/modal-game-list-swiper',
   ModalGameDetails: '/modal-game-details',
   ModalRegister: '/modal-register',

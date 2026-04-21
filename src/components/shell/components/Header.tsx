@@ -32,6 +32,14 @@ export default function Header() {
           <Button
             className="isTabletOrDesktop"
             onClick={() => {
+              router.push(Routes.Cart);
+            }}
+          >
+            购物车
+          </Button>
+          <Button
+            className="isTabletOrDesktop"
+            onClick={() => {
               const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes.profile);
               router.push(jumpToUrl, { scroll: false });
             }}

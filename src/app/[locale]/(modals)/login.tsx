@@ -7,11 +7,13 @@ export default function Login() {
   return (
     <div
       data-name="Login"
-      className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-white p-3 sm:h-[600px] sm:w-[400px] sm:rounded-md"
+      className="flex h-screen w-screen items-center justify-center gap-4 bg-white sm:h-[600px] sm:w-[800px] sm:overflow-hidden sm:rounded-lg"
     >
-      <h1 className="text-2xl font-bold">登录</h1>
-      <div className="cursor-pointer hover:text-blue-500" onClick={closeModal}>
-        返回
+      <div className="h-full flex-1 bg-amber-600"></div>
+      <div className="flex h-full flex-1 items-center justify-center">
+        <div className="cursor-pointer hover:text-blue-500" onClick={closeModal}>
+          返回
+        </div>
       </div>
     </div>
   );
