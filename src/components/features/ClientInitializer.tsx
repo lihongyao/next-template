@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useMount } from 'ahooks';
 
 import { useCheckAppVersion } from '@/hooks/useCheckAppVersion';
@@ -13,6 +15,10 @@ export default function ClientInitializer() {
   useModalPageAutoCollapse();
   // 版本升级监听
   useCheckAppVersion();
+
+  useEffect(() => {
+    // throw new Error('🧨 Sentry test error from client');
+  }, []);
 
   useMount(() => {
     console.log('__ClientInitializer__');

@@ -47,3 +47,5 @@ src/configs/brands/index.ts
 # 脚本生成
 src/generated/
 src/assets/svg/generated/
+# Sentry Config File
+.env.sentry-build-plugin
