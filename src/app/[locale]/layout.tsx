@@ -15,7 +15,6 @@ import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { CURRENT_VERSION } from '@/constants';
 import '@/generated/brand.css';
-import { lcpB64 } from '@/generated/lcp-b64';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
 import { BrandConfigProvider } from '@/providers/brand.provider';
@@ -85,7 +84,12 @@ export default async function LocaleLayout({
 
       <body style={{ background: '#252526' }}>
         {/* lcp element */}
-        <img className="lcp-anchor" src={lcpB64} alt="lcp" role="none" />
+        <img
+          className="lcp-anchor"
+          src={`/res/${process.env.NEXT_PUBLIC_BRAND}/logo.png`}
+          alt="lcp"
+          role="none"
+        />
         {/* 国际化 */}
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>

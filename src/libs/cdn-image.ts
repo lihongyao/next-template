@@ -6,18 +6,19 @@
  * Docs:
  * https://developers.cloudflare.com/images/transform-images/transform-via-url
  */
+import brands from '@/configs/brands';
 
 // ==============================
 
-const CDN_ORIGIN = 'https://img.engames.com';
-const CDN_PREFIX = '/cdn-cgi/image';
+const CDN_ORIGIN = 'http://localhost:3000';
+const CDN_PREFIX = '/brands_latest';
 
 /**
  * 你的资源站路径前缀
  * 例如：
  * https://img.engames.com/assets/{seriesName}/xxx.png
  */
-const STATIC_PREFIX = '/assets';
+const STATIC_PREFIX = '/';
 
 // ⚠️ 这里替换为你的真实变量来源
 const seriesName = 'default';
@@ -78,11 +79,11 @@ function buildTransformParams(dpr: number, options: ImageTransformOptions = {}) 
  * 获取 CDN 图片 URL（SSR / CSR 通用）
  *
  * @example
- * getCdnImageUrl("classic/blue/afun/banner.png", {
+ * getImageUrl("classic/blue/afun/banner.png", {
  *   imageOptions: { w: 600 }
  * })
  */
-export function getCdnImageUrl(path: string, options?: GetImageOptions): string {
+export function getImageUrl(path: string, options?: GetImageOptions): string {
   if (!path?.trim()) return '';
 
   const { userAgent = null, imageOptions } = options || {};
@@ -91,7 +92,8 @@ export function getCdnImageUrl(path: string, options?: GetImageOptions): string 
   const dpr = getDeviceDpr(userAgent);
 
   // 2. transform 参数
-  const params = buildTransformParams(dpr, imageOptions);
+  // const params = buildTransformParams(dpr, imageOptions);
+  const params = '';
 
   // 3. 源路径
   let sourcePath: string;
@@ -99,9 +101,10 @@ export function getCdnImageUrl(path: string, options?: GetImageOptions): string 
   if (path.startsWith('http')) {
     sourcePath = new URL(path).pathname;
   } else {
-    sourcePath = `${STATIC_PREFIX}/${seriesName}/${path}`;
+    const route = `${process.env.NEXT_PUBLIC_BRAND.split('_').join('')}_${brands.series}`;
+    sourcePath = `${STATIC_PREFIX}${route}/${path}`;
   }
 
   // 4. 最终 URL
-  return `${CDN_ORIGIN}${CDN_PREFIX}/${params}${sourcePath}`;
+  return `${CDN_ORIGIN}${CDN_PREFIX}${params}${sourcePath}`;
 }

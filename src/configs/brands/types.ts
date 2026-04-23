@@ -3,6 +3,8 @@
 export type Theme = 'classic' | 'modern';
 // -- 皮肤
 export type Skin = 'green' | 'blue';
+// -- 套图
+export type Series = 'green' | 'blue';
 // -- 布局
 export type Layout = 'top-nav' | 'side-nav';
 
@@ -26,6 +28,10 @@ export type BrandConfig = {
   theme: Theme;
   /** 皮肤 */
   skin: Skin;
+  /** 套图 */
+  series: Series;
+  /** 套图版本号 */
+  seriesVersion: string;
   /** 布局 */
   layout: Layout;
   /** 支持的语言 */

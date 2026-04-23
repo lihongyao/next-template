@@ -5,6 +5,8 @@ export default {
   appName: 'A-FUN',
   theme: 'modern',
   skin: 'green',
+  series: 'green',
+  seriesVersion: '0',
   appId: 'afun',
   layout: 'side-nav',
   locales: [

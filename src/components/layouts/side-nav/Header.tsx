@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 
 import Button from '@/components/ui/Button';
 import { ZIndex } from '@/constants';
@@ -19,13 +18,7 @@ export default function Header() {
       style={{ zIndex: ZIndex.Header }}
     >
       <Link href={Routes.Home}>
-        <Image
-          src={'/res/afun/logo.png'}
-          height={30}
-          width={60}
-          alt="logo"
-          className="h-[30px] w-auto"
-        />
+        <img src={'/res/afun/logo.png'} alt="logo" className="h-[30px] w-auto" />
       </Link>
       <div className="flex items-center gap-3">
         <Button
