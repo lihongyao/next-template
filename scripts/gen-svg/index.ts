@@ -11,8 +11,10 @@ async function main() {
     `✅ sprite 完成，共 ${spriteBuildResult.spriteNames.length} 个（source/sprites），输出 ${spriteBuildResult.publicSpriteFile}`,
   );
 
-  const svgrNames = await generateSvgrComponents();
-  console.log(`✅ svgr 完成，共 ${svgrNames.length} 个（source/svgrs）`);
+  const { names: svgrNames, stats: svgrStats } = await generateSvgrComponents();
+  console.log(
+    `✅ svgr 完成，共 ${svgrNames.length} 个（source/svgrs），新增 ${svgrStats.created.length}，保留已编辑 ${svgrStats.skipped.length}，删除 ${svgrStats.removed.length}`,
+  );
 
   await generateSvgTypesAndRegistry({
     spriteNames: spriteBuildResult.spriteNames,

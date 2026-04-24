@@ -31,11 +31,11 @@ export const PageRoutes = {
 
 // 弹窗路由
 export const ModalRoutes = {
-  ModalProfile: '/modal-profile',
   ModalLogin: '/login',
+  ModalRegister: '/register',
+  ModalProfile: '/modal-profile',
   ModalGameListSwiper: '/modal-game-list-swiper',
   ModalGameDetails: '/modal-game-details',
-  ModalRegister: '/modal-register',
   ModalNewsDetails: '/modal-news-details',
 } as const;
 

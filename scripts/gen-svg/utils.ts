@@ -33,12 +33,32 @@ export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
     .sort((a, b) => a.localeCompare(b));
 }
 
-export async function cleanGeneratedTsxFiles(dir: string): Promise<void> {
-  // 只清理脚本生成的 tsx，避免误删其它手写文件。
+/**
+ * 删除 source/svgrs 里已不存在的图标对应的 generated/*.tsx，与源目录保持对齐。
+ * 仅按「safe 文件名 = safeFileBase(源名).tsx」判断，不处理其它手写在 generated 里的 tsx（视为孤儿并删除）。
+ */
+export async function removeOrphanedSvgrTsxFiles(
+  dir: string,
+  currentSourceBaseNames: string[],
+): Promise<string[]> {
+  const expected = new Set(currentSourceBaseNames.map((n) => safeFileBase(n)));
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
-  await Promise.all(
-    entries
-      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.tsx'))
-      .map((entry) => fs.rm(path.join(dir, entry.name), { force: true })),
-  );
+  const removed: string[] = [];
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.toLowerCase().endsWith('.tsx')) continue;
+    const base = path.basename(entry.name, '.tsx');
+    if (expected.has(base)) continue;
+    await fs.rm(path.join(dir, entry.name), { force: true });
+    removed.push(entry.name);
+  }
+  return removed;
+}
+
+export async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.stat(filePath);
+    return true;
+  } catch {
+    return false;
+  }
 }

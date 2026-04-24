@@ -11,7 +11,7 @@ const ModalGameDetails = dynamic(() => import('@/app/[locale]/(modals)/game-deta
 const ModalRegister = dynamic(() => import('@/app/[locale]/(modals)/register'));
 const ModalNewsDetails = dynamic(() => import('@/app/[locale]/(modals)/news-details'));
 export const ModalComponents: Record<string, ComponentType> = {
-  'modal-register': ModalRegister,
+  register: ModalRegister,
   'modal-profile': ModalProfile,
   login: ModalLogin,
   'modal-game-list': ModalGameList,
