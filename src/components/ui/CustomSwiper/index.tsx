@@ -44,7 +44,7 @@ export interface CustomSwiperRef {
  * 自定义 swiper props
  */
 interface CustomSwiperProps<T> {
-  // 数据源
+  // 数据源，可传入范型指定 item 类型
   items: T[];
   // 渲染函数
   renderItem: (
@@ -56,21 +56,21 @@ interface CustomSwiperProps<T> {
   columns?: number;
   // 行数
   lines?: number;
-  // 列间距（建议列间距小于容器 padding，比如容器间距是12px，列间距建议为6或者8）
+  // 列间距（建议列间距小于容器 padding，比如容器间距是12px，列间距建议为6或者8，peek 模式才看得到效果）
   gap?: number;
   // 溢出模式 normal - 默认不溢出，peek - 溢出一点点
   overflowMode?: 'normal' | 'peek';
   // peek 模式下用于抵消外层横向 padding 的值（单位 px），如果外层 padding 左右是 12，那么这里就传 12
   peekPaddingX?: number;
-  // 类名
+  // 自定义容器类名
   className?: string;
-  // item 类名
+  // 自定义元素类名
   itemClassName?: string;
   // 是否懒加载
   lazy?: boolean;
-  // 懒加载距离
+  // 懒加载阈值
   lazyRootMargin?: string;
-  // 懒加载回调
+  // 状态回调
   onStateChange?: (state: CustomSwiperState) => void;
 }
 
@@ -147,7 +147,7 @@ function CustomSwiperInner<T>(
   }, [totalPages]);
 
   // lazy：用 IntersectionObserver 看每个格子是否和横向滚动区有交集，有则记入 visibleIndices，
-  // renderItem 里的 isVisible 据此决定要不要渲染重内容。只增不减，滑过去露过面的格子保持为已可见。
+  // renderItem 里的 isVisible 据此决定要不要渲染重内容，只增不减，滑过去露过面的格子保持为已可见。
   useEffect(() => {
     if (!lazy) return;
     const container = containerRef.current;
@@ -293,7 +293,7 @@ function CustomSwiperInner<T>(
             : undefined),
         }}
         onPointerDownCapture={(e) => {
-          // 只在 PC 鼠标左键时启用“拖拽滚动”，避免干扰触摸滚动。
+          // 只在 PC 鼠标左键时启用“拖拽滚动”，避免影响触摸滚动。
           if (e.pointerType !== 'mouse') return;
           if (e.button !== 0) return;
           const container = containerRef.current;
@@ -325,7 +325,7 @@ function CustomSwiperInner<T>(
           if (dragRef.current.pointerId !== e.pointerId) return;
 
           const dx = e.clientX - dragRef.current.startClientX;
-          // 只有移动超过很小的阈值，才进入“拖拽翻页模式”，避免影响点击
+          // 只有移动超过阈值，才进入“拖拽翻页模式”，避免影响点击功能
           if (!dragRef.current.isActive) {
             if (Math.abs(dx) < 6) return;
             dragRef.current.isActive = true;
@@ -354,7 +354,7 @@ function CustomSwiperInner<T>(
           if (!container) return;
           if (dragRef.current.pointerId !== e.pointerId) return;
 
-          // 如果没有进入拖拽模式，放行 click（不要做翻页/对齐/阻止）
+          // 如果没有进入拖拽模式，放行 click
           if (!dragRef.current.isActive) {
             dragRef.current.isDragging = false;
             dragRef.current.isActive = false;
