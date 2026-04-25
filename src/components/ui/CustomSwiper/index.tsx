@@ -102,6 +102,19 @@ function CustomSwiperInner<T>(
   const elementToIndex = useRef(new Map<HTMLDivElement, number>());
   const isTouchScroll = useRef(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragRef = useRef<{
+    isDragging: boolean;
+    isActive: boolean;
+    pointerId: number | null;
+    startClientX: number;
+  }>({
+    isDragging: false,
+    isActive: false,
+    pointerId: null,
+    startClientX: 0,
+  });
+  const [isMouseDragging, setIsMouseDragging] = useState(false);
+  const supportsPointerEvents = typeof window !== 'undefined' && 'PointerEvent' in window;
 
   const itemsPerPage = columns * lines;
   const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -259,6 +272,8 @@ function CustomSwiperInner<T>(
         ref={containerRef}
         className={cn(
           'no-scrollbar grid snap-x snap-mandatory grid-flow-col overflow-x-auto overflow-y-hidden scroll-smooth',
+          'cursor-grab',
+          isMouseDragging ? 'cursor-grabbing select-none' : 'select-auto',
           // 具体情况需要根据外层容器的 padding 决定（也就是页面间距）：
           // 1. 如果页面间距是 px-3，那么这里就是 -mx-3 scroll-pl-3 px-3
           // 2. 如果页面间距是 px-6，那么这里就是 -mx-6 scroll-pl-6 px-6
@@ -276,6 +291,183 @@ function CustomSwiperInner<T>(
                 paddingInline: peekPaddingX,
               }
             : undefined),
+        }}
+        onPointerDownCapture={(e) => {
+          // 只在 PC 鼠标左键时启用“拖拽滚动”，避免干扰触摸滚动。
+          if (e.pointerType !== 'mouse') return;
+          if (e.button !== 0) return;
+          const container = containerRef.current;
+          if (!container) return;
+
+          dragRef.current.isDragging = true;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = e.pointerId;
+          dragRef.current.startClientX = e.clientX;
+
+          isTouchScroll.current = true;
+        }}
+        onMouseDownCapture={(e) => {
+          // fallback：Safari 等环境 pointer 事件不可用时，走 mouse 事件
+          if (supportsPointerEvents) return;
+          if (e.button !== 0) return;
+          const container = containerRef.current;
+          if (!container) return;
+
+          dragRef.current.isDragging = true;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = null;
+          dragRef.current.startClientX = e.clientX;
+          isTouchScroll.current = true;
+        }}
+        onPointerMoveCapture={(e) => {
+          if (e.pointerType !== 'mouse') return;
+          if (!dragRef.current.isDragging) return;
+          if (dragRef.current.pointerId !== e.pointerId) return;
+
+          const dx = e.clientX - dragRef.current.startClientX;
+          // 只有移动超过很小的阈值，才进入“拖拽翻页模式”，避免影响点击
+          if (!dragRef.current.isActive) {
+            if (Math.abs(dx) < 6) return;
+            dragRef.current.isActive = true;
+            setIsMouseDragging(true);
+            const container = containerRef.current;
+            if (container) container.setPointerCapture(e.pointerId);
+          }
+
+          // 进入拖拽模式后，阻止默认行为（避免选中文本/触发原生拖拽）
+          e.preventDefault();
+        }}
+        onMouseMoveCapture={(e) => {
+          if (supportsPointerEvents) return;
+          if (!dragRef.current.isDragging) return;
+          const dx = e.clientX - dragRef.current.startClientX;
+          if (!dragRef.current.isActive) {
+            if (Math.abs(dx) < 6) return;
+            dragRef.current.isActive = true;
+            setIsMouseDragging(true);
+          }
+          e.preventDefault();
+        }}
+        onPointerUpCapture={(e) => {
+          if (e.pointerType !== 'mouse') return;
+          const container = containerRef.current;
+          if (!container) return;
+          if (dragRef.current.pointerId !== e.pointerId) return;
+
+          // 如果没有进入拖拽模式，放行 click（不要做翻页/对齐/阻止）
+          if (!dragRef.current.isActive) {
+            dragRef.current.isDragging = false;
+            dragRef.current.isActive = false;
+            dragRef.current.pointerId = null;
+            return;
+          }
+
+          const dragDx = e.clientX - dragRef.current.startClientX;
+
+          dragRef.current.isDragging = false;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = null;
+          setIsMouseDragging(false);
+          try {
+            container.releasePointerCapture(e.pointerId);
+          } catch {
+            // ignore
+          }
+
+          // 将鼠标拖拽映射为“翻页”动作：拖动距离越大，可跨多页
+          const paddingLeft = parseInt(getComputedStyle(container).paddingLeft, 10);
+          const paddingRight = parseInt(getComputedStyle(container).paddingRight, 10);
+          const containerRect = container.getBoundingClientRect();
+          const containerPadding = paddingLeft + paddingRight;
+          const pageWidth = usePeek ? containerRect.width - containerPadding : containerRect.width;
+
+          const threshold = Math.max(36, pageWidth * 0.08);
+          if (Math.abs(dragDx) < threshold) {
+            // 拖动不足阈值：回到最近的 snap 点
+            isTouchScroll.current = true;
+            syncCurrentPage();
+            return;
+          }
+
+          const pages = clamp(
+            Math.round(Math.abs(dragDx) / Math.max(1, pageWidth)),
+            1,
+            Math.max(1, totalPages - 1),
+          );
+
+          const dir = dragDx < 0 ? 1 : -1; // 向左拖 => 下一页；向右拖 => 上一页
+          scrollToPage(currentPage + dir * pages);
+        }}
+        onMouseUpCapture={(e) => {
+          if (supportsPointerEvents) return;
+          const container = containerRef.current;
+          if (!container) return;
+          if (!dragRef.current.isDragging) return;
+
+          if (!dragRef.current.isActive) {
+            dragRef.current.isDragging = false;
+            dragRef.current.isActive = false;
+            dragRef.current.pointerId = null;
+            return;
+          }
+
+          const dragDx = e.clientX - dragRef.current.startClientX;
+          dragRef.current.isDragging = false;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = null;
+          setIsMouseDragging(false);
+
+          const paddingLeft = parseInt(getComputedStyle(container).paddingLeft, 10);
+          const paddingRight = parseInt(getComputedStyle(container).paddingRight, 10);
+          const containerRect = container.getBoundingClientRect();
+          const containerPadding = paddingLeft + paddingRight;
+          const pageWidth = usePeek ? containerRect.width - containerPadding : containerRect.width;
+
+          const threshold = Math.max(36, pageWidth * 0.08);
+          if (Math.abs(dragDx) < threshold) {
+            isTouchScroll.current = true;
+            syncCurrentPage();
+            return;
+          }
+
+          const pages = clamp(
+            Math.round(Math.abs(dragDx) / Math.max(1, pageWidth)),
+            1,
+            Math.max(1, totalPages - 1),
+          );
+          const dir = dragDx < 0 ? 1 : -1;
+          scrollToPage(currentPage + dir * pages);
+        }}
+        onPointerCancelCapture={(e) => {
+          if (e.pointerType !== 'mouse') return;
+          const container = containerRef.current;
+          if (!container) return;
+          if (dragRef.current.pointerId !== e.pointerId) return;
+
+          dragRef.current.isDragging = false;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = null;
+          setIsMouseDragging(false);
+          try {
+            container.releasePointerCapture(e.pointerId);
+          } catch {
+            // ignore
+          }
+          isTouchScroll.current = true;
+          syncCurrentPage();
+        }}
+        onMouseLeave={() => {
+          if (supportsPointerEvents) return;
+          if (!dragRef.current.isDragging) return;
+          // 鼠标移出时取消拖拽状态，避免卡住
+          dragRef.current.isDragging = false;
+          dragRef.current.isActive = false;
+          dragRef.current.pointerId = null;
+          setIsMouseDragging(false);
+        }}
+        onDragStartCapture={(e) => {
+          // 防止在卡片/图片/链接上拖动时触发浏览器原生拖拽（会导致“拖出链接/图片”，并抢走翻页手势）
+          e.preventDefault();
         }}
         onTouchStart={() => {
           isTouchScroll.current = true;
@@ -301,7 +493,10 @@ function CustomSwiperInner<T>(
               }}
               className={cn('shrink-0 snap-start', itemClassName)}
             >
-              {renderItem(item, index, { isVisible, page: Math.floor(index / itemsPerPage) })}
+              {renderItem(item, index, {
+                isVisible,
+                page: Math.floor(index / itemsPerPage),
+              })}
             </div>
           );
         })}
