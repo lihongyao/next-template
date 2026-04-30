@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-04-24T11:47:35.537Z
+// 生成时间: 2026-04-30T15:07:31.533Z
 import type React from 'react';
 
 import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';
@@ -14,6 +14,7 @@ import Icon_bottom_user from './bottom_user';
 import Icon_bottom_vip2 from './bottom_vip2';
 import Icon_close from './close';
 import Icon_file from './file';
+import Icon_glass_border from './glass_border';
 import Icon_globe from './globe';
 import Icon_next from './next';
 import Icon_time from './time';
@@ -30,6 +31,7 @@ export const SVG_COMPONENT_MAP = {
   bottom_vip2: Icon_bottom_vip2,
   close: Icon_close,
   file: Icon_file,
+  'glass-border': Icon_glass_border,
   globe: Icon_globe,
   next: Icon_next,
   time: Icon_time,
@@ -43,6 +45,7 @@ export const SVG_SPRITE_ID_MAP = {
   home: 'icon-home',
   order: 'icon-order',
   profile: 'icon-profile',
+  xxx: 'icon-xxx',
 } as const satisfies Partial<Record<SvgPathName, string>>;
 
 export const SVG_ICON_KIND_MAP = {
@@ -57,6 +60,7 @@ export const SVG_ICON_KIND_MAP = {
   cart: 'sprite',
   close: 'svgr',
   file: 'svgr',
+  'glass-border': 'svgr',
   globe: 'svgr',
   home: 'sprite',
   next: 'svgr',
@@ -64,6 +68,7 @@ export const SVG_ICON_KIND_MAP = {
   profile: 'sprite',
   time: 'svgr',
   window: 'svgr',
+  xxx: 'sprite',
 } as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
 
-export const SVG_SPRITE_FILE = '/sprite.4609867e.svg';
+export const SVG_SPRITE_FILE = '/sprite.7e6d380b.svg';

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
+import DragView from '@/components/ui/DragView';
 import Icon from '@/components/ui/Icon';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
@@ -144,6 +145,22 @@ export default function HomePage() {
         </div>
       </div>
 
+      <DragView
+        position={{
+          top: 100,
+          left: 100,
+        }}
+      >
+        <div className="hollow-border-container">
+          <div className="hollow-border-content">
+            <div>123123dsjahkdjshdjhasjdhjshdsj</div>
+            <div>123123</div>
+            <div>123123</div>
+            <div>123123</div>
+          </div>
+          <div className="hollow-border" />
+        </div>
+      </DragView>
       <img
         src={
           'https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg'

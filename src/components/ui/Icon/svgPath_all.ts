@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-04-24T11:47:35.537Z
+// 生成时间: 2026-04-30T15:07:31.533Z
 
 export const SVG_PATH_NAMES = [
   'arrow_long_left',
@@ -13,6 +13,7 @@ export const SVG_PATH_NAMES = [
   'cart',
   'close',
   'file',
+  'glass-border',
   'globe',
   'home',
   'next',
@@ -20,6 +21,7 @@ export const SVG_PATH_NAMES = [
   'profile',
   'time',
   'window',
+  'xxx',
 ] as const;
 
 export type SvgPathName = (typeof SVG_PATH_NAMES)[number];
