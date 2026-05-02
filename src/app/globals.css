@@ -116,50 +116,38 @@ body {
   display: none;
 }
 
-/* 容器包裹内容与边框 */
-.hollow-border-container {
-  position: relative;
-  background: rgba(0, 0, 0, 0.1);
-  box-shadow: 0.5px 0.5px 2px white inset;
-  backdrop-filter: blur(2px); /* 背景模糊 */
-  border-radius: 9999px;
-  cursor: pointer;
-  overflow: hidden; /* 防止外层渐变溢出 */
+/* ---- 玻璃 */
+/* 玻璃按钮 */
+#glassBtn {
+  width: 400px;
+  height: 160px;
+  z-index: 100;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  /* 2. 液态玻璃核心：高模糊 + 强饱和 */
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
+  /* backdrop-filter: blur(4px) saturate(200%);
+  -webkit-backdrop-filter: blur(35px) saturate(200%); */
+
+  border-radius: 50px;
+  /* border: 1.5px solid var(--glass-border); */
+
+  /* 3. 模拟物理厚度的高光与阴影 */
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    /* 顶部亮边 */ inset 1px 1px 1px rgba(255, 255, 255, 0.5),
+    /* 底部暗边 */ inset -1px -1px 3px rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* 实现镂空渐变边框的层 */
-.hollow-border {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-
-  /* 边框颜色渐变 */
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.45),
-    transparent,
-    transparent,
-    rgba(255, 255, 255, 0.5)
-  );
-
-  /* mask 技术制造“镂空效果”，只显示边框部分 */
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: destination-out; /* Safari 专用合成模式 */
-  mask-composite: exclude; /* 其他现代浏览器 */
-  mask-mode: alpha;
-
-  padding: 1px; /* 边框厚度 */
-  pointer-events: none; /* 避免遮挡交互 */
-}
-/* 内容层，位于镂空边框之上 */
-.hollow-border-content {
-  position: relative;
-  z-index: 1;
-  padding: 16px 50px;
-  color: white;
+#glassBtn:active {
+  cursor: grabbing;
+  transform: scale(0.94);
+  transition: transform 0.2s cubic-bezier(0.1, 0.5, 0.1, 1);
 }

@@ -151,16 +151,11 @@ export default function HomePage() {
           left: 100,
         }}
       >
-        <div className="hollow-border-container">
-          <div className="hollow-border-content">
-            <div>123123dsjahkdjshdjhasjdhjshdsj</div>
-            <div>123123</div>
-            <div>123123</div>
-            <div>123123</div>
-          </div>
-          <div className="hollow-border" />
+        <div id="glassBtn">
+          <span className="text-5xl font-bold italic">GLASS</span>
         </div>
       </DragView>
+
       <img
         src={
           'https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg'
