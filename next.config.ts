@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 import { withSentryConfig } from '@sentry/nextjs';
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { execSync } from 'node:child_process';
 
 import brandConfig from './src/configs/brands';
@@ -37,6 +38,13 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  turbopack: {
+    // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
+    rules: codeInspectorPlugin({
+      bundler: 'turbopack',
+      showSwitch: true,
+    }),
+  },
 };
 const withNextIntl = createNextIntlPlugin();
 export default withSentryConfig(withNextIntl(nextConfig), {
@@ -55,6 +63,10 @@ export default withSentryConfig(withNextIntl(nextConfig), {
 
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
+  sourcemaps: {
+    disable: false,
+    deleteSourcemapsAfterUpload: true,
+  },
   webpack: {
     // Tree-shaking options for reducing bundle size
     treeshake: {
