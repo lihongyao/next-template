@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface ResponsiveImageProps {
   desktop?: string;
   mobile?: string;
@@ -7,7 +9,7 @@ interface ResponsiveImageProps {
   fetchPriority?: 'high' | 'low' | 'auto';
 }
 
-export function ResponsiveImage({
+export default memo(function ResponsiveImage({
   desktop,
   mobile,
   alt,
@@ -32,4 +34,4 @@ export function ResponsiveImage({
       />
     </picture>
   );
-}
+});

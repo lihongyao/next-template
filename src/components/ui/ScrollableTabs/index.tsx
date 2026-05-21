@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -43,7 +43,7 @@ interface ScrollableTabsProps<T = unknown> {
   onItemClick?: (item: T, index: number) => void;
 }
 
-export default function ScrollableTabs<T = unknown>({
+export default memo(function ScrollableTabs<T = unknown>({
   id = '',
   dataName,
   className,
@@ -316,4 +316,4 @@ export default function ScrollableTabs<T = unknown>({
       </div>
     </div>
   );
-}
+});
