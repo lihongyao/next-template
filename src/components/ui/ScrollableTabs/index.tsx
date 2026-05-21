@@ -211,7 +211,7 @@ export default function ScrollableTabs<T = unknown>({
     (item: T, index: number) => {
       console.log('onItemTap >>> ', item, index, innerIndex);
       // 拖拽状态下或已经选中，不触发
-      if (isDragging.current || innerIndex === index) return;
+      if (isDragging.current || (currentIndex > 0 && innerIndex === index)) return;
 
       // 标记为用户交互，后续滚动会使用平滑动画
       isUserInteraction.current = true;

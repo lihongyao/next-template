@@ -5,7 +5,6 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import { withSentryConfig } from '@sentry/nextjs';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { execSync } from 'node:child_process';
-import path from 'node:path';
 
 import brandConfig from './src/configs/brands';
 import { ModalRoutes } from './src/router/routes';
@@ -17,10 +16,6 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 }));
 
 const appVersion = getAppVersion();
-const removeClientConsoleLoader = path.resolve(
-  process.cwd(),
-  'scripts/loaders/remove-client-console-loader.cjs',
-);
 
 const nextConfig: NextConfig = {
   // 生成 build id
@@ -45,28 +40,10 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
-    rules: {
-      ...codeInspectorPlugin({
-        bundler: 'turbopack',
-        showSwitch: true,
-      }),
-      '*.{js,jsx,ts,tsx,mjs,cjs}': {
-        // 不使用 compiler.removeConsole，避免影响服务端构建产物里的日志。
-        condition: { all: ['browser', 'production', { not: { path: /[\\/]node_modules[\\/]/ } }] },
-        loaders: [removeClientConsoleLoader],
-      },
-    },
-  },
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      config.module.rules.push({
-        test: /\.[cm]?[jt]sx?$/,
-        exclude: /node_modules/,
-        use: removeClientConsoleLoader,
-      });
-    }
-
-    return config;
+    rules: codeInspectorPlugin({
+      bundler: 'turbopack',
+      showSwitch: true,
+    }),
   },
 };
 const withNextIntl = createNextIntlPlugin();
