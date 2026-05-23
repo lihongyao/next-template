@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
-import DragView from '@/components/ui/DragView';
 import Icon from '@/components/ui/Icon';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { getImgUrl } from '@/libs/helpers';
@@ -145,7 +144,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <DragView
+      {/* <DragView
         position={{
           top: 100,
           left: 100,
@@ -154,7 +153,7 @@ export default function HomePage() {
         <div id="glassBtn">
           <span className="text-5xl font-bold italic">GLASS</span>
         </div>
-      </DragView>
+      </DragView> */}
 
       <img
         src={

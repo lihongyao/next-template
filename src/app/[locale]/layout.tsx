@@ -62,6 +62,8 @@ export default async function LocaleLayout({
 
   const userAgent = (await headers()).get('user-agent') || '';
 
+  console.log('============================= userAgent:', userAgent);
+
   return (
     <html
       lang={locale}

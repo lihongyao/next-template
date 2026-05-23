@@ -5,6 +5,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import { withSentryConfig } from '@sentry/nextjs';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { execSync } from 'node:child_process';
+import path from 'node:path';
 
 import brandConfig from './src/configs/brands';
 import { ModalRoutes } from './src/router/routes';
@@ -16,6 +17,17 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 }));
 
 const appVersion = getAppVersion();
+const removeClientConsoleLoader = path.resolve(
+  process.cwd(),
+  'scripts/loaders/remove-client-console-loader.cjs',
+);
+const codeInspectorRules =
+  process.env.NODE_ENV === 'development'
+    ? codeInspectorPlugin({
+        bundler: 'turbopack',
+        showSwitch: true,
+      })
+    : {};
 
 const nextConfig: NextConfig = {
   // 生成 build id
@@ -27,6 +39,7 @@ const nextConfig: NextConfig = {
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
+  allowedDevOrigins: ['192.168.0.53'],
   // 环境变量
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
@@ -39,11 +52,16 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   turbopack: {
-    // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
-    rules: codeInspectorPlugin({
-      bundler: 'turbopack',
-      showSwitch: true,
-    }),
+    rules: {
+      // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
+      ...codeInspectorRules,
+      // 客户端生产包移除调试 console，服务端日志不处理。
+      // production: next build；browser: 浏览器端 bundle；foreign: node_modules / Next 内部模块。
+      '*.{js,jsx,ts,tsx,mjs,cjs}': {
+        condition: { all: ['production', 'browser', { not: 'foreign' }] },
+        loaders: [removeClientConsoleLoader],
+      },
+    },
   },
 };
 const withNextIntl = createNextIntlPlugin();

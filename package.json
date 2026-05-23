@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "predev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
-    "dev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next dev --turbopack",
+    "dev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next dev",
     "prebuild": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
-    "build": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next build --turbopack",
-    "start": "cross-env app=${app:-afun} env=${env:-dev} next start",
+    "build": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next build",
+    "start": "cross-env app=${app:-afun} env=${env:-dev} tsx scripts/start/index.ts",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "prettier --write .",
