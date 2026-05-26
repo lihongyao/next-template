@@ -12,4 +12,13 @@ export const registerSchema = z.object({
   email: z_email,
 });
 
-export type RegisterFormValues = z.infer<typeof registerSchema>;
+export const loginSchema = z.object({
+  username: z_username,
+  password: z_password,
+});
+
+export type RegisterFormValues = z.input<typeof registerSchema>;
+export type RegisterSubmitValues = z.output<typeof registerSchema>;
+
+export type LoginFormValues = z.input<typeof loginSchema>;
+export type LoginSubmitValues = z.output<typeof loginSchema>;

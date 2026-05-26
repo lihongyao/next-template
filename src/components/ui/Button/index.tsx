@@ -10,7 +10,7 @@ export default function Button({ children, disabled, className, onClick }: Butto
   return (
     <div
       className={cn(
-        'w-fit cursor-pointer rounded-sm bg-green-700 px-3 py-1 text-sm text-white',
+        'flex w-fit cursor-pointer items-center justify-center rounded-sm bg-green-700 px-3 py-1 text-sm text-white',
         className,
       )}
       onClick={() => {

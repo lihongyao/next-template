@@ -28,8 +28,9 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
             } else {
               if (history.length > 2) {
                 router.back();
+                return;
               }
-              router.push(Routes.Home);
+              router.replace(Routes.Home);
             }
           }}
         >

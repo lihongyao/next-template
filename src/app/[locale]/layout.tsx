@@ -62,8 +62,6 @@ export default async function LocaleLayout({
 
   const userAgent = (await headers()).get('user-agent') || '';
 
-  console.log('============================= userAgent:', userAgent);
-
   return (
     <html
       lang={locale}
@@ -84,7 +82,7 @@ export default async function LocaleLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
 
-      <body style={{ background: '#252526' }}>
+      <body style={{ background: '#101010' }}>
         {/* lcp element */}
         <img
           className="lcp-anchor"
@@ -95,16 +93,16 @@ export default async function LocaleLayout({
         {/* 国际化 */}
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
-            <DialogProvider>
-              <DeviceProvider userAgent={userAgent}>
+            <DeviceProvider userAgent={userAgent}>
+              <DialogProvider>
                 <ModalProvider>
                   <LogoLoading />
                   <ClientInitializer />
                   <RouteModalRenderer />
                   {children}
                 </ModalProvider>
-              </DeviceProvider>
-            </DialogProvider>
+              </DialogProvider>
+            </DeviceProvider>
           </BrandConfigProvider>
         </NextIntlClientProvider>
         {/* 记录滚动位置 */}

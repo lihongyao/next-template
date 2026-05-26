@@ -115,8 +115,6 @@ export default function RouteModalRenderer() {
       {modalComponents.map((Modal, idx) => {
         const modalKey = modalKeys[idx];
 
-        // return <Modal key={modalKey} />;
-
         return (
           <motion.div
             key={modalKey}
@@ -133,6 +131,7 @@ export default function RouteModalRenderer() {
               onClick={closeModal}
             />
             <motion.div
+              className="bg-[#101010]"
               variants={contentVariants}
               initial="hidden"
               animate="visible"

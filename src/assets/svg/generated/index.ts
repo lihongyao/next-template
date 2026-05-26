@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-04-30T15:07:31.533Z
+// 生成时间: 2026-05-26T13:16:01.555Z
 import type React from 'react';
 
 import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';
@@ -41,16 +41,28 @@ export const SVG_COMPONENT_MAP = {
 >;
 
 export const SVG_SPRITE_ID_MAP = {
+  arrow_down: 'icon-arrow_down',
+  arrow_left: 'icon-arrow_left',
+  arrow_right: 'icon-arrow_right',
+  arrow_up: 'icon-arrow_up',
   cart: 'icon-cart',
+  copy: 'icon-copy',
+  edit: 'icon-edit',
   home: 'icon-home',
+  message: 'icon-message',
   order: 'icon-order',
   profile: 'icon-profile',
-  xxx: 'icon-xxx',
+  promotion: 'icon-promotion',
+  settings: 'icon-settings',
 } as const satisfies Partial<Record<SvgPathName, string>>;
 
 export const SVG_ICON_KIND_MAP = {
+  arrow_down: 'sprite',
+  arrow_left: 'sprite',
   arrow_long_left: 'svgr',
   arrow_long_right: 'svgr',
+  arrow_right: 'sprite',
+  arrow_up: 'sprite',
   bottom_acting: 'svgr',
   bottom_casino: 'svgr',
   bottom_home: 'svgr',
@@ -59,16 +71,20 @@ export const SVG_ICON_KIND_MAP = {
   bottom_vip2: 'svgr',
   cart: 'sprite',
   close: 'svgr',
+  copy: 'sprite',
+  edit: 'sprite',
   file: 'svgr',
   'glass-border': 'svgr',
   globe: 'svgr',
   home: 'sprite',
+  message: 'sprite',
   next: 'svgr',
   order: 'sprite',
   profile: 'sprite',
+  promotion: 'sprite',
+  settings: 'sprite',
   time: 'svgr',
   window: 'svgr',
-  xxx: 'sprite',
 } as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
 
-export const SVG_SPRITE_FILE = '/sprite.7e6d380b.svg';
+export const SVG_SPRITE_FILE = '/sprite.64db2e45.svg';
