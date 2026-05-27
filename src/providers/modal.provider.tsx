@@ -1,25 +1,10 @@
 'use client';
 
-import { type ReactNode, createContext, useCallback, useContext, useReducer } from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useMemo, useRef } from 'react';
 
 export interface ModalContextValue {
   closeModal: () => void;
   setCloseModal: (closeModal: () => void) => void;
-}
-
-type ModalState = {
-  closeModal: () => void;
-};
-
-type ModalAction = { type: 'SET_CLOSE_MODAL'; payload: () => void };
-
-function modalReducer(state: ModalState, action: ModalAction): ModalState {
-  switch (action.type) {
-    case 'SET_CLOSE_MODAL':
-      return { closeModal: action.payload };
-    default:
-      return state;
-  }
 }
 
 const noop = () => {};
@@ -27,16 +12,23 @@ const noop = () => {};
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(modalReducer, { closeModal: noop });
+  const closeModalRef = useRef<() => void>(noop);
 
   const setCloseModal = useCallback((closeModal: () => void) => {
-    dispatch({ type: 'SET_CLOSE_MODAL', payload: closeModal });
+    closeModalRef.current = closeModal;
   }, []);
 
-  const value: ModalContextValue = {
-    closeModal: state.closeModal,
-    setCloseModal,
-  };
+  const closeModal = useCallback(() => {
+    closeModalRef.current();
+  }, []);
+
+  const value: ModalContextValue = useMemo(
+    () => ({
+      closeModal,
+      setCloseModal,
+    }),
+    [closeModal, setCloseModal],
+  );
 
   return <ModalContext.Provider value={value}>{children}</ModalContext.Provider>;
 }

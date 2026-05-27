@@ -80,6 +80,13 @@ export default function HomePage() {
           国际化
         </Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
+        <Button
+          onClick={() => {
+            throw new Error('测试 sentry');
+          }}
+        >
+          测试 sentry
+        </Button>
       </div>
 
       <div className="text-[#187843]">1231232</div>

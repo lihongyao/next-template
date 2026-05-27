@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
@@ -58,15 +58,21 @@ export default function MobilePageTransition({
   direction,
   pageKey,
   kind,
+  suspended = false,
 }: {
   children: React.ReactNode | null;
   direction: Direction;
   pageKey: string;
   kind: TransitionKind;
+  suspended?: boolean;
 }) {
   const routerContext = useContext(LayoutRouterContext);
   const makeLayer = (): PageLayer | null =>
     children ? { key: pageKey, node: children, routerContext } : null;
+  const liveLayerRef = useRef<PageLayer | null>(null);
+  if (!suspended) {
+    liveLayerRef.current = makeLayer();
+  }
 
   const [currentLayer, setCurrentLayer] = useState<PageLayer | null>(makeLayer);
   const [underLayer, setUnderLayer] = useState<PageLayer | null>(null);
@@ -75,12 +81,13 @@ export default function MobilePageTransition({
   const previousKeyRef = useRef(pageKey);
   const shouldAnimate = kind === 'cover';
 
-  useEffect(() => {
-    const nextLayer = makeLayer();
+  useLayoutEffect(() => {
+    if (suspended) return;
+
+    const nextLayer = liveLayerRef.current;
     const previousLayer = prevLayerRef.current;
 
     if (previousKeyRef.current === pageKey) {
-      setCurrentLayer(nextLayer);
       prevLayerRef.current = nextLayer;
       return;
     }
@@ -100,8 +107,10 @@ export default function MobilePageTransition({
 
     setCurrentLayer(nextLayer);
     prevLayerRef.current = nextLayer;
-  }, [children, direction, pageKey, routerContext, shouldAnimate]);
+  }, [direction, pageKey, shouldAnimate, suspended]);
 
+  const renderedCurrentLayer =
+    !suspended && currentLayer?.key === pageKey ? liveLayerRef.current : currentLayer;
   const currentInitialX = shouldAnimate && direction === 'forward' ? '100%' : 0;
   const currentZIndex = direction === 'forward' ? baseZIndex + 1 : baseZIndex;
   const exitZIndex = direction === 'back' ? baseZIndex + 1 : baseZIndex;
@@ -120,10 +129,10 @@ export default function MobilePageTransition({
           animateX={0}
         />
       ) : null}
-      {currentLayer ? (
+      {renderedCurrentLayer ? (
         <PageFrame
-          key={currentLayer.key}
-          layer={currentLayer}
+          key={renderedCurrentLayer.key}
+          layer={renderedCurrentLayer}
           zIndex={currentZIndex}
           initialX={currentInitialX}
           animateX={0}

@@ -3,10 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { Link } from '@/i18n/navigation';
 import { getImageUrl } from '@/libs/cdn-image';
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
+import { Link } from '@/router';
 import { Routes } from '@/router/routes';
 import { LoginFormValues, LoginSubmitValues, loginSchema } from '@/schemas/user.schema';
 import { useGlobalStore } from '@/stores/useGlobalStore';

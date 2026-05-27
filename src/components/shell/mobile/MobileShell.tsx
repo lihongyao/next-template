@@ -26,9 +26,15 @@ type TabSnapshot = {
 };
 
 const tabTransition = { type: 'tween' as const, duration: 0.2, ease: 'easeOut' as const };
+const modalRouteSegments = new Set(
+  Object.values(ModalRoutes).map((value) => value.replace(/^\//, '')),
+);
 
 function isModalRoute(path: string): boolean {
-  return Object.values(ModalRoutes).some((value) => path.includes(value));
+  return path
+    .split('/')
+    .filter(Boolean)
+    .some((segment) => modalRouteSegments.has(segment));
 }
 
 function isSamePath(prevPathname: string, pathname: string): boolean {
@@ -51,13 +57,14 @@ export default function MobileShell({ children }: { children: React.ReactNode })
   const prevPathnameRef = useRef(pathname);
   const pathRef = useRef(pathname);
   const skipForCurrentPathRef = useRef(false);
-  const lastTabRef = useRef<TabSnapshot>({
-    pathname: Routes.Home,
-    children: null,
-  });
+  const lastTabRef = useRef<TabSnapshot | null>(null);
   const currentIsModal = isModalRoute(pathname);
+  const currentIsLevel1 = meta.mobileLevel === 1;
+  const currentIsTabPage = currentIsLevel1 && !currentIsModal;
 
-  if (meta.mobileLevel === 1 && !currentIsModal) {
+  // App Router may provide destination children before usePathname reflects that destination.
+  // Do not overwrite the cached tab for the same path during that intermediate render.
+  if (currentIsTabPage && lastTabRef.current?.pathname !== pathname) {
     lastTabRef.current = { pathname, children };
   }
 
@@ -74,13 +81,10 @@ export default function MobileShell({ children }: { children: React.ReactNode })
     !skipForCurrentPathRef.current && shouldUseCoverTransition(prevPathname, pathname);
   const transitionKind: TransitionKind = useCover ? 'cover' : 'none';
   const transitionDirection: Direction = direction;
-  const currentIsLevel1 = meta.mobileLevel === 1;
   const prevMeta = matchRouteMeta(prevPathname);
-  const baseTab = currentIsLevel1
-    ? { pathname, children }
-    : lastTabRef.current.pathname
-      ? lastTabRef.current
-      : { pathname: Routes.Home, children: null };
+  const baseTab =
+    lastTabRef.current ??
+    (currentIsTabPage ? { pathname, children } : { pathname: Routes.Home, children: null });
   const showSubPage = meta.mobileLevel === 2;
   const useTabTransition =
     prevMeta.mobileLevel === 1 &&
@@ -127,6 +131,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
         pageKey={pathname}
         direction={transitionDirection}
         kind={transitionKind}
+        suspended={currentIsModal}
       >
         {showSubPage ? <MobileLevel2>{children}</MobileLevel2> : null}
       </MobilePageTransition>

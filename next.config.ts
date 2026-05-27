@@ -6,8 +6,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import path from 'node:path';
 
-import { getAppVersion } from '@/libs/helpers';
-
+import { getAppVersion } from './scripts/shared/app-version';
 import brandConfig from './src/configs/brands';
 import { ModalRoutes } from './src/router/routes';
 
@@ -18,6 +17,7 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 }));
 
 const appVersion = getAppVersion();
+const isProduction = process.env.NODE_ENV === 'production';
 const removeClientConsoleLoader = path.resolve(
   process.cwd(),
   'scripts/loaders/remove-client-console-loader.cjs',
@@ -36,15 +36,18 @@ const baseConfig: NextConfig = {
   // 禁用响应头 X-Powered-By: Next.js
   poweredByHeader: false,
   // 保持开发环境快速运行
-  reactCompiler: process.env.NODE_ENV === 'production',
+  // React Compiler 会改变 sourcemap 中的 sourcesContent，Sentry 里会看到编译后的缓存代码。
+  reactCompiler: false,
+  // 启用严格模式
+  reactStrictMode: false,
   // 生成 build id
   generateBuildId: () => appVersion,
-  reactStrictMode: false,
   // 在路由匹配前把 /modal-xxx 等重写到 /{defaultLocale}，避免被 [locale] 误匹配成 locale
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
   allowedDevOrigins: ['192.168.0.53'],
+  // 启用 sourcemap
   productionBrowserSourceMaps: true,
   // 环境变量
   env: {
@@ -93,18 +96,11 @@ configWithPlugins = withSentryConfig(configWithPlugins, {
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
-  tunnelRoute: '/monitoring',
+  tunnelRoute: isProduction ? '/monitoring' : undefined,
 
   sourcemaps: {
-    disable: false,
-    deleteSourcemapsAfterUpload: true,
-  },
-  webpack: {
-    // Tree-shaking options for reducing bundle size
-    treeshake: {
-      // Automatically tree-shake Sentry logger statements to reduce bundle size
-      removeDebugLogging: true,
-    },
+    // 由 scripts/sentry/upload-sourcemaps.ts 统一使用 sentry-cli 上传并删除 .map，避免重复上传。
+    disable: true,
   },
 });
 

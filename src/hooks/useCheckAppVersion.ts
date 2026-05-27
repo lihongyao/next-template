@@ -9,6 +9,8 @@ import { CURRENT_VERSION } from '@/constants';
 export function useCheckAppVersion() {
   const router = useRouter();
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return;
+
     let timer: number | null = null;
     let interval = 60_000; // 初始 1 分钟
 

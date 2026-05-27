@@ -1,6 +1,6 @@
 // src/hooks/useSwipeBack.ts
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type SwipeBackOptions = {
   enabled?: boolean;
@@ -10,6 +10,11 @@ type SwipeBackOptions = {
 
 export function useSwipeBack(onSwipe: (value: boolean) => void, options: SwipeBackOptions = {}) {
   const { enabled = true, edge = 30, distance = 50 } = options;
+  const onSwipeRef = useRef(onSwipe);
+
+  useEffect(() => {
+    onSwipeRef.current = onSwipe;
+  }, [onSwipe]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -35,7 +40,7 @@ export function useSwipeBack(onSwipe: (value: boolean) => void, options: SwipeBa
     };
 
     const onTouchEnd = () => {
-      onSwipe(swiped);
+      onSwipeRef.current(swiped);
     };
 
     window.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -47,5 +52,5 @@ export function useSwipeBack(onSwipe: (value: boolean) => void, options: SwipeBa
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [enabled, onSwipe, edge, distance]);
+  }, [enabled, edge, distance]);
 }

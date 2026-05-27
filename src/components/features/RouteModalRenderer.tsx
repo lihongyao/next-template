@@ -16,6 +16,7 @@ import { ModalComponents } from '@/app/[locale]/(modals)';
 import { ZIndex } from '@/constants';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { routing } from '@/i18n/routing';
+import { MOBILE_MODAL_HISTORY_CHANGE_EVENT } from '@/libs/mobile-modal-history';
 import { getH5PathForPcPath } from '@/libs/modal-page-routes-utils';
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
@@ -38,9 +39,11 @@ export default function RouteModalRenderer() {
   const router = useRouter();
   const pathname = usePathname();
   const { isMobile } = useDevice();
+  const [nativeModalPathname, setNativeModalPathname] = useState<string | null>(null);
+  const modalPathname = nativeModalPathname ?? pathname;
   const pathSegments = useMemo(
-    () => getEffectivePathForModals(pathname, isMobile === true),
-    [pathname, isMobile],
+    () => getEffectivePathForModals(modalPathname, isMobile === true),
+    [modalPathname, isMobile],
   );
   const searchParamsString = useSearchParams().toString();
   const { setCloseModal } = useModal();
@@ -56,6 +59,25 @@ export default function RouteModalRenderer() {
       }),
     [modalKeys],
   );
+
+  useEffect(() => {
+    const syncNativeModalPathname = () => {
+      setNativeModalPathname(window.location.pathname);
+    };
+
+    window.addEventListener(MOBILE_MODAL_HISTORY_CHANGE_EVENT, syncNativeModalPathname);
+    window.addEventListener('popstate', syncNativeModalPathname);
+    return () => {
+      window.removeEventListener(MOBILE_MODAL_HISTORY_CHANGE_EVENT, syncNativeModalPathname);
+      window.removeEventListener('popstate', syncNativeModalPathname);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (nativeModalPathname === pathname) {
+      setNativeModalPathname(null);
+    }
+  }, [nativeModalPathname, pathname]);
 
   const closeModal = useCallback(() => {
     if (!modalComponents.length) return;
@@ -78,7 +100,11 @@ export default function RouteModalRenderer() {
     setCloseModal(closeModal);
   }, [closeModal, setCloseModal]);
 
-  useSwipeBack((value) => setIsAllow(!value), { enabled: modalComponents.length > 0 });
+  const handleSwipeBack = useCallback((value: boolean) => {
+    setIsAllow(!value);
+  }, []);
+
+  useSwipeBack(handleSwipeBack, { enabled: modalComponents.length > 0 });
 
   useEffect(() => {
     if (modalComponents.length) {
