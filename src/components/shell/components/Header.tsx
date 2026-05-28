@@ -46,11 +46,17 @@ export default function Header({ fixed = false }: { fixed?: boolean }) {
                 购物车
               </Button>
 
+              {/* 奖金中心 */}
+              <div className="from-[] to-[] flex h-[36px] w-[48px] cursor-pointer items-center justify-center rounded-sm bg-linear-180 from-[#FFBC00] to-[#FF8000] shadow-xl">
+                <img className="size-7" src={getImageUrl('bonus/bonus-animation.webp')} />
+              </div>
+              {/* 通知中心 */}
               <Icon
                 name="message"
                 className="size-4"
-                wrapperClass="size-[36px] bg-gray-600 rounded-sm isTabletOrDesktop"
+                wrapperClass="size-[36px] bg-gray-600 rounded-sm isTabletOrDesktop cursor-pointer"
               />
+              {/* 个人中心 */}
               <img
                 className="size-[36px] rounded-sm"
                 src={getImageUrl('avatars/h_0.jpg')}
