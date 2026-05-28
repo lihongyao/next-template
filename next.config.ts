@@ -4,7 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 import { withSentryConfig } from '@sentry/nextjs';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
-import path from 'node:path';
+
+// import path from 'node:path';
 
 import { getAppVersion } from './scripts/shared/app-version';
 import brandConfig from './src/configs/brands';
@@ -18,10 +19,12 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 
 const enableSentry = ['stage', 'prod'].includes(process.env.NEXT_PUBLIC_ENV);
 const appVersion = getAppVersion();
-const removeClientConsoleLoader = path.resolve(
-  process.cwd(),
-  'scripts/loaders/remove-client-console-loader.cjs',
-);
+
+// const removeClientConsoleLoader = path.resolve(
+//   process.cwd(),
+//   'scripts/loaders/remove-client-console-loader.cjs',
+// );
+
 const codeInspectorRules =
   process.env.NODE_ENV === 'development'
     ? codeInspectorPlugin({
@@ -57,16 +60,20 @@ const baseConfig: NextConfig = {
     // https://github.com/RevoTale/next-scroll-restorer
     scrollRestoration: true,
   },
+  compiler: {
+    removeConsole: { exclude: ['error', 'warn'] },
+  },
   turbopack: {
     rules: {
       // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
       ...codeInspectorRules,
+
       // 客户端生产包移除调试 console，服务端日志不处理。
       // production: next build；browser: 浏览器端 bundle；foreign: node_modules / Next 内部模块。
-      '*.{js,jsx,ts,tsx,mjs,cjs}': {
-        condition: { all: ['production', 'browser', { not: 'foreign' }] },
-        loaders: [removeClientConsoleLoader],
-      },
+      // '*.{js,jsx,ts,tsx,mjs,cjs}': {
+      //   condition: { all: ['production', 'browser', { not: 'foreign' }] },
+      //   loaders: [removeClientConsoleLoader],
+      // },
     },
   },
 };
