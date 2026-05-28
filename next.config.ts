@@ -16,8 +16,8 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
   destination: `/${defaultLocale}`,
 }));
 
+const enableSentry = ['stage', 'prod'].includes(process.env.NEXT_PUBLIC_ENV);
 const appVersion = getAppVersion();
-const isProduction = process.env.NODE_ENV === 'production';
 const removeClientConsoleLoader = path.resolve(
   process.cwd(),
   'scripts/loaders/remove-client-console-loader.cjs',
@@ -48,7 +48,7 @@ const baseConfig: NextConfig = {
   }),
   allowedDevOrigins: ['192.168.0.53'],
   // 启用 sourcemap
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: enableSentry,
   // 环境变量
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
@@ -74,35 +74,37 @@ const baseConfig: NextConfig = {
 // Initialize the Next-Intl plugin
 let configWithPlugins = createNextIntlPlugin()(baseConfig);
 
-// Conditionally enable Sentry configuration
-configWithPlugins = withSentryConfig(configWithPlugins, {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-  org: '8u8',
-  project: 'javascript-nextjs',
+if (enableSentry) {
+  // Conditionally enable Sentry configuration
+  configWithPlugins = withSentryConfig(configWithPlugins, {
+    // For all available options, see:
+    // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+    org: '8u8',
+    project: 'javascript-nextjs',
 
-  release: { name: appVersion },
+    release: { name: appVersion },
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
+    // Only print logs for uploading source maps in CI
+    silent: !process.env.CI,
 
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+    // For all available options, see:
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
+    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    widenClientFileUpload: true,
 
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: isProduction ? '/monitoring' : undefined,
+    // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+    // This can increase your server load as well as your hosting bill.
+    // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+    // side errors will fail.
+    tunnelRoute: '/monitoring',
 
-  sourcemaps: {
-    // 由 scripts/sentry/upload-sourcemaps.ts 统一使用 sentry-cli 上传并删除 .map，避免重复上传。
-    disable: true,
-  },
-});
+    sourcemaps: {
+      // 由 scripts/sentry/upload-sourcemaps.ts 统一使用 sentry-cli 上传并删除 .map，避免重复上传。
+      disable: true,
+    },
+  });
+}
 
 const nextConfig = configWithPlugins;
 export default nextConfig;
