@@ -17,6 +17,7 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
   destination: `/${defaultLocale}`,
 }));
 
+const isDev = process.env.NODE_ENV === 'development';
 const enableSentry = ['stage', 'prod'].includes(process.env.NEXT_PUBLIC_ENV);
 const appVersion = getAppVersion();
 
@@ -61,7 +62,7 @@ const baseConfig: NextConfig = {
     scrollRestoration: true,
   },
   compiler: {
-    removeConsole: { exclude: ['error', 'warn'] },
+    // removeConsole: isDev ? false : { exclude: ['error', 'warn'] },
   },
   turbopack: {
     rules: {
