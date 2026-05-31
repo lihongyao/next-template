@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -509,4 +510,4 @@ const CustomSwiper = forwardRef(CustomSwiperInner) as <T>(
   props: CustomSwiperProps<T> & { ref?: React.Ref<CustomSwiperRef> },
 ) => React.ReactElement;
 
-export default CustomSwiper;
+export default memo(CustomSwiper);

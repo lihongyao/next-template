@@ -1,16 +1,13 @@
 'use client';
 
-import { memo, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useRef } from 'react';
 
-import { Link, usePathname } from '@/i18n/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { cn } from '@/libs/class-helpers';
+import { Link } from '@/router';
 import { type Route, Routes } from '@/router/routes';
 
 import Icon from '../ui/Icon';
-
-const BUBBLE_H = Math.round((65 * 66) / 80);
-const TRACK_H = 65;
-const TRACK_PAD_X = 8;
 
 export interface TabBarItemProps {
   path: Route;
@@ -18,40 +15,15 @@ export interface TabBarItemProps {
   icon: string;
 }
 
-export const TabRoutes: Route[] = [Routes.Home, Routes.Cart, Routes.Order, Routes.Profile];
 export default memo(function AppTabBar() {
   const tabBarConfig: TabBarItemProps[] = [
     { path: Routes.Home, label: '首页', icon: 'home' },
     { path: Routes.Cart, label: '购物车', icon: 'cart' },
     { path: Routes.Order, label: '订单', icon: 'order' },
-    { path: Routes.Profile, label: '个人中心', icon: 'profile' },
+    { path: Routes.Promotion, label: '线下活动', icon: 'promotion' },
   ];
   const pathname = usePathname();
   const trackRef = useRef<HTMLDivElement>(null);
-  const [slotWidth, setSlotWidth] = useState(0);
-
-  const activeIndex = Math.max(
-    0,
-    tabBarConfig.findIndex((item) => item.path === pathname),
-  );
-
-  useLayoutEffect(() => {
-    const el = trackRef.current;
-    if (!el || typeof window === 'undefined') return;
-
-    const apply = () => {
-      const tw = el.offsetWidth;
-      const sw = Math.max(0, (tw - TRACK_PAD_X * 2) / tabBarConfig.length);
-      setSlotWidth(sw);
-    };
-
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const bubbleTop = (TRACK_H - BUBBLE_H) / 2;
 
   return (
     // bottom-0 才会被 iOS safari 底部工具栏吸取颜色

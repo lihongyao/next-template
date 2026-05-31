@@ -4,10 +4,12 @@ import fs from 'fs';
 import path from 'path';
 
 export async function GET() {
-  const buildId = fs.readFileSync(path.join(process.cwd(), '.next/BUILD_ID'), 'utf8').trim();
+  const version =
+    process.env.NEXT_PUBLIC_APP_VERSION ||
+    fs.readFileSync(path.join(process.cwd(), '.next/BUILD_ID'), 'utf8').trim();
 
   return NextResponse.json(
-    { version: buildId },
+    { version },
     {
       headers: {
         // ⭐ 永远不要缓存

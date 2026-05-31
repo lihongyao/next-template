@@ -120,6 +120,8 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
     output: path.relative(ROOT_DIR, PUBLIC_DIR),
     // 只产出一个 sprite 文件，不按目录分组。
     group: false,
+    // 项目运行时通过 /sprite.hash.svg 外链引用，关闭 neodx inline asset 生成。
+    inline: false,
     defaultSpriteName: PUBLIC_SPRITE_PREFIX,
     // 产出文件名带内容 hash，用于缓存失效。
     fileName: '{name}.{hash:8}.svg',

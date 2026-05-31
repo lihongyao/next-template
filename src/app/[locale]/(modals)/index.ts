@@ -3,19 +3,14 @@ import type { ComponentType } from 'react';
 
 import dynamic from 'next/dynamic';
 
-const ModalProfile = dynamic(() => import('@/app/[locale]/(modals)/profile'));
-const ModalLogin = dynamic(() => import('@/app/[locale]/(modals)/login'));
-const ModalGameList = dynamic(() => import('@/app/[locale]/(modals)/game-list'));
-const ModalGameListSwiper = dynamic(() => import('@/app/[locale]/(modals)/game-list-swiper'));
-const ModalGameDetails = dynamic(() => import('@/app/[locale]/(modals)/game-details'));
-const ModalRegister = dynamic(() => import('@/app/[locale]/(modals)/register'));
-const ModalNewsDetails = dynamic(() => import('@/app/[locale]/(modals)/news-details'));
+const loadModal = (name: string) => dynamic(() => import(`@/app/[locale]/(modals)/${name}`));
+
 export const ModalComponents: Record<string, ComponentType> = {
-  register: ModalRegister,
-  'modal-profile': ModalProfile,
-  login: ModalLogin,
-  'modal-game-list': ModalGameList,
-  'modal-game-list-swiper': ModalGameListSwiper,
-  'modal-game-details': ModalGameDetails,
-  'modal-news-details': ModalNewsDetails,
+  register: loadModal('register'),
+  profile: loadModal('profile'),
+  login: loadModal('login'),
+  'game-list': loadModal('game-list'),
+  'game-list-swiper': loadModal('game-list-swiper'),
+  'game-details': loadModal('game-details'),
+  'news-details': loadModal('news-details'),
 };

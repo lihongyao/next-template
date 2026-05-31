@@ -63,7 +63,7 @@ export default function GameListSwiper() {
           overflowMode="peek"
           onStateChange={setSwiperState}
           // peekPaddingX={24}
-          renderItem={(item, _index, { isVisible }) => (
+          renderItem={(item: any, _index, { isVisible }) => (
             <div
               className="aspect-[200/267] overflow-hidden rounded-md bg-gray-800"
               onClick={() => {

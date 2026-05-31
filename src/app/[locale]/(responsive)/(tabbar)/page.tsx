@@ -6,7 +6,6 @@ import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { getImgUrl } from '@/libs/helpers';
 import { useDevice } from '@/providers/device.provider';
 import { useRouter } from '@/router';
 import { ModalPageRoutes, Routes } from '@/router/routes';
@@ -81,6 +80,13 @@ export default function HomePage() {
           国际化
         </Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
+        <Button
+          onClick={() => {
+            throw new Error('测试 sentry');
+          }}
+        >
+          测试 sentry
+        </Button>
       </div>
 
       <div className="text-[#187843]">1231232</div>
@@ -161,8 +167,6 @@ export default function HomePage() {
         }
         alt=""
       />
-
-      <img src={getImgUrl('login/login.webp')} alt="" />
       {/* <ResponsiveImage
         mobile="https://f88cc7f7-cdbc-4de0-b27f-bbfa4a0d5455.mdnplay.dev/shared-assets/images/examples/grapefruit-slice.jpg"
         desktop="https://7962f838-71f7-4241-a247-d66de3a48854.mdnplay.dev/shared-assets/images/examples/surfer.jpg"

@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 
 import Button from '@/components/ui/Button';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useRouter } from '@/i18n/navigation';
 import { useModal } from '@/providers/modal.provider';
+import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
 export default function ModalGame() {

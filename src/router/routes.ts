@@ -1,11 +1,19 @@
 // src/lib/routes.ts
 
+/**
+ * 路由分类
+ * 1. PC/H5 均是独立页
+ * 2. PC/H5 均是路由弹窗
+ * 2. PC 是路由弹窗，H5 是独立页
+ * 3. H5 是路由弹窗，PC 是独立页
+ */
+
 // 标签栏路由
 export const TabRoutes = {
   Home: '/',
   Cart: '/cart',
   Order: '/order',
-  Profile: '/profile',
+  Promotion: '/promotion',
 };
 
 // 页面路由
@@ -33,10 +41,10 @@ export const PageRoutes = {
 export const ModalRoutes = {
   ModalLogin: '/login',
   ModalRegister: '/register',
-  ModalProfile: '/modal-profile',
-  ModalGameListSwiper: '/modal-game-list-swiper',
-  ModalGameDetails: '/modal-game-details',
-  ModalNewsDetails: '/modal-news-details',
+  ModalProfile: '/profile',
+  ModalGameListSwiper: '/game-list-swiper',
+  ModalGameDetails: '/game-details',
+  ModalNewsDetails: '/news-details',
 } as const;
 
 // 所有路由
@@ -45,6 +53,9 @@ export const Routes = {
   ...PageRoutes,
   ...ModalRoutes,
 } as const;
+
+// 受保护（需要登录）的路由
+export const ProtectedRoutes = [Routes.ModalProfile] as const;
 
 export type Route = (typeof Routes)[keyof typeof Routes];
 export type TabRoute = (typeof TabRoutes)[keyof typeof TabRoutes];
@@ -69,10 +80,6 @@ export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
  * @see useModalRoutes
  */
 export const ModalPageRoutes = {
-  profile: {
-    pc: Routes.ModalProfile,
-    h5: Routes.Profile,
-  },
   'news-details': {
     pc: Routes.ModalNewsDetails,
     h5: Routes.News,
@@ -87,7 +94,7 @@ export const ModalPageRoutes = {
     pc: Routes.GameDetails,
     h5: Routes.ModalGameDetails,
     onlySwitchWhenParamPresent: true,
-    parentKey: 'gameList',
+    parentKey: 'game-list',
   },
 } as const satisfies Record<
   string,
@@ -95,7 +102,7 @@ export const ModalPageRoutes = {
     readonly pc: Route;
     readonly h5: Route;
     readonly onlySwitchWhenParamPresent?: boolean;
-    readonly parentKey?: 'gameList' | 'profile';
+    readonly parentKey?: 'game-list' | 'profile';
   }
 >;
 

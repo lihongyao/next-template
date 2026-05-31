@@ -4,8 +4,10 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 import { withSentryConfig } from '@sentry/nextjs';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
-import { execSync } from 'node:child_process';
 
+// import path from 'node:path';
+
+import { getAppVersion } from './scripts/shared/app-version';
 import brandConfig from './src/configs/brands';
 import { ModalRoutes } from './src/router/routes';
 
@@ -15,18 +17,42 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
   destination: `/${defaultLocale}`,
 }));
 
+const isDev = process.env.NODE_ENV === 'development';
+const enableSentry = ['stage', 'prod'].includes(process.env.NEXT_PUBLIC_ENV);
 const appVersion = getAppVersion();
 
-const nextConfig: NextConfig = {
+// const removeClientConsoleLoader = path.resolve(
+//   process.cwd(),
+//   'scripts/loaders/remove-client-console-loader.cjs',
+// );
+
+const codeInspectorRules =
+  process.env.NODE_ENV === 'development'
+    ? codeInspectorPlugin({
+        bundler: 'turbopack',
+        showSwitch: true,
+      })
+    : {};
+
+const baseConfig: NextConfig = {
+  // 屏幕指示器
+  devIndicators: { position: 'bottom-right' },
+  // 禁用响应头 X-Powered-By: Next.js
+  poweredByHeader: false,
+  // 保持开发环境快速运行
+  // React Compiler 会改变 sourcemap 中的 sourcesContent，Sentry 里会看到编译后的缓存代码。
+  reactCompiler: false,
+  // 启用严格模式
+  reactStrictMode: false,
   // 生成 build id
   generateBuildId: () => appVersion,
-  /* config options here */
-  reactCompiler: true,
-  reactStrictMode: false,
   // 在路由匹配前把 /modal-xxx 等重写到 /{defaultLocale}，避免被 [locale] 误匹配成 locale
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
+  allowedDevOrigins: ['192.168.0.53'],
+  // 启用 sourcemap
+  productionBrowserSourceMaps: enableSentry,
   // 环境变量
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
@@ -35,77 +61,58 @@ const nextConfig: NextConfig = {
     // https://github.com/RevoTale/next-scroll-restorer
     scrollRestoration: true,
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  compiler: {
+    // removeConsole: isDev ? false : { exclude: ['error', 'warn'] },
   },
   turbopack: {
-    // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
-    rules: codeInspectorPlugin({
-      bundler: 'turbopack',
-      showSwitch: true,
-    }),
-  },
-};
-const withNextIntl = createNextIntlPlugin();
-export default withSentryConfig(withNextIntl(nextConfig), {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+    rules: {
+      // 提升开发效率的工具，点击页面上的 DOM，它能够自动打开你的 IDE 并将光标定位到 DOM 对应的源代码位置
+      ...codeInspectorRules,
 
-  org: '8u8',
-
-  project: 'javascript-nextjs',
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
-  sourcemaps: {
-    disable: false,
-    deleteSourcemapsAfterUpload: true,
-  },
-  webpack: {
-    // Tree-shaking options for reducing bundle size
-    treeshake: {
-      // Automatically tree-shake Sentry logger statements to reduce bundle size
-      removeDebugLogging: true,
+      // 客户端生产包移除调试 console，服务端日志不处理。
+      // production: next build；browser: 浏览器端 bundle；foreign: node_modules / Next 内部模块。
+      // '*.{js,jsx,ts,tsx,mjs,cjs}': {
+      //   condition: { all: ['production', 'browser', { not: 'foreign' }] },
+      //   loaders: [removeClientConsoleLoader],
+      // },
     },
   },
-});
+};
 
-function getAppVersion() {
-  const app = process.env.app;
-  if (!app) {
-    throw new Error('app is not set');
-  }
-  try {
-    // 获取当前 commit 上的 tags
-    const tags = execSync('git tag --points-at HEAD', { encoding: 'utf8' })
-      .split('\n')
-      .map((t) => t.trim())
-      .filter(Boolean);
-    // 获取当前应用的版本号，格式为：release/${app}_${timestamp}，如 release/afun_20260405_1500
-    const match = tags.find((tag) => tag.startsWith(`release/${app}_`));
-    if (!match) {
-      throw new Error(`No tag found for ${app}`);
-    }
-    // 获取当前 commit 的 hash
-    const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    // 返回版本号，格式为：release/${app}_${timestamp}_${hash}，如 release/afun_20260405_1500_12345678
-    return `${match}_${hash}`;
-  } catch {
-    // 无 git 时 fallback，格式为：${timestamp}，如 v_afun_20260405_1500
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-    return `v_${app}_${timestamp}`;
-  }
+// Initialize the Next-Intl plugin
+let configWithPlugins = createNextIntlPlugin()(baseConfig);
+
+if (enableSentry) {
+  // Conditionally enable Sentry configuration
+  configWithPlugins = withSentryConfig(configWithPlugins, {
+    // For all available options, see:
+    // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+    org: '8u8',
+    project: 'javascript-nextjs',
+
+    release: { name: appVersion },
+
+    // Only print logs for uploading source maps in CI
+    silent: !process.env.CI,
+
+    // For all available options, see:
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    widenClientFileUpload: true,
+
+    // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+    // This can increase your server load as well as your hosting bill.
+    // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+    // side errors will fail.
+    tunnelRoute: '/monitoring',
+
+    sourcemaps: {
+      // 由 scripts/sentry/upload-sourcemaps.ts 统一使用 sentry-cli 上传并删除 .map，避免重复上传。
+      disable: true,
+    },
+  });
 }
+
+const nextConfig = configWithPlugins;
+export default nextConfig;

@@ -151,3 +151,22 @@ body {
   transform: scale(0.94);
   transition: transform 0.2s cubic-bezier(0.1, 0.5, 0.1, 1);
 }
+
+/* 按钮动画 */
+.button-animation {
+  cursor: pointer;
+  user-select: none;
+
+  transform: translateZ(0) scale(1);
+  transition: transform 140ms ease-out;
+}
+.button-animation:active {
+  transform: translateZ(0) scale(0.95);
+  transition: transform 80ms linear;
+}
+
+.button-animation.no-button-animation,
+.button-animation.no-button-animation:active {
+  transform: none;
+  transition: none;
+}
