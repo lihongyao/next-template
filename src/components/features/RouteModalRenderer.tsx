@@ -157,7 +157,6 @@ export default function RouteModalRenderer() {
               onClick={closeModal}
             />
             <motion.div
-              className="bg-[#101010]"
               variants={contentVariants}
               initial="hidden"
               animate="visible"

@@ -36,11 +36,11 @@ export default function Register() {
   return (
     <div
       data-name="Login"
-      className="flex h-dvh w-dvw flex-col items-center gap-4 bg-[#252526] sm:h-[600px] sm:w-[400px] sm:rounded-md"
+      className="flex h-dvh w-dvw flex-col items-center gap-4 overflow-hidden bg-[#252526] sm:h-[600px] sm:w-[800px] sm:flex-row sm:items-start sm:gap-0 sm:rounded-3xl"
     >
-      <img className="h-auto w-full" src={bannerSrc} alt="banner" />
+      <img className="h-auto w-full sm:w-[380px]" src={bannerSrc} alt="banner" />
 
-      <div className="w-full px-3">
+      <div className="w-full px-3 sm:px-6 sm:pt-6">
         <h1 className="mb-4 text-2xl font-bold text-white">Login</h1>
         <form className="flex w-full flex-col gap-4" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full">

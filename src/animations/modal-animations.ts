@@ -21,7 +21,7 @@ export const modalBackdropVariantsMobile: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
   exit: {
     opacity: 0,
@@ -37,7 +37,7 @@ export const modalContentVariantsDesktop: Variants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
   exit: {
     opacity: 0,
@@ -52,10 +52,10 @@ export const modalContentVariantsMobile: Variants = {
   hidden: { x: '100%' },
   visible: {
     x: 0,
-    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
   exit: {
     x: '100%',
-    transition: { type: 'tween', duration: 0.3, ease: 'linear' },
+    transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
 };

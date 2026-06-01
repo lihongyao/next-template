@@ -18,7 +18,7 @@ const modalRewrites = (Object.values(ModalRoutes) as string[]).map((path) => ({
 }));
 
 const isDev = process.env.NODE_ENV === 'development';
-const enableSentry = ['stage', 'prod'].includes(process.env.NEXT_PUBLIC_ENV);
+const enableSentry = ['prod'].includes(process.env.NEXT_PUBLIC_ENV);
 const appVersion = getAppVersion();
 
 // const removeClientConsoleLoader = path.resolve(
