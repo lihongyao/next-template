@@ -21,7 +21,7 @@ export default function Profile() {
   return (
     <div
       data-name="Profile"
-      className="relative flex h-dvh w-dvw flex-col justify-start gap-8 px-3 sm:h-[600px] sm:w-[400px]"
+      className="relative flex h-dvh w-dvw flex-col justify-start gap-8 bg-[#101010] px-3 sm:h-[600px] sm:w-[400px] sm:rounded-xl"
     >
       <Icon
         name="arrow_left"

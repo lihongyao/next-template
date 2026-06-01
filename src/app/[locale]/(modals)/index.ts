@@ -9,7 +9,6 @@ export const ModalComponents: Record<string, ComponentType> = {
   register: loadModal('register'),
   profile: loadModal('profile'),
   login: loadModal('login'),
-  'game-list': loadModal('game-list'),
   'game-list-swiper': loadModal('game-list-swiper'),
   'game-details': loadModal('game-details'),
   'news-details': loadModal('news-details'),
