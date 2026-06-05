@@ -62,52 +62,51 @@ export type TabRoute = (typeof TabRoutes)[keyof typeof TabRoutes];
 export type ModalRoute = (typeof ModalRoutes)[keyof typeof ModalRoutes];
 export type PageRoute = (typeof PageRoutes)[keyof typeof PageRoutes];
 
+export type ModalPageRouteConfig = {
+  readonly canonical: Route;
+  readonly pc: Route;
+  readonly h5: Route;
+  readonly onlySwitchWhenParamPresent?: boolean;
+  readonly parentKey?: 'game-list';
+};
+
 /**
- * 弹窗路由 ↔ 页面路由映射
+ * 同一业务路由在 PC / H5 下的展示策略。
  *
- * 当H5为路由弹窗页面，PC为独立页面时， 为实现H5/PC之间的动态切换。
- * 需在这里定义对应的映射关系，useModalPageAutoCollapse 会自动处理 H5/PC 之间的动态切换。
- * 如：/profile <-> /modal-profile
+ * - canonical：地址栏与后台配置统一使用的标准路径。
+ * - pc / h5：当前设备实际渲染的页面或 modal 路由。
+ * - onlySwitchWhenParamPresent：设为 true 表示只有带参数尾巴时才命中，例如 /news/1。
+ * - parentKey：当前 modal 需要嵌套在另一个 modal 中渲染时使用。
  *
- * 涉及参数时，处理有点复杂，比如：
- * 1. 游戏列表：/game-list（列表页） /game-list/1（PC 详情） /modal-game-details/1（H5 弹窗详情）
- * 2. 仅当「当前路径带参数」时才随视窗切换；列表页（无参）不切换。无参页（如 profile）始终切换。
+ * 业务跳转应优先使用 canonical 路径，router 代理会按设备自动决定是正常页面跳转
+ * 还是保留底页的 route modal。
  *
- * - onlySwitchWhenParamPresent：设为 true 表示该条是「列表+详情」型，仅当 path 带参数（详情）时才切换，列表页不切换。
- * - parentKey：当 h5 下该路由嵌套于另一 modal 内时（如 modal-game-list/modal-game-details/1），指定父路由 key，以便 pc/h5 切换时正确展开/折叠路径。
- *
- * @see useModalPageAutoCollapse
  * @see useModalRoutes
  */
 export const ModalPageRoutes = {
   'news-details': {
+    canonical: Routes.News,
     pc: Routes.ModalNewsDetails,
     h5: Routes.News,
     onlySwitchWhenParamPresent: true,
   },
   'game-list': {
+    canonical: Routes.GameList,
     pc: Routes.GameList,
     h5: Routes.ModalGameListSwiper,
   },
   /** 详情页在 h5 下嵌套于 gameList 内：modal-game-list/modal-game-details/1 */
   gameDetails: {
+    canonical: Routes.GameList,
     pc: Routes.GameDetails,
     h5: Routes.ModalGameDetails,
     onlySwitchWhenParamPresent: true,
     parentKey: 'game-list',
   },
-} as const satisfies Record<
-  string,
-  {
-    readonly pc: Route;
-    readonly h5: Route;
-    readonly onlySwitchWhenParamPresent?: boolean;
-    readonly parentKey?: 'game-list' | 'profile';
-  }
->;
+} as const satisfies Record<string, ModalPageRouteConfig>;
 
 /** ModalPageRoutes 的 key，用于遍历与索引 */
 export type ModalPageRouteKey = keyof typeof ModalPageRoutes;
 
 /** 单个弹窗/页面对应的路由配置 */
-export type ModalPageRouteConfig = (typeof ModalPageRoutes)[ModalPageRouteKey];
+export type ModalPageRouteEntry = (typeof ModalPageRoutes)[ModalPageRouteKey];

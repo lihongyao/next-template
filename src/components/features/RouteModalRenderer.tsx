@@ -15,35 +15,39 @@ import {
 import { ModalComponents } from '@/app/[locale]/(modals)';
 import { ZIndex } from '@/constants';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
-import { routing } from '@/i18n/routing';
-import { MOBILE_MODAL_HISTORY_CHANGE_EVENT } from '@/libs/mobile-modal-history';
-import { getH5PathForPcPath } from '@/libs/modal-page-routes-utils';
+import {
+  MOBILE_MODAL_HISTORY_CHANGE_EVENT,
+  isRouteModalHistoryEntry,
+} from '@/libs/mobile-modal-history';
+import {
+  getRouteModalClosePathname,
+  getRouteModalRenderPath,
+} from '@/libs/modal-page-routes-utils';
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
 import { usePathname, useRouter } from '@/router';
 
-/** h5 下 pathname 为 pc 格式时，按 ModalPageRoutes 转为 modal 路径用于渲染 */
-function getEffectivePathForModals(pathname: string, isMobile: boolean): string[] {
-  const raw = pathname.split('/').filter(Boolean);
-  if (!isMobile) return raw;
-  const h5Path = getH5PathForPcPath(pathname);
-  return h5Path ? h5Path.split('/').filter(Boolean) : raw;
-}
-
 /**
- * 按 URL 里的 modal 段（如 /en/modal-login）渲染弹窗，支持多层叠。
+ * 按当前地址的 route modal 策略渲染弹窗，支持多层叠。
  * 进场右滑、退场等 AnimatePresence exit 播完再卸。isMobile 为 null 时不画。
- * h5 下当 pathname 为 pc 格式（如 /game-list）时，会按 ModalPageRoutes 映射为 modal 路径渲染。
  */
 export default function RouteModalRenderer() {
   const router = useRouter();
   const pathname = usePathname();
   const { isMobile } = useDevice();
-  const [nativeModalPathname, setNativeModalPathname] = useState<string | null>(null);
+  const [viewportIsMobile, setViewportIsMobile] = useState<boolean | null>(null);
+  const renderAsMobile = viewportIsMobile ?? isMobile === true;
+  const [nativeModalPathname, setNativeModalPathname] = useState<string | null>(() =>
+    typeof window === 'undefined' ? null : window.location.pathname,
+  );
   const modalPathname = nativeModalPathname ?? pathname;
+  const modalRenderPath = useMemo(
+    () => getRouteModalRenderPath(modalPathname, renderAsMobile),
+    [modalPathname, renderAsMobile],
+  );
   const pathSegments = useMemo(
-    () => getEffectivePathForModals(modalPathname, isMobile === true),
-    [modalPathname, isMobile],
+    () => modalRenderPath?.split('/').filter(Boolean) ?? [],
+    [modalRenderPath],
   );
   const searchParamsString = useSearchParams().toString();
   const { setCloseModal } = useModal();
@@ -61,10 +65,19 @@ export default function RouteModalRenderer() {
   );
 
   useEffect(() => {
+    const mobile = window.matchMedia('(max-width: 767px)');
+    const updateViewport = () => setViewportIsMobile(mobile.matches);
+    updateViewport();
+    mobile.addEventListener('change', updateViewport);
+    return () => mobile.removeEventListener('change', updateViewport);
+  }, []);
+
+  useEffect(() => {
     const syncNativeModalPathname = () => {
       setNativeModalPathname(window.location.pathname);
     };
 
+    syncNativeModalPathname();
     window.addEventListener(MOBILE_MODAL_HISTORY_CHANGE_EVENT, syncNativeModalPathname);
     window.addEventListener('popstate', syncNativeModalPathname);
     return () => {
@@ -81,20 +94,17 @@ export default function RouteModalRenderer() {
 
   const closeModal = useCallback(() => {
     if (!modalComponents.length) return;
-    if (window.history.length > 2) {
+    if (isRouteModalHistoryEntry()) {
       router.back();
       return;
     }
+
     const params = new URLSearchParams(searchParamsString);
     const nextQuery = params.toString();
-    const newPathSegments = [...pathSegments];
-    newPathSegments.pop();
-    const nextPath = newPathSegments.length
-      ? `/${newPathSegments.join('/')}`
-      : `/${routing.defaultLocale}`;
+    const nextPath = getRouteModalClosePathname(modalPathname, renderAsMobile) ?? '/';
     const url = nextQuery ? `${nextPath}?${nextQuery}` : nextPath;
     router.replace(url, { scroll: false });
-  }, [modalComponents.length, router, pathSegments, searchParamsString]);
+  }, [modalComponents.length, router, searchParamsString, modalPathname, renderAsMobile]);
 
   useEffect(() => {
     setCloseModal(closeModal);
@@ -122,12 +132,12 @@ export default function RouteModalRenderer() {
   if (isMobile === null) return null;
 
   const backdropVariants = isAllow
-    ? isMobile
+    ? renderAsMobile
       ? modalBackdropVariantsMobile
       : modalBackdropVariantsDesktop
     : undefined;
   const contentVariants = isAllow
-    ? isMobile
+    ? renderAsMobile
       ? modalContentVariantsMobile
       : modalContentVariantsDesktop
     : undefined;

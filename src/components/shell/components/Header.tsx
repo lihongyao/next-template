@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Icon from '@/components/ui/Icon';
 import { ZIndex } from '@/constants';
-import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { Link } from '@/i18n/navigation';
 import { getImageUrl } from '@/libs/cdn-image';
 import { cn } from '@/libs/class-helpers';
@@ -15,7 +14,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore';
 export default function Header({ fixed = false }: { fixed?: boolean }) {
   const router = useRouter();
   const { isLogin } = useGlobalStore();
-  const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   return (
     <header
       className={cn(
@@ -69,7 +67,7 @@ export default function Header({ fixed = false }: { fixed?: boolean }) {
             <>
               <Button
                 onClick={() =>
-                  router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin), {
+                  router.push(Routes.ModalLogin, {
                     scroll: false,
                   })
                 }
@@ -78,7 +76,7 @@ export default function Header({ fixed = false }: { fixed?: boolean }) {
               </Button>
               <Button
                 onClick={() =>
-                  router.push(mergeRouteIntoCurrentPath(Routes.ModalRegister), {
+                  router.push(Routes.ModalRegister, {
                     scroll: false,
                   })
                 }

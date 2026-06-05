@@ -1,12 +1,10 @@
 'use client';
 import AppHeader from '@/components/ui/AppHeader';
-import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useRouter } from '@/router';
-import { ModalPageRoutes } from '@/router/routes';
+import { Routes } from '@/router/routes';
 
 export default function NewsPage() {
   const router = useRouter();
-  const { resolveRouteForCurrentDevice } = useModalRoutes();
   return (
     <div data-name="news-page">
       <AppHeader title="新闻列表" />
@@ -16,8 +14,7 @@ export default function NewsPage() {
             className="flex aspect-[100/130] items-center justify-center rounded-md bg-black text-gray-600"
             key={i}
             onClick={() => {
-              const jumpUrl = resolveRouteForCurrentDevice(ModalPageRoutes['news-details']);
-              router.push(`${jumpUrl}/${i + 1}?ch=CBA`);
+              router.push(`${Routes.News}/${i + 1}?ch=CBA`);
             }}
           >
             NEWS {i + 1}

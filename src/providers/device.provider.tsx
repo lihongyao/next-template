@@ -13,6 +13,12 @@ export type DeviceState = {
 };
 
 const DeviceContext = createContext<DeviceState | null>(null);
+const DEVICE_COOKIE = 'app-device';
+
+function writeDeviceCookie(state: Pick<DeviceState, 'isMobile' | 'isTablet' | 'isDesktop'>) {
+  const device = state.isMobile ? 'mobile' : state.isTablet ? 'tablet' : 'desktop';
+  document.cookie = `${DEVICE_COOKIE}=${device}; path=/; max-age=31536000; SameSite=Lax`;
+}
 
 export function DeviceProvider({
   children,
@@ -36,6 +42,7 @@ export function DeviceProvider({
         isTablet: tablet.matches,
         isDesktop: desktop.matches,
       };
+      writeDeviceCookie(nextState);
       setState((prev) => {
         if (
           prev.isMobile === nextState.isMobile &&

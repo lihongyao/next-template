@@ -5,16 +5,12 @@ import { useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
-import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useDevice } from '@/providers/device.provider';
 import { useRouter } from '@/router';
-import { ModalPageRoutes, Routes } from '@/router/routes';
+import { Routes } from '@/router/routes';
 
 export default function HomePage() {
-  const { isMobile } = useDevice();
   const router = useRouter();
   // const routerA = useTransitionRouter();
-  const { mergeRouteIntoCurrentPath, resolveRouteForCurrentDevice } = useModalRoutes();
   useEffect(() => {
     console.log('render home page...');
   }, []);
@@ -22,15 +18,6 @@ export default function HomePage() {
     <div className="flex flex-col items-center gap-4 p-4">
       <Carousel loop />
       <div className="flex flex-wrap gap-2">
-        {/* <Button
-          onClick={() =>
-            router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), {
-              scroll: false,
-            })
-          }
-        >
-          路由弹窗(个人中心)
-        </Button> */}
         <Button
           onClick={() => {
             router.push(Routes.Dashboard);
@@ -40,19 +27,16 @@ export default function HomePage() {
         </Button>
         <Button
           onClick={() => {
-            const jumpToUrl = resolveRouteForCurrentDevice(ModalPageRoutes['game-list']);
-            router.push(jumpToUrl, { scroll: false });
+            router.push(Routes.GameList, { scroll: false });
           }}
         >
           游戏列表
         </Button>
         <Button
           onClick={() => {
-            if (isMobile) {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalGameListSwiper), {
-                scroll: false,
-              });
-            }
+            router.push(Routes.ModalGameListSwiper, {
+              scroll: false,
+            });
           }}
         >
           游戏列表（自定义Swiper）

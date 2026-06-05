@@ -2,19 +2,17 @@
 
 import { useRouter as useIntlRouter, usePathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { notifyMobileModalHistoryChange } from '@/libs/mobile-modal-history';
+import { writeRouteModalHistoryEntry } from '@/libs/mobile-modal-history';
+import { getCanonicalHref, shouldOpenAsRouteModal } from '@/libs/modal-page-routes-utils';
 import { markBack, markForward, markReplace } from '@/libs/navigation-direction';
 import { useDevice } from '@/providers/device.provider';
 
 import { matchRouteMeta } from './matchRoute';
-import { ModalRoutes } from './routes';
 
 type NavigationOptions = {
   scroll?: boolean;
   [key: string]: unknown;
 };
-
-const modalSegments = new Set(Object.values(ModalRoutes).map((route) => route.replace(/^\//, '')));
 
 function normalizeHrefPath(href: string): string {
   try {
@@ -22,13 +20,6 @@ function normalizeHrefPath(href: string): string {
   } catch {
     return href.split('?')[0] || href;
   }
-}
-
-function isModalPath(pathname: string): boolean {
-  return pathname
-    .split('/')
-    .filter(Boolean)
-    .some((segment) => modalSegments.has(segment));
 }
 
 function resolveNativeHref(href: string): string {
@@ -77,12 +68,16 @@ export default function useAppRouter() {
     method: 'pushState' | 'replaceState',
     href: string,
   ): string | null => {
-    if (!isMobile || !isModalPath(normalizeHrefPath(href))) return null;
+    const canonicalHref = getCanonicalHref(href);
+    if (!shouldOpenAsRouteModal(canonicalHref, isMobile === true)) return null;
 
-    const nativeHref = resolveNativeHref(href);
-    // Modal 只更新自身 URL；绕过 Next 的 history 包装，避免底层页面树切成 modal 路由。
-    History.prototype[method].call(window.history, null, '', nativeHref);
-    notifyMobileModalHistoryChange();
+    const nativeHref = resolveNativeHref(canonicalHref);
+    // Route modal 只更新地址栏；绕过 Next 的页面树切换，底页由当前 React tree 保持。
+    writeRouteModalHistoryEntry({
+      method,
+      href: nativeHref,
+      basePathname: currentPathname || '/',
+    });
     return nativeHref;
   };
 
@@ -104,8 +99,9 @@ export default function useAppRouter() {
         return;
       }
 
-      markForward(href);
-      router.push(href, getOptions(href, options));
+      const canonicalHref = getCanonicalHref(href);
+      markForward(canonicalHref);
+      router.push(canonicalHref, getOptions(canonicalHref, options));
     },
 
     replace(href: string, options?: NavigationOptions) {
@@ -115,8 +111,9 @@ export default function useAppRouter() {
         return;
       }
 
-      markReplace(href);
-      router.replace(href, getOptions(href, options));
+      const canonicalHref = getCanonicalHref(href);
+      markReplace(canonicalHref);
+      router.replace(canonicalHref, getOptions(canonicalHref, options));
     },
 
     back() {
@@ -134,7 +131,7 @@ export default function useAppRouter() {
     },
 
     prefetch(href: string) {
-      router.prefetch(href);
+      router.prefetch(getCanonicalHref(href));
     },
   };
 }

@@ -8,8 +8,7 @@ import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Button';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
-import { useModalRoutes } from '@/hooks/useModalRoutes';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
 type DialogConfig = {
@@ -26,7 +25,6 @@ export default function DialogPage() {
   const dialog = useDialog();
   const router = useRouter();
   const isJumpToOtherPage = useRef(false);
-  const { resolveRouteForCurrentDevice, mergeRouteIntoCurrentPath } = useModalRoutes();
 
   useMount(() => {
     console.log('brandConfig >>> ', brandConfig);
@@ -194,10 +192,7 @@ export default function DialogPage() {
           <Button onClick={() => router.push(Routes.Home)}>首页</Button>
           <Button
             onClick={() => {
-              router.push(mergeRouteIntoCurrentPath(Routes.ModalLogin));
-              // router.push(resolveRouteForCurrentDevice(ModalPageRoutes.profile), {
-              //   scroll: false,
-              // });
+              router.push(Routes.ModalLogin);
             }}
           >
             路由弹框
