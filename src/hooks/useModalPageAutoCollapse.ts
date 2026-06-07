@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -8,6 +8,7 @@ import { notifyMobileModalHistoryChange } from '@/libs/mobile-modal-history';
 import {
   getCanonicalHref,
   getLocalPathname,
+  getRouteModalSwitchBasePathname,
   shouldOpenAsRouteModal,
 } from '@/libs/modal-page-routes-utils';
 import { useDevice } from '@/providers/device.provider';
@@ -27,6 +28,7 @@ export default function useModalPageAutoCollapse(): void {
   const { isMobile } = useDevice();
   const [viewportIsMobile, setViewportIsMobile] = useState<boolean | null>(null);
   const routeAsMobile = viewportIsMobile ?? isMobile === true;
+  const pendingModalHrefRef = useRef<string | null>(null);
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
@@ -42,7 +44,9 @@ export default function useModalPageAutoCollapse(): void {
     if (typeof window === 'undefined') return;
 
     const query = searchParams.toString();
-    const browserHref = `${window.location.pathname}${query ? `?${query}` : ''}`;
+    const pendingModalHref = pendingModalHrefRef.current;
+    const browserHref =
+      pendingModalHref ?? `${window.location.pathname}${query ? `?${query}` : ''}`;
     const canonicalHref = getCanonicalHref(browserHref);
     const canonicalUrl = new URL(canonicalHref, window.location.origin);
     const canonicalPathname = canonicalUrl.pathname;
@@ -50,13 +54,33 @@ export default function useModalPageAutoCollapse(): void {
     const localCanonicalHref = `${localCanonicalPathname}${canonicalUrl.search}${canonicalUrl.hash}`;
     const isRouteModal = shouldOpenAsRouteModal(canonicalHref, routeAsMobile);
 
-    if (window.location.pathname !== canonicalPathname) {
-      History.prototype.replaceState.call(window.history, window.history.state, '', canonicalHref);
-    }
-
     if (isRouteModal) {
+      const modalBasePathname = getRouteModalSwitchBasePathname(canonicalPathname, routeAsMobile);
+      const localModalBasePathname = modalBasePathname ? getLocalPathname(modalBasePathname) : null;
+
+      if (localModalBasePathname && pathname !== localModalBasePathname) {
+        pendingModalHrefRef.current = canonicalHref;
+        router.replace(localModalBasePathname, { scroll: false });
+        return;
+      }
+
+      if (window.location.pathname !== canonicalPathname || pendingModalHref) {
+        History.prototype.replaceState.call(
+          window.history,
+          window.history.state,
+          '',
+          canonicalHref,
+        );
+      }
+      pendingModalHrefRef.current = null;
       notifyMobileModalHistoryChange();
       return;
+    }
+
+    pendingModalHrefRef.current = null;
+
+    if (window.location.pathname !== canonicalPathname) {
+      History.prototype.replaceState.call(window.history, window.history.state, '', canonicalHref);
     }
 
     if (pathname !== localCanonicalPathname) {

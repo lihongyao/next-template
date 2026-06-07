@@ -298,6 +298,18 @@ export function getRouteModalBasePathname(pathname: string, isMobile: boolean): 
   return getRouteModalClosePathname(pathname, isMobile) ?? '/';
 }
 
+export function getRouteModalSwitchBasePathname(
+  pathname: string,
+  isMobile: boolean,
+): string | null {
+  const canonicalPathname = getCanonicalPathname(pathname);
+  const adaptiveMatch = adaptiveModalMatch(canonicalPathname, isMobile);
+  if (!adaptiveMatch) return null;
+
+  const basePathname = adaptiveClosePathname(canonicalPathname, isMobile);
+  return basePathname && basePathname !== '/' ? basePathname : null;
+}
+
 export function shouldRewriteRouteModalRequest(pathname: string, isMobile: boolean): boolean {
   const originalExplicitMatch = firstExplicitModalMatch(pathname);
   if (originalExplicitMatch && originalExplicitMatch.index > 0) return true;

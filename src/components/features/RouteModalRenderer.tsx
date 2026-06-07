@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useSearchParams } from 'next/navigation';
-
 import { AnimatePresence, motion } from 'framer-motion';
 
 import {
@@ -49,7 +47,6 @@ export default function RouteModalRenderer() {
     () => modalRenderPath?.split('/').filter(Boolean) ?? [],
     [modalRenderPath],
   );
-  const searchParamsString = useSearchParams().toString();
   const { setCloseModal } = useModal();
 
   const [isAllow, setIsAllow] = useState(true);
@@ -87,10 +84,10 @@ export default function RouteModalRenderer() {
   }, []);
 
   useEffect(() => {
-    if (nativeModalPathname === pathname) {
+    if (window.location.pathname === pathname) {
       setNativeModalPathname(null);
     }
-  }, [nativeModalPathname, pathname]);
+  }, [pathname]);
 
   const closeModal = useCallback(() => {
     if (!modalComponents.length) return;
@@ -99,12 +96,10 @@ export default function RouteModalRenderer() {
       return;
     }
 
-    const params = new URLSearchParams(searchParamsString);
-    const nextQuery = params.toString();
     const nextPath = getRouteModalClosePathname(modalPathname, renderAsMobile) ?? '/';
-    const url = nextQuery ? `${nextPath}?${nextQuery}` : nextPath;
-    router.replace(url, { scroll: false });
-  }, [modalComponents.length, router, searchParamsString, modalPathname, renderAsMobile]);
+    setNativeModalPathname(null);
+    router.replace(nextPath, { scroll: false });
+  }, [modalComponents.length, router, modalPathname, renderAsMobile]);
 
   useEffect(() => {
     setCloseModal(closeModal);
