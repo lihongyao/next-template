@@ -14,6 +14,7 @@ import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
 import { CURRENT_VERSION } from '@/constants';
+import { inter } from '@/fonts';
 import '@/generated/brand.css';
 import { routing } from '@/i18n/routing';
 import { getBrandConfigSSR } from '@/libs/brand';
@@ -82,7 +83,7 @@ export default async function LocaleLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
 
-      <body style={{ background: '#101010' }}>
+      <body className={inter.className} style={{ background: '#101010' }}>
         {/* lcp element */}
         <img
           className="lcp-anchor"

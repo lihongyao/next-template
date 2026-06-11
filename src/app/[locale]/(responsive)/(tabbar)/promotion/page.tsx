@@ -16,9 +16,9 @@ export default function PromotionPage() {
               }}
             />
             <div className="flex w-full items-center gap-3 p-3">
-              <div className="flex-1 leading-[21px]">
-                <h1 className="text-lg text-white">Torneo Jelly Express</h1>
-                <p className="text-md text-[#b3b8c1]">Termina en 139H:30M:34S</p>
+              <div className="flex-1 text-sm leading-[21px]">
+                <h2 className="font-bold text-white">Torneo Jelly Express</h2>
+                <p className="text-[#b3b8c1]">Termina en 139H:30M:34S</p>
               </div>
               <Button onClick={() => {}}>Detalles</Button>
             </div>

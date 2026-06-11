@@ -174,7 +174,7 @@ export class JsBridgeSDK extends BaseSDK implements IReportSDK {
 
       const fail = () => {
         cleanup();
-        reject(new Error(`js bridge is not ready after ${timeoutMs}ms`));
+        // reject(new Error(`js bridge is not ready after ${timeoutMs}ms`));
       };
 
       const tick = () => {
