@@ -9,8 +9,6 @@ import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
 import { initNavigation } from '@/libs/navigation-direction';
 import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
 
-// import { installViewTransitionPatch } from '@/libs/animate';
-
 export default function ClientInitializer() {
   // PC/H5 路由弹窗 & 页面响应式自动切换
   useModalPageAutoCollapse();
@@ -24,7 +22,6 @@ export default function ClientInitializer() {
   useMount(() => {
     console.log('__ClientInitializer__');
     import('vconsole').then(({ default: VConsole }) => new VConsole());
-    // installViewTransitionPatch();
     initNavigation();
 
     bootstrapSDK({

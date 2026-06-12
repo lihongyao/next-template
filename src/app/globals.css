@@ -74,48 +74,6 @@ body {
   max-height: 99vh;
 }
 
-/* ----------------------------------------------------------------------------------  */
-/* 防止 transition 覆盖 UI */
-::view-transition-group(root) {
-  z-index: auto !important;
-  isolation: isolate;
-  pointer-events: none;
-}
-
-/* snapshot pair */
-::view-transition-image-pair(root) {
-  isolation: isolate;
-  will-change: transform, opacity;
-  contain: layout paint style;
-  backface-visibility: hidden;
-  z-index: 1;
-}
-
-/* new page */
-::view-transition-new(root) {
-  z-index: var(--vt-new-z, 2);
-  animation: none !important;
-}
-
-/* old page */
-::view-transition-old(root) {
-  z-index: var(--vt-old-z, 1);
-  animation: none !important;
-}
-
-/* safari blend fix */
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  mix-blend-mode: normal;
-}
-
-/* 防止 loading.tsx 进入 snapshot */
-::view-transition-old(loading),
-::view-transition-new(loading) {
-  display: none;
-}
-
 /* ---- 玻璃 */
 /* 玻璃按钮 */
 #glassBtn {
