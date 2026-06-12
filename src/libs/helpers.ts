@@ -1,41 +1,6 @@
 import dynamic from 'next/dynamic';
 
-import brandConfig from '@/configs/brands';
-import { imageManifest } from '@/generated/image-manifest';
 import type { ComponentInfo } from '@/types';
-
-/**
- * 获取图片资源地址
- *
- * @param path 图片路径，如 'banner.jpg'
- * @param version 版本号，如 '202601062258'
- * @returns 图片资源地址
- */
-export function getImgUrl(path: string, general = false, version?: string): string {
-  const { theme, skin, appId: brand } = brandConfig;
-
-  // ===== 扁平化 theme-skin key =====
-  const themeSkin = `${theme}-${skin}`;
-  const root = 'images/cdn-imgs';
-
-  // ===== 查 Sparse Manifest =====
-  const skinData = imageManifest[themeSkin as keyof typeof imageManifest] as unknown as
-    | Record<string, string[]>
-    | undefined;
-  const brandFiles = skinData?.[brand] || [];
-
-  let resolvedPath: string;
-
-  if (general) {
-    resolvedPath = `/general/${path}`;
-  } else if (brandFiles.includes(path)) {
-    resolvedPath = `/${themeSkin}/${brand}/${path}`;
-  } else {
-    resolvedPath = `/${themeSkin}/common/${path}`;
-  }
-
-  return version ? `${root}${resolvedPath}?v=${version}` : `${root}${resolvedPath}`;
-}
 
 /**
  * 加载动态组件

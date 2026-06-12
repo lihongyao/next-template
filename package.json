@@ -20,7 +20,6 @@
     "convert:theme-tw": "tsx scripts/convert-css-vars/index.js --tw",
     "gen-figma-variables": "tsx scripts/gen-figma-variables/index.ts",
     "gen-svg": "tsx scripts/gen-svg/index.ts",
-    "gen-img-manifest": "tsx scripts/gen-image-manifest/index.ts",
     "sentry:upload-sourcemaps": "dotenv -e .env.sentry-build-plugin -- tsx scripts/sentry/upload-sourcemaps.ts"
   },
   "lint-staged": {
