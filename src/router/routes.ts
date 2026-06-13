@@ -14,6 +14,7 @@ export const TabRoutes = {
   Cart: '/cart',
   Order: '/order',
   Promotion: '/promotion',
+  Truco: '/truco',
 };
 
 // 页面路由

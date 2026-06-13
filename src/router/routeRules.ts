@@ -14,7 +14,6 @@ export const routeRules: Array<{
   meta: RouteMeta;
 }> = [
   { path: Routes.Home, meta: { mobileLevel: 1, desktopLevel: 1, keepAlive: true } },
-
   { path: Routes.GameList, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.GameList + '/:id', meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.Cart, meta: { mobileLevel: 1, desktopLevel: 1 } },
@@ -26,4 +25,5 @@ export const routeRules: Array<{
   { path: Routes.DataPathThrough, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.News, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.News + '/:id', meta: { mobileLevel: 2, desktopLevel: 1 } },
+  { path: Routes.Truco, meta: { mobileLevel: 1, desktopLevel: 1 } },
 ];

@@ -8,6 +8,7 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
+import '@/assets/styles/global-animate.css';
 import ClientInitializer from '@/components/features/ClientInitializer';
 import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRestorer';
 import LogoLoading from '@/components/features/LogoLoading';
