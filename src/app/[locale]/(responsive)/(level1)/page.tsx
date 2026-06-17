@@ -5,19 +5,54 @@ import { useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
+import { notification } from '@/components/ui/Notification';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
 export default function HomePage() {
   const router = useRouter();
+  const api = notification.useNotificationApi();
   // const routerA = useTransitionRouter();
   useEffect(() => {
     console.log('render home page...');
   }, []);
+
+  const triggerNotifications = () => {
+    api.success({
+      title: 'Success',
+      description: 'The first notification shows progress and auto closes.',
+      duration: 0,
+      // showProgress: true,
+      // pauseOnHover: true,
+    });
+    // api.info({
+    //   title: 'Info',
+    //   description: 'A second one appears right after it.',
+    //   duration: 5,
+    //   showProgress: true,
+    //   pauseOnHover: true,
+    // });
+    // api.warning({
+    //   title: 'Warning',
+    //   description: 'This one helps exercise the queue and maxCount behavior.',
+    //   duration: 6,
+    //   showProgress: true,
+    //   pauseOnHover: true,
+    // });
+    // api.error({
+    //   title: 'Error',
+    //   description: 'The oldest item should drop when maxCount is exceeded.',
+    //   duration: 7,
+    //   showProgress: true,
+    //   pauseOnHover: true,
+    // });
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <Carousel loop />
       <div className="flex flex-wrap gap-2">
+        <Button onClick={triggerNotifications}>触发通知</Button>
         <Button
           onClick={() => {
             router.push(Routes.Dashboard);

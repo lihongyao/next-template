@@ -1,5 +1,12 @@
 {
   "title": "Guia de Estudo de i18n",
+  "Notification": {
+    "success": "Sucesso",
+    "info": "Informação",
+    "warning": "Aviso",
+    "error": "Erro",
+    "close": "Fechar notificação"
+  },
   "profile": {
     "tips": "A associação expirou, por favor renove.",
     "reward1": "Parabéns! Você ganhou {point} pontos.",

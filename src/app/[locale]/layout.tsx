@@ -14,6 +14,7 @@ import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRest
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
+import Notification, { NotificationProvider } from '@/components/ui/Notification';
 import { CURRENT_VERSION } from '@/constants';
 import { inter } from '@/fonts';
 import '@/generated/brand.css';
@@ -98,10 +99,13 @@ export default async function LocaleLayout({
             <DeviceProvider userAgent={userAgent}>
               <DialogProvider>
                 <ModalProvider>
-                  <LogoLoading />
-                  <ClientInitializer />
-                  <RouteModalRenderer />
-                  {children}
+                  <NotificationProvider>
+                    <LogoLoading />
+                    <ClientInitializer />
+                    <RouteModalRenderer />
+                    {children}
+                    <Notification />
+                  </NotificationProvider>
                 </ModalProvider>
               </DialogProvider>
             </DeviceProvider>

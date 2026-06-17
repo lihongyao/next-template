@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-05-26T13:16:01.555Z
+// 生成时间: 2026-06-16T16:09:57.179Z
 
 export const SVG_PATH_NAMES = [
   'arrow_down',
@@ -29,6 +29,10 @@ export const SVG_PATH_NAMES = [
   'promotion',
   'settings',
   'time',
+  'tips_correct',
+  'tips_error',
+  'tips_system',
+  'tips_warning',
   'window',
 ] as const;
 

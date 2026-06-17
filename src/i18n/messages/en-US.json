@@ -1,5 +1,12 @@
 {
   "title": "i18n Study Guide",
+  "Notification": {
+    "success": "Success",
+    "info": "Info",
+    "warning": "Warning",
+    "error": "Error",
+    "close": "Close notification"
+  },
   "profile": {
     "tips": "Membership has expired, please renew.",
     "reward1": "Congratulations! You’ve earned {point} points.",
