@@ -21,9 +21,9 @@ export default function HomePage() {
     api.success({
       title: 'Success',
       description: 'The first notification shows progress and auto closes.',
-      duration: 0,
-      // showProgress: true,
-      // pauseOnHover: true,
+      duration: 4,
+      showProgress: true,
+      pauseOnHover: true,
     });
     // api.info({
     //   title: 'Info',
