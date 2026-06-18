@@ -19,7 +19,7 @@ import { CURRENT_VERSION } from '@/constants';
 import { inter } from '@/fonts';
 import '@/generated/brand.css';
 import { routing } from '@/i18n/routing';
-import { getBrandConfigSSR } from '@/libs/brand';
+import { getServerBrandConfig } from '@/libs/brand.server';
 import { BrandConfigProvider } from '@/providers/brand.provider';
 import { DeviceProvider } from '@/providers/device.provider';
 import { ModalProvider } from '@/providers/modal.provider';
@@ -61,7 +61,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   // 获取品牌配置
-  const brandConfig = await getBrandConfigSSR();
+  const brandConfig = await getServerBrandConfig();
 
   const userAgent = (await headers()).get('user-agent') || '';
 

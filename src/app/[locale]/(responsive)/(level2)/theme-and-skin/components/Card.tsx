@@ -1,12 +1,12 @@
 // src/app/[lang]/_components/Card.tsx
-import { getBrandConfigSSR } from '@/libs/brand';
+import { getServerBrandConfig } from '@/libs/brand.server';
 import { getImageUrl } from '@/libs/cdn-image';
 
 import ClientInfo from './ClientInfo';
 import ServerInfo from './ServerInfo';
 
 export default async function Card() {
-  const brand = await getBrandConfigSSR();
+  const brand = await getServerBrandConfig();
   return (
     <div className="flex gap-4 rounded-(--card-radius) border border-(--card-border-color) bg-(--card-bg) p-(--card-padding) text-(--card-text)">
       <img src={getImageUrl('banner.jpg')} alt="banner" className="w-[300px]" />

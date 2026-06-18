@@ -13,13 +13,13 @@ export default function ThemeSkinSwitcher() {
       <div className="flex items-center gap-4">
         <span>主题切换：</span>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': theme === 'modern' })}
+          className={cn('cursor-pointer', { 'text-[red]': theme === 'modern' })}
           onClick={() => setTheme('modern')}
         >
           Modern
         </button>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': theme === 'classic' })}
+          className={cn('cursor-pointer', { 'text-[red]': theme === 'classic' })}
           onClick={() => setTheme('classic')}
         >
           Classic
@@ -28,13 +28,13 @@ export default function ThemeSkinSwitcher() {
       <div className="flex items-center gap-4">
         <span>皮肤切换：</span>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': skin === 'green' })}
+          className={cn('cursor-pointer', { 'text-[red]': skin === 'green' })}
           onClick={() => setSkin('green')}
         >
           Green
         </button>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': skin === 'blue' })}
+          className={cn('cursor-pointer', { 'text-[red]': skin === 'blue' })}
           onClick={() => setSkin('blue')}
         >
           Blue
@@ -43,13 +43,13 @@ export default function ThemeSkinSwitcher() {
       <div className="flex items-center gap-4">
         <span>布局切换：</span>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': layout === 'top-nav' })}
+          className={cn('cursor-pointer', { 'text-[red]': layout === 'top-nav' })}
           onClick={() => setLayout('top-nav')}
         >
           top-nav
         </button>
         <button
-          className={cn('cursor-pointer', { 'text-(--color-primary)': layout === 'side-nav' })}
+          className={cn('cursor-pointer', { 'text-[red]': layout === 'side-nav' })}
           onClick={() => setLayout('side-nav')}
         >
           side-nav

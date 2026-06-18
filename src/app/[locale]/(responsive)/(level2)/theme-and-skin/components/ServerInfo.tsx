@@ -1,8 +1,8 @@
 // src/app/[lang]/_components/ServerInfo.tsx
-import { getBrandConfigSSR } from '@/libs/brand';
+import { getServerBrandConfig } from '@/libs/brand.server';
 
 export default async function ServerInfo() {
-  const brand = await getBrandConfigSSR();
+  const brand = await getServerBrandConfig();
   return (
     <div>
       <h2 className="mb-4">—— 服务端组件 ——</h2>

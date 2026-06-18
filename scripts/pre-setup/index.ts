@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { BrandConfig } from '@/configs/brands/types';
 
-const app = process.env.app;
+const app = process.env.app || 'afun';
 const env = process.env.env;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +19,7 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
 
 (async function main() {
   try {
-    const brandConfig = await getBrandConfig();
+    const brandConfig = await getBrandConfig(app);
     setupBrandConfig();
     setupBrandCssImports(brandConfig);
   } catch (e) {
@@ -32,13 +32,18 @@ console.log('process.env.NEXT_PUBLIC_BRAND >> :', process.env.NEXT_PUBLIC_BRAND)
  * 获取品牌配置
  * @returns
  */
-async function getBrandConfig() {
-  const brandsIndexPath = path.join(ROOT, '/src/configs/brands/index.ts');
+async function getBrandConfig(appKey: string) {
+  const brandConfigPath = path.join(ROOT, `/src/configs/brands/${appKey}.ts`);
+
+  if (!fs.existsSync(brandConfigPath)) {
+    throw new Error(`[pre-setup] 品牌配置不存在: src/configs/brands/${appKey}.ts，请先添加该文件`);
+  }
+
   try {
-    const mod = await import(brandsIndexPath);
+    const mod = await import(brandConfigPath);
     return mod.default as BrandConfig;
   } catch (err) {
-    console.error(`❌ 加载品牌配置失败: ${brandsIndexPath}`);
+    console.error(`❌ 加载品牌配置失败: ${brandConfigPath}`);
     throw err;
   }
 }

@@ -98,6 +98,13 @@ export default function HomePage() {
         >
           国际化
         </Button>
+        <Button
+          onClick={() => {
+            router.push(Routes.ThemeAndSkin);
+          }}
+        >
+          主题皮肤
+        </Button>
         <Button onClick={() => router.push(Routes.DataPathThrough)}>数据传递</Button>
         <Button
           onClick={() => {

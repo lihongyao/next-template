@@ -53,6 +53,11 @@ interface CookieOptions {
   sameSite?: 'strict' | 'lax' | 'none';
 }
 
+function _normalizeExpires(expires?: number | Date): Date | undefined {
+  if (!expires) return undefined;
+  return expires instanceof Date ? expires : new Date(Date.now() + expires * 24 * 60 * 60 * 1000);
+}
+
 /**
  * 检测是否支持 cookieStore API（私有工具函数）
  */
@@ -83,10 +88,8 @@ function _setCookieWithDocument(name: string, value: string, options: CookieOpti
   let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
 
   if (options.expires) {
-    const expires =
-      options.expires instanceof Date
-        ? options.expires
-        : new Date(Date.now() + options.expires * 24 * 60 * 60 * 1000);
+    const expires = _normalizeExpires(options.expires);
+    if (!expires) return;
     cookieString += `; expires=${expires.toUTCString()}`;
   }
 
@@ -298,6 +301,7 @@ class CookieHelper {
           };
           if (options) {
             Object.assign(cookieOptions, options);
+            cookieOptions.expires = _normalizeExpires(options.expires);
           }
           await this.cookieStore.set(cookieOptions);
           return;
