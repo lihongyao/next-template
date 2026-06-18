@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useMount } from 'ahooks';
 
 import { useCheckAppVersion } from '@/hooks/useCheckAppVersion';
+import useDeviceRouteAvailability from '@/hooks/useDeviceRouteAvailability';
 import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
 import { initNavigation } from '@/libs/navigation-direction';
 import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
@@ -12,6 +13,8 @@ import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
 export default function ClientInitializer() {
   // PC/H5 路由弹窗 & 页面响应式自动切换
   useModalPageAutoCollapse();
+  // 当前设备不支持的路由自动回退
+  useDeviceRouteAvailability();
   // 版本升级监听
   useCheckAppVersion();
 

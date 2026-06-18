@@ -17,6 +17,7 @@ export interface TabBarItemProps {
 
 export default memo(function AppTabBar() {
   const tabBarConfig: TabBarItemProps[] = [
+    { path: Routes.Menu, label: '菜单', icon: 'menu' },
     { path: Routes.Home, label: '首页', icon: 'home' },
     { path: Routes.Cart, label: '购物车', icon: 'cart' },
     { path: Routes.Order, label: '订单', icon: 'order' },

@@ -34,6 +34,7 @@ export const PageRoutes = {
   DataPathThrough: '/data-pass-through',
   GameList: '/game-list',
   GameDetails: '/game-list',
+  Menu: '/menu',
   Goods: '/goods',
   News: '/news',
 } as const;

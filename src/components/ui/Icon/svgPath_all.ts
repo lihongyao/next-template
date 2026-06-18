@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-06-16T16:09:57.179Z
+// 生成时间: 2026-06-18T16:35:34.377Z
 
 export const SVG_PATH_NAMES = [
   'arrow_down',
@@ -22,6 +22,7 @@ export const SVG_PATH_NAMES = [
   'glass-border',
   'globe',
   'home',
+  'menu',
   'message',
   'next',
   'order',

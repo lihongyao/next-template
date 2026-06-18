@@ -4,6 +4,7 @@ import { ModalRoutes } from './routes';
 
 const compiled = routeRules.map((r) => ({
   pattern: compilePath(r.path),
+  path: r.path,
   meta: r.meta,
 }));
 
@@ -18,14 +19,27 @@ function normalizePathForModal(pathname: string) {
 }
 
 export function matchRouteMeta(pathname: string) {
+  return matchRouteRule(pathname)?.meta ?? { mobileLevel: 1, desktopLevel: 1 };
+}
+
+export function matchRouteRule(pathname: string) {
   for (const r of compiled) {
-    if (r.pattern.test(pathname)) return r.meta;
+    if (r.pattern.test(pathname)) return r;
   }
   const normalized = normalizePathForModal(pathname);
   if (normalized !== pathname) {
     for (const r of compiled) {
-      if (r.pattern.test(normalized)) return r.meta;
+      if (r.pattern.test(normalized)) return r;
     }
   }
-  return { mobileLevel: 1, desktopLevel: 1 };
+  return null;
+}
+
+export function getDeviceRouteFallback(pathname: string, isMobile: boolean): string | null {
+  const rule = matchRouteRule(pathname);
+  const availability = rule?.meta.availability;
+  if (!availability) return null;
+
+  const isAvailable = isMobile ? availability.mobile !== false : availability.desktop !== false;
+  return isAvailable ? null : (availability.fallback ?? '/');
 }

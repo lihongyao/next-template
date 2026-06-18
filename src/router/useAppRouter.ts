@@ -7,7 +7,7 @@ import { getCanonicalHref, shouldOpenAsRouteModal } from '@/libs/modal-page-rout
 import { markBack, markForward, markReplace } from '@/libs/navigation-direction';
 import { useDevice } from '@/providers/device.provider';
 
-import { matchRouteMeta } from './matchRoute';
+import { getDeviceRouteFallback, matchRouteMeta } from './matchRoute';
 
 type NavigationOptions = {
   scroll?: boolean;
@@ -100,8 +100,11 @@ export default function useAppRouter() {
       }
 
       const canonicalHref = getCanonicalHref(href);
-      markForward(canonicalHref);
-      router.push(canonicalHref, getOptions(canonicalHref, options));
+      const nextHref =
+        getDeviceRouteFallback(normalizeHrefPath(canonicalHref), isMobile === true) ??
+        canonicalHref;
+      markForward(nextHref);
+      router.push(nextHref, getOptions(nextHref, options));
     },
 
     replace(href: string, options?: NavigationOptions) {
@@ -112,8 +115,11 @@ export default function useAppRouter() {
       }
 
       const canonicalHref = getCanonicalHref(href);
-      markReplace(canonicalHref);
-      router.replace(canonicalHref, getOptions(canonicalHref, options));
+      const nextHref =
+        getDeviceRouteFallback(normalizeHrefPath(canonicalHref), isMobile === true) ??
+        canonicalHref;
+      markReplace(nextHref);
+      router.replace(nextHref, getOptions(nextHref, options));
     },
 
     back() {

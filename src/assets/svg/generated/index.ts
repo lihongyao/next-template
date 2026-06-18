@@ -1,5 +1,5 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-06-16T16:09:57.179Z
+// 生成时间: 2026-06-18T16:35:34.377Z
 import type React from 'react';
 
 import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';
@@ -49,6 +49,7 @@ export const SVG_SPRITE_ID_MAP = {
   copy: 'icon-copy',
   edit: 'icon-edit',
   home: 'icon-home',
+  menu: 'icon-menu',
   message: 'icon-message',
   order: 'icon-order',
   profile: 'icon-profile',
@@ -81,6 +82,7 @@ export const SVG_ICON_KIND_MAP = {
   'glass-border': 'svgr',
   globe: 'svgr',
   home: 'sprite',
+  menu: 'sprite',
   message: 'sprite',
   next: 'svgr',
   order: 'sprite',
@@ -95,4 +97,4 @@ export const SVG_ICON_KIND_MAP = {
   window: 'svgr',
 } as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
 
-export const SVG_SPRITE_FILE = '/sprite.a03f2b89.svg';
+export const SVG_SPRITE_FILE = '/sprite.3de77a9e.svg';
