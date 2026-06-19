@@ -1,15 +1,15 @@
 {
   "title": "i18n 学习指南",
-  "Notification": {
+  "profile": {
+    "tips": "会员已到期，请充值",
+    "reward1": "恭喜您，获得 {point} 个积分",
+    "reward2": "恭喜您，获得 <tag>{point}</tag> 积分"
+  },
+  "notification": {
     "success": "成功",
     "info": "提示",
     "warning": "警告",
     "error": "错误",
     "close": "关闭通知"
-  },
-  "profile": {
-    "tips": "会员已到期，请充值",
-    "reward1": "恭喜您，获得 {point} 个积分",
-    "reward2": "恭喜您，获得 <tag>{point}</tag> 积分"
   }
 }

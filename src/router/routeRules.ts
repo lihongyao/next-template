@@ -30,7 +30,7 @@ export const routeRules: Array<{
   {
     path: Routes.Menu,
     meta: {
-      mobileLevel: 2,
+      mobileLevel: 1,
       desktopLevel: 1,
       availability: { mobile: true, desktop: false, fallback: Routes.Home },
     },

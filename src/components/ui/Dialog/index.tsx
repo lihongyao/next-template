@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom';
 import { type Root, createRoot } from 'react-dom/client';
 
 import { dialogRegistry } from '@/components/features/dialogs';
-import { ZIndex } from '@/constants';
+import { ZIndex } from '@/constants/z-index';
 import { cn } from '@/libs/class-helpers';
 
 import './animate.css';

@@ -97,8 +97,8 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <BrandConfigProvider value={brandConfig}>
             <DeviceProvider userAgent={userAgent}>
-              <DialogProvider>
-                <ModalProvider>
+              <ModalProvider>
+                <DialogProvider>
                   <NotificationProvider>
                     <LogoLoading />
                     <ClientInitializer />
@@ -106,8 +106,8 @@ export default async function LocaleLayout({
                     {children}
                     <Notification />
                   </NotificationProvider>
-                </ModalProvider>
-              </DialogProvider>
+                </DialogProvider>
+              </ModalProvider>
             </DeviceProvider>
           </BrandConfigProvider>
         </NextIntlClientProvider>

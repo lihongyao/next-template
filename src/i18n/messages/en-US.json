@@ -1,15 +1,15 @@
 {
   "title": "i18n Study Guide",
-  "Notification": {
+  "profile": {
+    "tips": "Membership has expired, please renew.",
+    "reward1": "Congratulations! You’ve earned {point} points.",
+    "reward2": "Congratulations! You’ve earned <tag>{point}</tag> points."
+  },
+  "notification": {
     "success": "Success",
     "info": "Info",
     "warning": "Warning",
     "error": "Error",
     "close": "Close notification"
-  },
-  "profile": {
-    "tips": "Membership has expired, please renew.",
-    "reward1": "Congratulations! You’ve earned {point} points.",
-    "reward2": "Congratulations! You’ve earned <tag>{point}</tag> points."
   }
 }

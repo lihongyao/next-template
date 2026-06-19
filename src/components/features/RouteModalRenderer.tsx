@@ -7,11 +7,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   modalBackdropVariantsDesktop,
   modalBackdropVariantsMobile,
+  modalBackdropVariantsMobileVertical,
   modalContentVariantsDesktop,
   modalContentVariantsMobile,
+  modalContentVariantsMobileVertical,
 } from '@/animations/modal-animations';
 import { ModalComponents } from '@/app/[locale]/(modals)';
-import { ZIndex } from '@/constants';
+import { ZIndex } from '@/constants/z-index';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import {
   MOBILE_MODAL_HISTORY_CHANGE_EVENT,
@@ -24,6 +26,11 @@ import {
 import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
 import { usePathname, useRouter } from '@/router';
+import { ModalRoutes } from '@/router/routes';
+
+const MOBILE_VERTICAL_MODAL_KEYS = new Set(
+  [ModalRoutes.ModalLogin, ModalRoutes.ModalRegister].map((route) => route.replace(/^\//, '')),
+);
 
 /**
  * 按当前地址的 route modal 策略渲染弹窗，支持多层叠。
@@ -59,6 +66,10 @@ export default function RouteModalRenderer() {
         return ModalComponents[m];
       }),
     [modalKeys],
+  );
+  const shouldUseVerticalMobileAnimation = useMemo(
+    () => renderAsMobile && modalKeys.some((key) => MOBILE_VERTICAL_MODAL_KEYS.has(key)),
+    [modalKeys, renderAsMobile],
   );
 
   useEffect(() => {
@@ -128,12 +139,16 @@ export default function RouteModalRenderer() {
 
   const backdropVariants = isAllow
     ? renderAsMobile
-      ? modalBackdropVariantsMobile
+      ? shouldUseVerticalMobileAnimation
+        ? modalBackdropVariantsMobileVertical
+        : modalBackdropVariantsMobile
       : modalBackdropVariantsDesktop
     : undefined;
   const contentVariants = isAllow
     ? renderAsMobile
-      ? modalContentVariantsMobile
+      ? shouldUseVerticalMobileAnimation
+        ? modalContentVariantsMobileVertical
+        : modalContentVariantsMobile
       : modalContentVariantsDesktop
     : undefined;
 

@@ -2,9 +2,9 @@
 
 import { memo, useRef } from 'react';
 
-import { usePathname } from '@/i18n/navigation';
+import { ZIndex } from '@/constants/z-index';
 import { cn } from '@/libs/class-helpers';
-import { Link } from '@/router';
+import { Link, usePathname } from '@/router';
 import { type Route, Routes } from '@/router/routes';
 
 import Icon from '../ui/Icon';
@@ -20,7 +20,7 @@ export default memo(function AppTabBar() {
     { path: Routes.Menu, label: '菜单', icon: 'menu' },
     { path: Routes.Home, label: '首页', icon: 'home' },
     { path: Routes.Cart, label: '购物车', icon: 'cart' },
-    { path: Routes.Order, label: '订单', icon: 'order' },
+    { path: Routes.Truco, label: 'Truco', icon: 'truco' },
     { path: Routes.Promotion, label: '线下活动', icon: 'promotion' },
   ];
   const pathname = usePathname();
@@ -32,6 +32,7 @@ export default memo(function AppTabBar() {
       data-name="app-tab-bar"
       className="fixed bottom-0 left-0 w-full"
       style={{
+        zIndex: ZIndex.Footer,
         paddingBottom: 'calc(env(safe-area-inset-bottom))',
       }}
     >

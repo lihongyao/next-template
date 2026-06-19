@@ -6,7 +6,7 @@ export default function DesktopShell({ children }: { children: React.ReactNode }
     <div className="text-white">
       <Header />
       <div className="mx-auto w-full max-w-[1200px]">
-        <div className="min-h-[300px] py-3">{children}</div>
+        {children}
         <Footer />
       </div>
     </div>

@@ -109,5 +109,5 @@ header.forEach((lang) => {
   console.log(`✅ [${lang}] 文件生成: ${filePath}，共 ${langCounts[lang]} 条有效翻译`);
 });
 
-console.log(`🎉 转换完成！共生成 ${header.length} 个语言文件`);
+console.log(`🎉 转换完成，共生成 ${header.length} 个语言文件`);
 console.log(`📂 输出目录: ${OUTPUT_DIR}`);

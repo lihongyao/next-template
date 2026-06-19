@@ -1,6 +1,6 @@
 'use client';
 
-import { ZIndex } from '@/constants';
+import { ZIndex } from '@/constants/z-index';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 

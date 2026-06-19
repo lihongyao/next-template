@@ -65,7 +65,6 @@ Route group 目录不会出现在 URL 里：
 | ------------ | ----------------------------------------------------------- | ------------------ | ---------------------------------------- |
 | `/`          | `src/app/[locale]/(responsive)/(level1)/page.tsx`           | `Routes.Home`      | 首页，移动端一级页，也是 tab 页。        |
 | `/cart`      | `src/app/[locale]/(responsive)/(level1)/cart/page.tsx`      | `Routes.Cart`      | 购物车，移动端一级页，也是 tab 页。      |
-| `/order`     | `src/app/[locale]/(responsive)/(level1)/order/page.tsx`     | `Routes.Order`     | 订单，移动端一级页，也是 tab 页。        |
 | `/promotion` | `src/app/[locale]/(responsive)/(level1)/promotion/page.tsx` | `Routes.Promotion` | 活动，移动端一级页，也是 tab 页。        |
 | `/truco`     | `src/app/[locale]/(responsive)/(level1)/truco/page.tsx`     | `Routes.Truco`     | Truco 一级页，当前不在底部 TabBar 中。   |
 | `/vip`       | `src/app/[locale]/(responsive)/(level1)/vip/page.tsx`       | 当前未进 `Routes`  | 文件路由已存在，如需业务跳转建议补常量。 |

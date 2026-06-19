@@ -6,7 +6,7 @@ import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.sha
 
 import { motion } from 'framer-motion';
 
-import { ZIndex } from '@/constants';
+import { ZIndex } from '@/constants/z-index';
 
 export type Direction = 'forward' | 'back';
 export type TransitionKind = 'none' | 'cover';

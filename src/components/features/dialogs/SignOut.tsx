@@ -3,18 +3,17 @@
 import Button from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
 import Icon from '@/components/ui/Icon';
-import { Routes } from '@/router/routes';
-import useAppRouter from '@/router/useAppRouter';
+import { useModal } from '@/providers/modal.provider';
 import { useGlobalStore } from '@/stores/useGlobalStore';
 
 export default function SignOut() {
   const dialog = useDialog();
+  const { closeModal } = useModal();
   const globalStore = useGlobalStore((s) => s);
-  const router = useAppRouter();
   const onSignOut = () => {
-    globalStore.toggleLogin();
+    globalStore.setLogin(false);
     dialog.close('SignOut').then(() => {
-      router.replace(Routes.Home);
+      closeModal();
     });
   };
 

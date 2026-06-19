@@ -2,9 +2,8 @@
 
 import { useEffect } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { CURRENT_VERSION } from '@/constants';
+import { useRouter } from '@/router';
 
 export function useCheckAppVersion() {
   const router = useRouter();

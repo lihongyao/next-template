@@ -1,10 +1,9 @@
 'use client';
 
 import Button from '@/components/ui/Button';
-import { ZIndex } from '@/constants';
-import { Link } from '@/i18n/navigation';
+import { ZIndex } from '@/constants/z-index';
 import { useBrandConfig } from '@/providers/brand.provider';
-import { useRouter } from '@/router';
+import { Link, useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
 export default function Header() {

@@ -12,7 +12,6 @@
 export const TabRoutes = {
   Home: '/',
   Cart: '/cart',
-  Order: '/order',
   Promotion: '/promotion',
   Truco: '/truco',
 };

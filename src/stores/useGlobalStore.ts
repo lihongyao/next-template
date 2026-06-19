@@ -9,6 +9,7 @@ type GlobalStateProps = {
   count: number;
   toggleSidebar: () => void;
   toggleLogin: () => void;
+  setLogin: (isLogin: boolean) => void;
   increment: () => void;
   decrement: () => void;
 };
@@ -26,6 +27,10 @@ export const useGlobalStore = create<GlobalStateProps>()(
       toggleLogin: () =>
         set((state) => {
           state.isLogin = !state.isLogin;
+        }),
+      setLogin: (isLogin: boolean) =>
+        set((state) => {
+          state.isLogin = isLogin;
         }),
       increment: () =>
         set((state) => {

@@ -59,3 +59,29 @@ export const modalContentVariantsMobile: Variants = {
     transition: { type: 'tween', duration: 0.2, ease: 'linear' },
   },
 };
+
+/** 遮罩层 - Mobile Bottom Sheet：淡入淡出 */
+export const modalBackdropVariantsMobileVertical: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { type: 'tween', duration: 0.16, ease: 'linear' },
+  },
+  exit: {
+    opacity: 0,
+    transition: { type: 'tween', duration: 0.16, ease: 'linear' },
+  },
+};
+
+/** 内容层 - Mobile Bottom Sheet：从下往上进入，关闭时向下退出 */
+export const modalContentVariantsMobileVertical: Variants = {
+  hidden: { y: '100%' },
+  visible: {
+    y: 0,
+    transition: { type: 'tween', duration: 0.18, ease: 'linear' },
+  },
+  exit: {
+    y: '100%',
+    transition: { type: 'tween', duration: 0.18, ease: 'linear' },
+  },
+};

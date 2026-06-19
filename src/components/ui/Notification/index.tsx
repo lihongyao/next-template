@@ -17,7 +17,7 @@ import {
 
 import { useTranslations } from 'next-intl';
 
-import { ZIndex } from '@/constants';
+import { ZIndex } from '@/constants/z-index';
 import { cn } from '@/libs/class-helpers';
 import { useDevice } from '@/providers/device.provider';
 

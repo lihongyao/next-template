@@ -6,13 +6,12 @@ import { motion } from 'framer-motion';
 
 import AppTabBar from '@/components/features/AppTabBar';
 import { KeepAlive } from '@/components/features/KeepAlive';
-import { usePathname } from '@/i18n/navigation';
 import {
   consumeDirection,
   consumeSkipNextTransition,
   shouldSkipNextTransition,
 } from '@/libs/navigation-direction';
-import { matchRouteMeta } from '@/router';
+import { matchRouteMeta, usePathname } from '@/router';
 import { ModalRoutes, Routes } from '@/router/routes';
 
 import Header from '../components/Header';

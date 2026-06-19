@@ -1,6 +1,6 @@
 // src/hooks/useModalRoutes.ts
-import { usePathname } from '@/i18n/navigation';
 import { getCanonicalHref, getModalParamsFromPath } from '@/libs/modal-page-routes-utils';
+import { usePathname } from '@/router';
 import { ModalPageRouteConfig } from '@/router/routes';
 
 /**
