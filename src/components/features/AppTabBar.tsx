@@ -17,11 +17,11 @@ export interface TabBarItemProps {
 
 export default memo(function AppTabBar() {
   const tabBarConfig: TabBarItemProps[] = [
-    { path: Routes.Menu, label: '菜单', icon: 'menu' },
-    { path: Routes.Home, label: '首页', icon: 'home' },
-    { path: Routes.Cart, label: '购物车', icon: 'cart' },
+    { path: Routes.Menu, label: 'Menu', icon: 'menu' },
+    { path: Routes.Home, label: 'Home', icon: 'home' },
+    { path: Routes.Cart, label: 'Cart', icon: 'cart' },
     { path: Routes.Truco, label: 'Truco', icon: 'truco' },
-    { path: Routes.Promotion, label: '线下活动', icon: 'promotion' },
+    { path: Routes.Promotion, label: 'Promotions', icon: 'promotion' },
   ];
   const pathname = usePathname();
   const trackRef = useRef<HTMLDivElement>(null);
@@ -50,11 +50,14 @@ export default memo(function AppTabBar() {
             >
               <Icon
                 className="size-5"
-                color={pathname === item.path ? 'orange' : 'white'}
+                color={pathname === item.path ? '#31ED87' : 'white'}
                 src={item.icon}
               />
               <span
-                className={cn('text-xs', pathname === item.path ? 'text-[orange]' : 'text-[white]')}
+                className={cn(
+                  'text-xs',
+                  pathname === item.path ? 'text-[#31ED87]' : 'text-[white]',
+                )}
               >
                 {item.label}
               </span>
