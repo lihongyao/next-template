@@ -144,7 +144,10 @@ type RouteMeta = {
 - `mobileLevel: 2`：移动端二级页，显示在 `MobilePageTransition` / `MobileLevel2` 中。
 - 未命中的路由默认 `{ mobileLevel: 1, desktopLevel: 1 }`。
 
-移动端一级页的缓存不由 `routeRules` 配置控制。当前 `MobileShell` 会对一级页底页使用 `KeepAlive`，缓存 key 是页面 pathname。
+移动端一级页的底层快照不由 `routeRules` 配置控制。当前 `MobileShell` 会用
+`useSelectedLayoutSegments()` 判断 `children` 实际属于哪个页面，只在实际渲染树是一级页时
+缓存页面层和对应的 `LayoutRouterContext`。这样可以避免 App Router 过渡期间 URL 与
+`children` 短暂不同步时，把二级页内容写进一级页底层。
 
 新增动态路由时要同时加动态规则：
 

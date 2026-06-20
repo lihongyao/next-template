@@ -10,7 +10,7 @@ import brands from '@/configs/brands';
 
 // ==============================
 
-const CDN_ORIGIN = 'http://192.168.0.53:3001';
+const CDN_ORIGIN = 'http://localhost:3000';
 const CDN_PREFIX = '/brands_latest';
 
 /**

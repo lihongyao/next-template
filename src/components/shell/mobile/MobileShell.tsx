@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
+
+import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { useSelectedLayoutSegments } from 'next/navigation';
 
 import { motion } from 'framer-motion';
 
 import AppTabBar from '@/components/features/AppTabBar';
-import { KeepAlive } from '@/components/features/KeepAlive';
 import {
   consumeDirection,
   consumeSkipNextTransition,
@@ -15,13 +17,14 @@ import { matchRouteMeta, usePathname } from '@/router';
 import { ModalRoutes, Routes } from '@/router/routes';
 
 import Header from '../components/Header';
-import FrozenRouter from './FrozenRouter';
 import MobileLevel2 from './Level2';
 import MobilePageTransition, { type Direction, type TransitionKind } from './MobilePageTransition';
 
-type TabSnapshot = {
+type RouterContextValue = React.ContextType<typeof LayoutRouterContext>;
+type PageLayer = {
   pathname: string;
-  children: React.ReactNode | null;
+  node: React.ReactNode;
+  routerContext: RouterContextValue;
 };
 
 const tabTransition = { type: 'tween' as const, duration: 0.2, ease: 'easeOut' as const };
@@ -40,6 +43,13 @@ function isSamePath(prevPathname: string, pathname: string): boolean {
   return prevPathname === pathname;
 }
 
+function getPathnameFromSegments(segments: string[] | null): string {
+  const routeSegments = (segments ?? []).filter(
+    (segment) => segment && !segment.startsWith('(') && !segment.startsWith('@'),
+  );
+  return routeSegments.length > 0 ? `/${routeSegments.join('/')}` : Routes.Home;
+}
+
 function shouldUseCoverTransition(prevPathname: string, pathname: string): boolean {
   if (isSamePath(prevPathname, pathname)) return false;
   if (isModalRoute(pathname) || isModalRoute(prevPathname)) return false;
@@ -51,21 +61,24 @@ function shouldUseCoverTransition(prevPathname: string, pathname: string): boole
 
 export default function MobileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const renderedPathname = getPathnameFromSegments(useSelectedLayoutSegments());
+  const routerContext = useContext(LayoutRouterContext);
   const meta = matchRouteMeta(pathname);
+  const renderedMeta = matchRouteMeta(renderedPathname);
   const direction = consumeDirection();
   const prevPathnameRef = useRef(pathname);
   const pathRef = useRef(pathname);
   const skipForCurrentPathRef = useRef(false);
-  const lastTabRef = useRef<TabSnapshot | null>(null);
+  const level1CacheRef = useRef(new Map<string, PageLayer>());
+  const lastLevel1Ref = useRef<PageLayer | null>(null);
   const currentIsModal = isModalRoute(pathname);
   const currentIsLevel1 = meta.mobileLevel === 1;
   const currentIsTabPage = currentIsLevel1 && !currentIsModal;
-
-  // App Router may provide destination children before usePathname reflects that destination.
-  // Do not overwrite the cached tab for the same path during that intermediate render.
-  if (currentIsTabPage && lastTabRef.current?.pathname !== pathname) {
-    lastTabRef.current = { pathname, children };
-  }
+  const renderedIsLevel1 = renderedMeta.mobileLevel === 1 && !isModalRoute(renderedPathname);
+  const currentLevel1Layer =
+    currentIsTabPage && renderedIsLevel1 && renderedPathname === pathname
+      ? { pathname: renderedPathname, node: children, routerContext }
+      : null;
 
   if (pathRef.current !== pathname) {
     pathRef.current = pathname;
@@ -81,10 +94,13 @@ export default function MobileShell({ children }: { children: React.ReactNode })
   const transitionKind: TransitionKind = useCover ? 'cover' : 'none';
   const transitionDirection: Direction = direction;
   const prevMeta = matchRouteMeta(prevPathname);
-  const baseTab =
-    lastTabRef.current ??
-    (currentIsTabPage ? { pathname, children } : { pathname: Routes.Home, children: null });
+  const baseLayer =
+    currentLevel1Layer ??
+    (currentIsTabPage ? level1CacheRef.current.get(pathname) : null) ??
+    lastLevel1Ref.current ??
+    null;
   const showSubPage = meta.mobileLevel === 2;
+  const renderSubPage = showSubPage && renderedMeta.mobileLevel === 2;
   const useTabTransition =
     prevMeta.mobileLevel === 1 &&
     currentIsLevel1 &&
@@ -97,10 +113,18 @@ export default function MobileShell({ children }: { children: React.ReactNode })
     skipForCurrentPathRef.current = false;
   }, [pathname]);
 
-  const level1Page = baseTab.children ? (
-    <KeepAlive cacheKey={baseTab.pathname}>
-      <FrozenRouter>{baseTab.children}</FrozenRouter>
-    </KeepAlive>
+  useLayoutEffect(() => {
+    if (!renderedIsLevel1) return;
+
+    const nextLayer = { pathname: renderedPathname, node: children, routerContext };
+    level1CacheRef.current.set(renderedPathname, nextLayer);
+    lastLevel1Ref.current = nextLayer;
+  }, [children, renderedIsLevel1, renderedPathname, routerContext]);
+
+  const level1Page = baseLayer ? (
+    <LayoutRouterContext.Provider value={baseLayer.routerContext}>
+      {baseLayer.node}
+    </LayoutRouterContext.Provider>
   ) : null;
 
   return (
@@ -132,7 +156,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
         kind={transitionKind}
         suspended={currentIsModal}
       >
-        {showSubPage ? <MobileLevel2>{children}</MobileLevel2> : null}
+        {renderSubPage ? <MobileLevel2>{children}</MobileLevel2> : null}
       </MobilePageTransition>
     </div>
   );

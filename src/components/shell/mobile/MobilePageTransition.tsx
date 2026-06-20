@@ -69,17 +69,22 @@ export default function MobilePageTransition({
   const routerContext = useContext(LayoutRouterContext);
   const makeLayer = (): PageLayer | null =>
     children ? { key: pageKey, node: children, routerContext } : null;
+  const liveLayer = suspended ? null : makeLayer();
+  const hasLiveLayer = liveLayer !== null;
   const liveLayerRef = useRef<PageLayer | null>(null);
-  if (!suspended) {
-    liveLayerRef.current = makeLayer();
-  }
 
-  const [currentLayer, setCurrentLayer] = useState<PageLayer | null>(makeLayer);
+  const [currentLayer, setCurrentLayer] = useState<PageLayer | null>(liveLayer);
   const [underLayer, setUnderLayer] = useState<PageLayer | null>(null);
   const [exitLayer, setExitLayer] = useState<PageLayer | null>(null);
   const prevLayerRef = useRef<PageLayer | null>(currentLayer);
   const previousKeyRef = useRef(pageKey);
   const shouldAnimate = kind === 'cover';
+
+  useLayoutEffect(() => {
+    if (!suspended) {
+      liveLayerRef.current = liveLayer;
+    }
+  });
 
   useLayoutEffect(() => {
     if (suspended) return;
@@ -89,6 +94,9 @@ export default function MobilePageTransition({
 
     if (previousKeyRef.current === pageKey) {
       prevLayerRef.current = nextLayer;
+      if (nextLayer) {
+        setCurrentLayer((layer) => layer ?? nextLayer);
+      }
       return;
     }
 
@@ -107,10 +115,10 @@ export default function MobilePageTransition({
 
     setCurrentLayer(nextLayer);
     prevLayerRef.current = nextLayer;
-  }, [direction, pageKey, shouldAnimate, suspended]);
+  }, [direction, hasLiveLayer, pageKey, shouldAnimate, suspended]);
 
   const renderedCurrentLayer =
-    !suspended && currentLayer?.key === pageKey ? liveLayerRef.current : currentLayer;
+    !suspended && currentLayer?.key === pageKey ? liveLayer : currentLayer;
   const currentInitialX = shouldAnimate && direction === 'forward' ? '100%' : 0;
   const currentZIndex = direction === 'forward' ? baseZIndex + 1 : baseZIndex;
   const exitZIndex = direction === 'back' ? baseZIndex + 1 : baseZIndex;
