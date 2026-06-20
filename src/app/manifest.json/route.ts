@@ -6,8 +6,6 @@ import { NextRequest, NextResponse } from 'next/server';
  * 可选 ?value=<JSON>：读取其中的 screenshots 覆盖 manifest.screenshots，start_url 覆盖 manifest.start_url
  */
 export async function GET(request: NextRequest) {
-  console.log(request);
-
   return NextResponse.json(
     {
       name: 'Next.js Template',

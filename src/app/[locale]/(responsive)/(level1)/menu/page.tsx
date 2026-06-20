@@ -19,7 +19,8 @@ const Grids1: Array<MenuListItemProps> = [
 
 const GridsList1: Array<MenuListItemProps> = [
   { label: 'VIP Club', icon: 'vip' },
-  { label: 'Bonus', icon: 'bonus' },
+  { label: 'Bonus', icon: 'bonus', path: '/i18n' },
+  { label: 'Truco', icon: 'truco', path: '/truco' },
   { label: 'Tournament', icon: 'tournament' },
   { label: 'Affiliate', icon: 'affiliate', dot: true },
   { label: 'Promotions', icon: 'promotion' },
