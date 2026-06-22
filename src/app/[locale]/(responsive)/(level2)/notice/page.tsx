@@ -1,5 +1,6 @@
 /**
  * 页面展示了基于 viewerjs 实现富文本中的图片点击预览功能。
+ * @See https://photoswipe.com/
  */
 'use client';
 
@@ -20,16 +21,19 @@ export default function NoticePage() {
 
     if (!container) return;
 
-    const imgs = container.querySelectorAll('img');
-    const dataSource = Array.from(imgs).map((img) => ({
-      src: img.src,
-      width: img.naturalWidth,
-      height: img.naturalHeight,
-    }));
+    const imgs = Array.from(container.querySelectorAll('img'));
+
+    const buildDataSource = () =>
+      imgs.map((img) => ({
+        src: img.currentSrc || img.src,
+        width: img.naturalWidth || img.clientWidth || 1,
+        height: img.naturalHeight || img.clientHeight || 1,
+      }));
+
     imgs.forEach((img, index) => {
       img.style.cursor = 'pointer';
       img.onclick = () => {
-        const pswp = new PhotoSwipe({ dataSource, index });
+        const pswp = new PhotoSwipe({ dataSource: buildDataSource(), index });
         pswp.init();
       };
     });
