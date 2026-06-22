@@ -2,7 +2,11 @@
 
 import { useRouter as useIntlRouter, usePathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { writeRouteModalHistoryEntry } from '@/libs/mobile-modal-history';
+import {
+  readRouteModalHistoryState,
+  startRouteModalPageTransition,
+  writeRouteModalHistoryEntry,
+} from '@/libs/mobile-modal-history';
 import { getCanonicalHref, shouldOpenAsRouteModal } from '@/libs/modal-page-routes-utils';
 import { markBack, markForward, markReplace } from '@/libs/navigation-direction';
 import { useDevice } from '@/providers/device.provider';
@@ -81,6 +85,16 @@ export default function useAppRouter() {
     return nativeHref;
   };
 
+  const prepareActiveRouteModalBeforePageNavigation = (href: string) => {
+    const modalState = readRouteModalHistoryState();
+    if (!modalState) return;
+
+    const canonicalHref = getCanonicalHref(href);
+    if (shouldOpenAsRouteModal(canonicalHref, isMobile === true)) return;
+
+    startRouteModalPageTransition(canonicalHref);
+  };
+
   const getOptions = (href: string, options?: NavigationOptions) =>
     withMobileCoverScrollOption(
       options,
@@ -100,6 +114,7 @@ export default function useAppRouter() {
       }
 
       const canonicalHref = getCanonicalHref(href);
+      prepareActiveRouteModalBeforePageNavigation(canonicalHref);
       const nextHref =
         getDeviceRouteFallback(normalizeHrefPath(canonicalHref), isMobile === true) ??
         canonicalHref;
@@ -115,6 +130,7 @@ export default function useAppRouter() {
       }
 
       const canonicalHref = getCanonicalHref(href);
+      prepareActiveRouteModalBeforePageNavigation(canonicalHref);
       const nextHref =
         getDeviceRouteFallback(normalizeHrefPath(canonicalHref), isMobile === true) ??
         canonicalHref;

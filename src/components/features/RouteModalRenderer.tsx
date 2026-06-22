@@ -17,7 +17,10 @@ import { ZIndex } from '@/constants/z-index';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import {
   MOBILE_MODAL_HISTORY_CHANGE_EVENT,
+  finishRouteModalPageTransition,
   isRouteModalHistoryEntry,
+  isRouteModalPageTransitionTarget,
+  readRouteModalHistoryState,
 } from '@/libs/mobile-modal-history';
 import {
   getRouteModalClosePathname,
@@ -58,6 +61,7 @@ export default function RouteModalRenderer() {
 
   const [isAllow, setIsAllow] = useState(true);
   const [pureHidden, setPureHidden] = useState(false); // 等 exit 播完再隐藏，否则关时会闪
+  const [suppressNextMobileEnter, setSuppressNextMobileEnter] = useState(false);
 
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
   const modalComponents = useMemo(
@@ -84,17 +88,35 @@ export default function RouteModalRenderer() {
     const syncNativeModalPathname = () => {
       setNativeModalPathname(window.location.pathname);
     };
+    const syncNativeModalPathnameOnPopstate = (event: PopStateEvent) => {
+      if (readRouteModalHistoryState(event.state)) {
+        setSuppressNextMobileEnter(true);
+      }
+
+      syncNativeModalPathname();
+    };
 
     syncNativeModalPathname();
     window.addEventListener(MOBILE_MODAL_HISTORY_CHANGE_EVENT, syncNativeModalPathname);
-    window.addEventListener('popstate', syncNativeModalPathname);
+    window.addEventListener('popstate', syncNativeModalPathnameOnPopstate);
     return () => {
       window.removeEventListener(MOBILE_MODAL_HISTORY_CHANGE_EVENT, syncNativeModalPathname);
-      window.removeEventListener('popstate', syncNativeModalPathname);
+      window.removeEventListener('popstate', syncNativeModalPathnameOnPopstate);
     };
   }, []);
 
   useEffect(() => {
+    if (window.location.pathname !== pathname) return;
+
+    if (isRouteModalPageTransitionTarget(pathname)) {
+      const timer = window.setTimeout(() => {
+        setNativeModalPathname(null);
+        finishRouteModalPageTransition(pathname);
+      }, 320);
+
+      return () => window.clearTimeout(timer);
+    }
+
     if (window.location.pathname === pathname) {
       setNativeModalPathname(null);
     }
@@ -115,6 +137,16 @@ export default function RouteModalRenderer() {
   useEffect(() => {
     setCloseModal(closeModal);
   }, [closeModal, setCloseModal]);
+
+  useEffect(() => {
+    if (!suppressNextMobileEnter || !modalComponents.length) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      setSuppressNextMobileEnter(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [modalComponents.length, suppressNextMobileEnter]);
 
   const handleSwipeBack = useCallback((value: boolean) => {
     setIsAllow(!value);
@@ -151,6 +183,7 @@ export default function RouteModalRenderer() {
         : modalContentVariantsMobile
       : modalContentVariantsDesktop
     : undefined;
+  const initialState = renderAsMobile && suppressNextMobileEnter ? false : 'hidden';
 
   return (
     <AnimatePresence
@@ -171,14 +204,14 @@ export default function RouteModalRenderer() {
             <motion.div
               className="absolute size-full bg-black/70"
               variants={backdropVariants}
-              initial="hidden"
+              initial={initialState}
               animate="visible"
               exit="exit"
               onClick={closeModal}
             />
             <motion.div
               variants={contentVariants}
-              initial="hidden"
+              initial={initialState}
               animate="visible"
               exit="exit"
               style={{ willChange: 'transform, opacity' }}

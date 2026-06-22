@@ -33,7 +33,16 @@ export default function NoticePage() {
     imgs.forEach((img, index) => {
       img.style.cursor = 'pointer';
       img.onclick = () => {
-        const pswp = new PhotoSwipe({ dataSource: buildDataSource(), index });
+        const pswp = new PhotoSwipe({
+          dataSource: buildDataSource(),
+          index,
+          paddingFn: (viewportSize) => ({
+            top: 0,
+            bottom: 0,
+            left: viewportSize.x < 768 ? 16 : 0,
+            right: viewportSize.x < 768 ? 16 : 0,
+          }),
+        });
         pswp.init();
       };
     });

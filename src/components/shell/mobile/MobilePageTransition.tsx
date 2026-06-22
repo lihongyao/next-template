@@ -7,6 +7,7 @@ import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.sha
 import { motion } from 'framer-motion';
 
 import { ZIndex } from '@/constants/z-index';
+import { isRouteModalHistoryEntry } from '@/libs/mobile-modal-history';
 
 export type Direction = 'forward' | 'back';
 export type TransitionKind = 'none' | 'cover';
@@ -59,12 +60,14 @@ export default function MobilePageTransition({
   pageKey,
   kind,
   suspended = false,
+  elevated = false,
 }: {
   children: React.ReactNode | null;
   direction: Direction;
   pageKey: string;
   kind: TransitionKind;
   suspended?: boolean;
+  elevated?: boolean;
 }) {
   const routerContext = useContext(LayoutRouterContext);
   const makeLayer = (): PageLayer | null =>
@@ -76,15 +79,40 @@ export default function MobilePageTransition({
   const [currentLayer, setCurrentLayer] = useState<PageLayer | null>(liveLayer);
   const [underLayer, setUnderLayer] = useState<PageLayer | null>(null);
   const [exitLayer, setExitLayer] = useState<PageLayer | null>(null);
+  const [exitAboveOverlay, setExitAboveOverlay] = useState(false);
+  const currentLayerRef = useRef<PageLayer | null>(currentLayer);
   const prevLayerRef = useRef<PageLayer | null>(currentLayer);
   const previousKeyRef = useRef(pageKey);
   const shouldAnimate = kind === 'cover';
+
+  useLayoutEffect(() => {
+    currentLayerRef.current = currentLayer;
+  });
 
   useLayoutEffect(() => {
     if (!suspended) {
       liveLayerRef.current = liveLayer;
     }
   });
+
+  useLayoutEffect(() => {
+    const handleBackToRouteModal = () => {
+      if (!isRouteModalHistoryEntry()) return;
+
+      const previousLayer = prevLayerRef.current ?? currentLayerRef.current;
+      if (!previousLayer) return;
+
+      setUnderLayer(null);
+      setCurrentLayer(null);
+      setExitLayer(previousLayer);
+      setExitAboveOverlay(true);
+      prevLayerRef.current = null;
+      liveLayerRef.current = null;
+    };
+
+    window.addEventListener('popstate', handleBackToRouteModal);
+    return () => window.removeEventListener('popstate', handleBackToRouteModal);
+  }, []);
 
   useLayoutEffect(() => {
     if (suspended) return;
@@ -120,8 +148,18 @@ export default function MobilePageTransition({
   const renderedCurrentLayer =
     !suspended && currentLayer?.key === pageKey ? liveLayer : currentLayer;
   const currentInitialX = shouldAnimate && direction === 'forward' ? '100%' : 0;
-  const currentZIndex = direction === 'forward' ? baseZIndex + 1 : baseZIndex;
-  const exitZIndex = direction === 'back' ? baseZIndex + 1 : baseZIndex;
+  const elevatedZIndex = ZIndex.Dialog + 1;
+  const currentZIndex = elevated
+    ? elevatedZIndex
+    : direction === 'forward'
+      ? baseZIndex + 1
+      : baseZIndex;
+  const exitZIndex =
+    elevated || exitAboveOverlay
+      ? elevatedZIndex
+      : direction === 'back'
+        ? baseZIndex + 1
+        : baseZIndex;
   const clearUnderLayer = (layerKey: string) => {
     setUnderLayer((layer) => (layer?.key === layerKey ? null : layer));
   };
@@ -158,7 +196,10 @@ export default function MobilePageTransition({
           zIndex={exitZIndex}
           initialX={0}
           animateX="100%"
-          onAnimationComplete={() => setExitLayer(null)}
+          onAnimationComplete={() => {
+            setExitLayer(null);
+            setExitAboveOverlay(false);
+          }}
         />
       ) : null}
     </>

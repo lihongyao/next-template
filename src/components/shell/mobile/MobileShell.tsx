@@ -9,6 +9,10 @@ import { motion } from 'framer-motion';
 
 import AppTabBar from '@/components/features/AppTabBar';
 import {
+  isRouteModalHistoryEntry,
+  isRouteModalPageTransitionTarget,
+} from '@/libs/mobile-modal-history';
+import {
   consumeDirection,
   consumeSkipNextTransition,
   shouldSkipNextTransition,
@@ -89,8 +93,11 @@ export default function MobileShell({ children }: { children: React.ReactNode })
   }
 
   const prevPathname = prevPathnameRef.current;
+  const isRouteModalPageEnter =
+    typeof window !== 'undefined' && isRouteModalPageTransitionTarget(pathname);
   const useCover =
-    !skipForCurrentPathRef.current && shouldUseCoverTransition(prevPathname, pathname);
+    !skipForCurrentPathRef.current &&
+    (isRouteModalPageEnter || shouldUseCoverTransition(prevPathname, pathname));
   const transitionKind: TransitionKind = useCover ? 'cover' : 'none';
   const transitionDirection: Direction = direction;
   const prevMeta = matchRouteMeta(prevPathname);
@@ -107,6 +114,14 @@ export default function MobileShell({ children }: { children: React.ReactNode })
     !currentIsModal &&
     prevPathname !== pathname &&
     !skipForCurrentPathRef.current;
+  const isNativeRouteModalEntry =
+    typeof window !== 'undefined' ? isRouteModalHistoryEntry() : false;
+  const elevatedPageTransition =
+    isRouteModalPageEnter ||
+    (typeof window !== 'undefined' &&
+      transitionDirection === 'back' &&
+      isNativeRouteModalEntry &&
+      prevMeta.mobileLevel === 2);
 
   useEffect(() => {
     prevPathnameRef.current = pathname;
@@ -155,6 +170,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
         direction={transitionDirection}
         kind={transitionKind}
         suspended={currentIsModal}
+        elevated={elevatedPageTransition}
       >
         {renderSubPage ? <MobileLevel2>{children}</MobileLevel2> : null}
       </MobilePageTransition>

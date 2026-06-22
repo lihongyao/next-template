@@ -1,5 +1,9 @@
 export const MOBILE_MODAL_HISTORY_CHANGE_EVENT = 'app:mobile-modal-history-change';
 const ROUTE_MODAL_HISTORY_STATE_KEY = '__routeModal';
+const ROUTE_MODAL_PAGE_TRANSITION_TTL = 5000;
+
+let routeModalPageTransitionPathname: string | null = null;
+let routeModalPageTransitionStartedAt = 0;
 
 export type RouteModalHistoryState = {
   basePathname: string;
@@ -9,6 +13,20 @@ export type RouteModalHistoryState = {
 type BrowserHistoryState = {
   [ROUTE_MODAL_HISTORY_STATE_KEY]?: RouteModalHistoryState;
 };
+
+function normalizePathname(href: string): string {
+  try {
+    return new URL(href, window.location.origin).pathname;
+  } catch {
+    return href.split(/[?#]/)[0] || '/';
+  }
+}
+
+function getCurrentHistoryState(): BrowserHistoryState {
+  return window.history.state && typeof window.history.state === 'object'
+    ? { ...window.history.state }
+    : {};
+}
 
 export function notifyMobileModalHistoryChange(): void {
   window.dispatchEvent(new Event(MOBILE_MODAL_HISTORY_CHANGE_EVENT));
@@ -37,9 +55,11 @@ export function writeRouteModalHistoryEntry({
   href: string;
   basePathname: string;
 }): void {
-  const currentState = readRouteModalHistoryState();
-  const modalPathname = new URL(href, window.location.origin).pathname;
+  const historyState = getCurrentHistoryState();
+  const currentState = readRouteModalHistoryState(historyState);
+  const modalPathname = normalizePathname(href);
   const state: BrowserHistoryState = {
+    ...historyState,
     [ROUTE_MODAL_HISTORY_STATE_KEY]: {
       basePathname: currentState?.basePathname ?? basePathname,
       modalPathname,
@@ -48,4 +68,32 @@ export function writeRouteModalHistoryEntry({
 
   History.prototype[method].call(window.history, state, '', href);
   notifyMobileModalHistoryChange();
+}
+
+export function startRouteModalPageTransition(href: string): void {
+  routeModalPageTransitionPathname = normalizePathname(href);
+  routeModalPageTransitionStartedAt = Date.now();
+}
+
+export function finishRouteModalPageTransition(pathname?: string): void {
+  if (
+    pathname &&
+    routeModalPageTransitionPathname &&
+    normalizePathname(pathname) !== routeModalPageTransitionPathname
+  ) {
+    return;
+  }
+
+  routeModalPageTransitionPathname = null;
+  routeModalPageTransitionStartedAt = 0;
+}
+
+export function isRouteModalPageTransitionTarget(pathname: string): boolean {
+  if (!routeModalPageTransitionPathname) return false;
+  if (Date.now() - routeModalPageTransitionStartedAt > ROUTE_MODAL_PAGE_TRANSITION_TTL) {
+    finishRouteModalPageTransition();
+    return false;
+  }
+
+  return normalizePathname(pathname) === routeModalPageTransitionPathname;
 }
