@@ -34,6 +34,7 @@ export const PageRoutes = {
   GameList: '/game-list',
   GameDetails: '/game-list',
   Menu: '/menu',
+  Notice: '/notice',
   Goods: '/goods',
   News: '/news',
 } as const;

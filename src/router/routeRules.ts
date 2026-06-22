@@ -27,6 +27,7 @@ export const routeRules: Array<{
   { path: Routes.Dialog, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.DynamicComps, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.DataPathThrough, meta: { mobileLevel: 2, desktopLevel: 1 } },
+  { path: Routes.Notice, meta: { mobileLevel: 2, desktopLevel: 1 } },
   {
     path: Routes.Menu,
     meta: {

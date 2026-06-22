@@ -8,15 +8,18 @@ import Icon from '@/components/ui/Icon';
 import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
 import { getImageUrl } from '@/libs/cdn-image';
 import { useModal } from '@/providers/modal.provider';
+import { useRouter } from '@/router';
+import { Routes } from '@/router/routes';
 
-const functions: Array<{ label: string; icon: SvgPathName }> = [
-  { label: '通知', icon: 'message' },
+const functions: Array<{ label: string; icon: SvgPathName; path?: string }> = [
+  { label: '通知', icon: 'message', path: Routes.Notice },
   { label: '设置', icon: 'settings' },
 ];
 
 export default function Profile() {
   const { closeModal } = useModal();
   const dialog = useDialog();
+  const router = useRouter();
 
   return (
     <div
@@ -79,7 +82,14 @@ export default function Profile() {
       <div className="rounded-lg bg-[#212121]">
         {functions.map((item, index) => (
           <div key={index} className="flex items-center justify-between p-3">
-            <div className="flex flex-1 items-center gap-2">
+            <div
+              className="flex flex-1 items-center gap-2"
+              onClick={() => {
+                if (item.path) {
+                  router.push(item.path);
+                }
+              }}
+            >
               <Icon name={item.icon} className="size-5 text-[#b3b8c1]" />
               <span className="text-sm font-bold text-white">{item.label}</span>
             </div>

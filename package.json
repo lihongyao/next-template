@@ -45,6 +45,7 @@
     "next": "16.1.4",
     "next-intl": "^4.12.0",
     "next-scroll-restorer": "^0.11.0",
+    "photoswipe": "^5.4.4",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
