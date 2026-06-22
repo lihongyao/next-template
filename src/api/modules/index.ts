@@ -1,8 +1,8 @@
 /**
- * API 模块统一导出
- * 在这里导出所有模块接口
+ * 领域 API 模块。
+ *
+ * 将接口路径收敛在模块内部，让应用代码导入业务函数，避免在组件里散落后端路径。
  */
-// 示例：导出用户模块
 import * as example from './example';
 import * as product from './product';
 

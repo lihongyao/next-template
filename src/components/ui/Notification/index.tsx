@@ -204,7 +204,7 @@ function NotificationProvider({ children }: PropsWithChildren) {
 }
 
 function NotificationCard({ item, placement, onClose, onExited }: NotificationCardProps) {
-  const t = useTranslations('Notification');
+  const t = useTranslations('notification');
   const { icon, accent, fallbackTitleKey } = TYPE_META[item.type];
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remainingMsRef = useRef<number | null>(

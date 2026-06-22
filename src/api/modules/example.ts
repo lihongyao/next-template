@@ -1,9 +1,8 @@
 /**
- * 示例 API 模块
- * 展示如何使用统一 API 封装模块接口
+ * API 模块示例。
  */
-import type { RequestOptions } from '../core/types';
-import { api, del, get, post, put } from '../fetch';
+import type { ApiRequestOptions } from '../core';
+import { del, get, post, put } from '../fetch';
 
 /**
  * 用户信息接口
@@ -35,41 +34,30 @@ export interface UserListResponse {
 }
 
 /**
- * 获取用户列表
- *
- * 可以在客户端或服务端使用，自动识别环境
- *
- * @example
- * ```ts
- * // 客户端组件
- * 'use client';
- * const users = await getUserList({ page: 1, limit: 10 });
- *
- * // 服务端组件（无需传 serverHeaders，自动从 Cookie 读 token）
- * const users = await getUserList({ page: 1, limit: 10 });
- * ```
+ * 默认是公开请求。列表适合被 Next Data Cache 缓存时，可以传入
+ * cache、revalidate 或 tags。
  */
-export async function getUserList(params?: UserListParams, options?: RequestOptions) {
+export async function getUserList(params?: UserListParams, options?: ApiRequestOptions) {
   return get<UserListResponse>('/users', {
     ...options,
-    params: params as Record<string, string | number | boolean>,
+    params: params as Record<string, string | number | boolean | undefined>,
   });
 }
 
 /**
  * 获取用户详情
  */
-export async function getUserById(id: number, options?: RequestOptions) {
+export async function getUserById(id: number, options?: ApiRequestOptions) {
   return get<User>(`/users/${id}`, options);
 }
 
 /**
  * 创建用户
  */
-export async function createUser(data: Omit<User, 'id'>, options?: RequestOptions) {
+export async function createUser(data: Omit<User, 'id'>, options?: ApiRequestOptions) {
   return post<User>('/users', {
     ...options,
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
@@ -79,27 +67,27 @@ export async function createUser(data: Omit<User, 'id'>, options?: RequestOption
 export async function updateUser(
   id: number,
   data: Partial<Omit<User, 'id'>>,
-  options?: RequestOptions,
+  options?: ApiRequestOptions,
 ) {
   return put<User>(`/users/${id}`, {
     ...options,
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
 /**
  * 删除用户
  */
-export async function deleteUser(id: number, options?: RequestOptions) {
+export async function deleteUser(id: number, options?: ApiRequestOptions) {
   return del(`/users/${id}`, options);
 }
 
 /**
  * 获取用户资料（需要登录）
  */
-export async function getUserProfile(options?: RequestOptions) {
+export async function getUserProfile(options?: ApiRequestOptions) {
   return get<User>('/user/profile', {
     ...options,
-    isLogin: true,
+    auth: 'required',
   });
 }
