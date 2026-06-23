@@ -11,7 +11,7 @@ import { Routes } from '@/router/routes';
 
 export default function HomePage() {
   const router = useRouter();
-  const api = notification.useNotificationApi();
+  const [api] = notification.useNotification();
   // const routerA = useTransitionRouter();
   useEffect(() => {
     console.log('render home page...');

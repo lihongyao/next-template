@@ -2,27 +2,20 @@
 import { Suspense } from 'react';
 
 import type { Metadata, Viewport } from 'next';
-import { NextIntlClientProvider, hasLocale } from 'next-intl';
+import { hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
 import '@/assets/styles/global-animate.css';
-import ClientInitializer from '@/components/features/ClientInitializer';
 import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRestorer';
-import LogoLoading from '@/components/features/LogoLoading';
-import RouteModalRenderer from '@/components/features/RouteModalRenderer';
-import { DialogProvider } from '@/components/ui/Dialog';
-import Notification, { NotificationProvider } from '@/components/ui/Notification';
 import { CURRENT_VERSION } from '@/constants';
 import { inter } from '@/fonts';
 import '@/generated/brand.css';
 import { routing } from '@/i18n/routing';
 import { getServerBrandConfig } from '@/libs/brand.server';
-import { BrandConfigProvider } from '@/providers/brand.provider';
-import { DeviceProvider } from '@/providers/device.provider';
-import { ModalProvider } from '@/providers/modal.provider';
+import { AppProviders } from '@/providers/app.provider';
 
 export const runtime = 'edge';
 export const viewport: Viewport = {
@@ -93,24 +86,14 @@ export default async function LocaleLayout({
           alt="lcp"
           role="none"
         />
-        {/* 国际化 */}
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <BrandConfigProvider value={brandConfig}>
-            <DeviceProvider userAgent={userAgent}>
-              <ModalProvider>
-                <DialogProvider>
-                  <NotificationProvider>
-                    <LogoLoading />
-                    <ClientInitializer />
-                    <RouteModalRenderer />
-                    {children}
-                    <Notification />
-                  </NotificationProvider>
-                </DialogProvider>
-              </ModalProvider>
-            </DeviceProvider>
-          </BrandConfigProvider>
-        </NextIntlClientProvider>
+        <AppProviders
+          locale={locale}
+          messages={messages}
+          brandConfig={brandConfig}
+          userAgent={userAgent}
+        >
+          {children}
+        </AppProviders>
         {/* 记录滚动位置 */}
         <Suspense>
           <ClientSideScrollRestorer />

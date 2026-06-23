@@ -1,4 +1,5 @@
-@keyframes fadeInUp {
+/* 通用动效 */
+@keyframes app-fade-in-up {
   from {
     opacity: 0;
     transform: translate3d(0, 12px, 0);
@@ -8,7 +9,8 @@
     transform: translate3d(0, 0, 0);
   }
 }
-@keyframes fadeOut {
+
+@keyframes app-fade-out {
   from {
     opacity: 1;
   }
@@ -17,7 +19,34 @@
   }
 }
 
-@keyframes notification-fade-in-down {
+.animate-pressable {
+  cursor: pointer;
+  user-select: none;
+  transform: translateZ(0) scale(1);
+  transition: transform 140ms ease-out;
+}
+
+.animate-pressable:active {
+  transform: translateZ(0) scale(0.95);
+  transition: transform 80ms linear;
+}
+
+/* 跑马灯 */
+@keyframes app-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--marquee-translate, -50%));
+  }
+}
+
+.animate-marquee {
+  animation: app-marquee 25s linear infinite;
+}
+
+/* Notification */
+@keyframes app-notification-enter-down {
   from {
     opacity: 0;
     transform: translate3d(0, -72px, 0);
@@ -32,7 +61,7 @@
   }
 }
 
-@keyframes notification-leave-fade {
+@keyframes app-notification-leave-up {
   from {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -43,7 +72,7 @@
   }
 }
 
-@keyframes notification-progress {
+@keyframes app-notification-progress-shrink {
   from {
     transform: scaleX(1);
   }
@@ -52,21 +81,51 @@
   }
 }
 
-.notification-enter-right,
-.notification-enter-down {
-  animation: notification-fade-in-down 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+.animate-notification-enter {
+  animation: app-notification-enter-down 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.notification-leave-fade {
-  animation: notification-leave-fade 0.22s ease-in both;
+.animate-notification-leave {
+  animation: app-notification-leave-up 0.22s ease-in both;
 }
 
-.notification-stack-item {
+.animate-notification-stack {
   transform: translate3d(0, 0, 0);
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
 .animate-notification-progress {
-  animation: notification-progress linear forwards;
+  animation: app-notification-progress-shrink linear forwards;
+}
+
+/* Message */
+@keyframes app-message-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes app-message-leave {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+}
+
+.animate-message-enter {
+  animation: app-message-enter 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-message-leave {
+  animation: app-message-leave 0.14s ease-in both;
 }

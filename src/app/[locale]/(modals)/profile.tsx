@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
 import Icon from '@/components/ui/Icon';
 import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
+import { message } from '@/components/ui/Message';
 import { getImageUrl } from '@/libs/cdn-image';
 import { useModal } from '@/providers/modal.provider';
 import { useRouter } from '@/router';
@@ -20,6 +21,7 @@ export default function Profile() {
   const { closeModal } = useModal();
   const dialog = useDialog();
   const router = useRouter();
+  const [messageApi] = message.useMessage();
 
   return (
     <div
@@ -48,18 +50,19 @@ export default function Profile() {
                 name="edit"
                 className="size-[14px]"
                 color="#b3b8c1"
-                wrapperClass="button-animation"
+                wrapperClass="animate-pressable"
               />
             </div>
             <div className="flex items-center gap-2 text-sm text-[#b3b8c1]">
               <span>ID:1314210</span>
               <Icon
                 name="copy"
-                wrapperClass="button-animation"
+                wrapperClass="animate-pressable"
                 className="size-[16px]"
                 color="#b3b8c1"
                 onClick={async () => {
                   await copy('1314210');
+                  messageApi.success('复制成功');
                 }}
               />
             </div>

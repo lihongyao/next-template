@@ -101,7 +101,7 @@ export default memo(function JoinCard() {
           style={
             {
               willChange: 'opacity, transform',
-              animation: `${textAnimationStatus === 'exit' ? 'fadeOut' : 'fadeInUp'} ${textAnimationStatus === 'exit' ? JOIN_TEXT_EXIT_DURATION : JOIN_TEXT_ENTER_DURATION}ms linear both`,
+              animation: `${textAnimationStatus === 'exit' ? 'app-fade-out' : 'app-fade-in-up'} ${textAnimationStatus === 'exit' ? JOIN_TEXT_EXIT_DURATION : JOIN_TEXT_ENTER_DURATION}ms linear both`,
             } as CSSProperties
           }
         >

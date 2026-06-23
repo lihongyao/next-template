@@ -50,18 +50,6 @@ body {
   display: none; /* Chrome / Safari */
 }
 
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(var(--marquee-translate, -50%));
-  }
-}
-.animate-marquee {
-  animation: marquee 25s linear infinite;
-}
-
 .lcp-anchor {
   opacity: 0.000001;
   pointer-events: none;
@@ -72,61 +60,6 @@ body {
   height: 900px;
   max-width: 99vw;
   max-height: 99vh;
-}
-
-/* ---- 玻璃 */
-/* 玻璃按钮 */
-#glassBtn {
-  width: 400px;
-  height: 160px;
-  z-index: 100;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-
-  /* 2. 液态玻璃核心：高模糊 + 强饱和 */
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(3px);
-  /* backdrop-filter: blur(4px) saturate(200%);
-  -webkit-backdrop-filter: blur(35px) saturate(200%); */
-
-  border-radius: 50px;
-  /* border: 1.5px solid var(--glass-border); */
-
-  /* 3. 模拟物理厚度的高光与阴影 */
-  box-shadow:
-    0 40px 80px rgba(0, 0, 0, 0.6),
-    /* 顶部亮边 */ inset 1px 1px 1px rgba(255, 255, 255, 0.5),
-    /* 底部暗边 */ inset -1px -1px 3px rgba(0, 0, 0, 0.5);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#glassBtn:active {
-  cursor: grabbing;
-  transform: scale(0.94);
-  transition: transform 0.2s cubic-bezier(0.1, 0.5, 0.1, 1);
-}
-
-/* 按钮动画 */
-.button-animation {
-  cursor: pointer;
-  user-select: none;
-
-  transform: translateZ(0) scale(1);
-  transition: transform 140ms ease-out;
-}
-.button-animation:active {
-  transform: translateZ(0) scale(0.95);
-  transition: transform 80ms linear;
-}
-
-.button-animation.no-button-animation,
-.button-animation.no-button-animation:active {
-  transform: none;
-  transition: none;
 }
 
 .rich-content img {
