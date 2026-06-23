@@ -55,7 +55,7 @@ export default function Header({ fixed = false }: { fixed?: boolean }) {
               />
               {/* 个人中心 */}
               <img
-                className="size-[36px] rounded-sm"
+                className="size-[36px] cursor-pointer rounded-sm"
                 src={getImageUrl('avatars/h_0.jpg')}
                 onClick={() => {
                   router.push(Routes.ModalProfile, { scroll: false });

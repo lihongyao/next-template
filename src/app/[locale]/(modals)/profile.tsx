@@ -8,6 +8,7 @@ import Icon from '@/components/ui/Icon';
 import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
 import { message } from '@/components/ui/Message';
 import { getImageUrl } from '@/libs/cdn-image';
+import { useDevice } from '@/providers/device.provider';
 import { useModal } from '@/providers/modal.provider';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
@@ -17,7 +18,19 @@ const functions: Array<{ label: string; icon: SvgPathName; path?: string }> = [
   { label: '设置', icon: 'settings' },
 ];
 
+const pcStatistics = [
+  { label: 'Wagers', value: '2100' },
+  { label: 'Wins', value: '1554' },
+  { label: 'Losses', value: '567' },
+  { label: 'Wagered', value: 'R$1,000,50' },
+];
+
 export default function Profile() {
+  const { isMobile } = useDevice();
+  return isMobile ? <H5Content /> : <PCContent />;
+}
+
+function H5Content() {
   const { closeModal } = useModal();
   const dialog = useDialog();
   const router = useRouter();
@@ -32,7 +45,7 @@ export default function Profile() {
         name="arrow_left"
         className="size-3"
         color="white"
-        wrapperClass="size-6 bg-white/30 rounded-sm absolute top-3 left-3"
+        wrapperClass="size-6 bg-white/30 rounded-sm absolute top-3 left-3 cursor-pointer"
         onClick={closeModal}
       />
 
@@ -118,6 +131,71 @@ export default function Profile() {
       >
         退出登录
       </Button>
+    </div>
+  );
+}
+function PCContent() {
+  const { closeModal } = useModal();
+  const [messageApi] = message.useMessage();
+  return (
+    <div data-name="Profile" className="h-[700px] w-[480px] rounded-xl bg-[#2A2A2B]">
+      <header className="flex h-[58px] items-center justify-between px-5">
+        <h1 className="text-base font-bold text-white">Profile</h1>
+        <Icon
+          name="close"
+          wrapperClass="size-[32px] bg-white/5 rounded-[6px] cursor-pointer"
+          className="size-4 text-white"
+          onClick={closeModal}
+        />
+      </header>
+
+      <main className="px-5">
+        <div className="relative flex items-center gap-4">
+          <div
+            className="size-[80px] rounded-full border-4 border-[#353535]"
+            style={{ background: `url(${getImageUrl('avatars/h_0.jpg')}) center center / cover` }}
+          />
+          <div className="flex flex-col gap-[6px]">
+            <p className="text-2xl leading-[36px] font-bold text-white">城南李大爷</p>
+            <div className="flex items-center gap-1">
+              <span className="text-sm leading-[21px] font-medium text-[#B3B8C1]">ID:1314210</span>
+              <Icon
+                name="copy"
+                wrapperClass="animate-pressable"
+                className="size-[16px]"
+                color="#b3b8c1"
+                onClick={async () => {
+                  await copy('1314210');
+                  messageApi.success('复制成功');
+                }}
+              />
+            </div>
+            <div className="absolute top-0 right-0">
+              <Icon
+                name="edit"
+                className="size-[14px]"
+                color="#b3b8c1"
+                wrapperClass=" animate-pressable size-[32px] cursor-pointer bg-white/5 rounded-[6px]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <section className="mt-8 rounded-xl bg-[#242426] p-4">
+          <h2 className="text-base leading-6 font-bold text-white">Statistics</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {pcStatistics.map((item) => (
+              <div
+                key={item.label}
+                className="flex h-[74px] flex-col items-center justify-center gap-2 rounded-lg bg-white/[0.06]"
+              >
+                <div className="text-sm leading-5 font-semibold text-[#B3B8C1]">{item.label}</div>
+                <div className="text-xl leading-7 font-extrabold text-white">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
