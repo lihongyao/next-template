@@ -1,43 +1,23 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-06-19T13:18:54.218Z
 import type React from 'react';
 
-import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';
-
+import Icon_adult from './adult';
 import Icon_arrow_long_left from './arrow_long_left';
 import Icon_arrow_long_right from './arrow_long_right';
-import Icon_bottom_acting from './bottom_acting';
-import Icon_bottom_casino from './bottom_casino';
-import Icon_bottom_home from './bottom_home';
-import Icon_bottom_sports from './bottom_sports';
-import Icon_bottom_user from './bottom_user';
-import Icon_bottom_vip2 from './bottom_vip2';
 import Icon_choose_off from './choose_off';
 import Icon_choose_on from './choose_on';
-import Icon_close from './close';
-import Icon_file from './file';
-import Icon_glass_border from './glass_border';
-import Icon_next from './next';
-import Icon_service from './service';
-import Icon_window from './window';
+import type { SvgPathName } from './svgPath_all';
+
+// 业务统一从 generated/index.ts 取类型，不再直接摸 svgPath_all.ts。
+export { SVG_PATH_NAMES } from './svgPath_all';
+export type { SvgPathName } from './svgPath_all';
 
 export const SVG_COMPONENT_MAP = {
+  adult: Icon_adult,
   arrow_long_left: Icon_arrow_long_left,
   arrow_long_right: Icon_arrow_long_right,
-  bottom_acting: Icon_bottom_acting,
-  bottom_casino: Icon_bottom_casino,
-  bottom_home: Icon_bottom_home,
-  bottom_sports: Icon_bottom_sports,
-  bottom_user: Icon_bottom_user,
-  bottom_vip2: Icon_bottom_vip2,
   choose_off: Icon_choose_off,
   choose_on: Icon_choose_on,
-  close: Icon_close,
-  file: Icon_file,
-  'glass-border': Icon_glass_border,
-  next: Icon_next,
-  service: Icon_service,
-  window: Icon_window,
 } as const satisfies Partial<
   Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
 >;
@@ -49,7 +29,14 @@ export const SVG_SPRITE_ID_MAP = {
   arrow_right: 'icon-arrow_right',
   arrow_up: 'icon-arrow_up',
   bonus: 'icon-bonus',
+  bottom_acting: 'icon-bottom_acting',
+  bottom_casino: 'icon-bottom_casino',
+  bottom_home: 'icon-bottom_home',
+  bottom_sports: 'icon-bottom_sports',
+  bottom_user: 'icon-bottom_user',
+  bottom_vip2: 'icon-bottom_vip2',
   cart: 'icon-cart',
+  close: 'icon-close',
   copy: 'icon-copy',
   edit: 'icon-edit',
   favorites: 'icon-favorites',
@@ -64,7 +51,13 @@ export const SVG_SPRITE_ID_MAP = {
   promotion: 'icon-promotion',
   recent: 'icon-recent',
   search: 'icon-search',
+  service: 'icon-service',
   settings: 'icon-settings',
+  sport_baseball: 'icon-sport_baseball',
+  sport_basketball: 'icon-sport_basketball',
+  sport_soccerball: 'icon-sport_soccerball',
+  sport_tennis: 'icon-sport_tennis',
+  sport_volleyball: 'icon-sport_volleyball',
   time: 'icon-time',
   tips_correct: 'icon-tips_correct',
   tips_error: 'icon-tips_error',
@@ -76,6 +69,7 @@ export const SVG_SPRITE_ID_MAP = {
 } as const satisfies Partial<Record<SvgPathName, string>>;
 
 export const SVG_ICON_KIND_MAP = {
+  adult: 'svgr',
   affiliate: 'sprite',
   arrow_down: 'sprite',
   arrow_left: 'sprite',
@@ -84,35 +78,37 @@ export const SVG_ICON_KIND_MAP = {
   arrow_right: 'sprite',
   arrow_up: 'sprite',
   bonus: 'sprite',
-  bottom_acting: 'svgr',
-  bottom_casino: 'svgr',
-  bottom_home: 'svgr',
-  bottom_sports: 'svgr',
-  bottom_user: 'svgr',
-  bottom_vip2: 'svgr',
+  bottom_acting: 'sprite',
+  bottom_casino: 'sprite',
+  bottom_home: 'sprite',
+  bottom_sports: 'sprite',
+  bottom_user: 'sprite',
+  bottom_vip2: 'sprite',
   cart: 'sprite',
   choose_off: 'svgr',
   choose_on: 'svgr',
-  close: 'svgr',
+  close: 'sprite',
   copy: 'sprite',
   edit: 'sprite',
   favorites: 'sprite',
-  file: 'svgr',
-  'glass-border': 'svgr',
   globe: 'sprite',
   help: 'sprite',
   home: 'sprite',
   hot: 'sprite',
   menu: 'sprite',
   message: 'sprite',
-  next: 'svgr',
   order: 'sprite',
   profile: 'sprite',
   promotion: 'sprite',
   recent: 'sprite',
   search: 'sprite',
-  service: 'svgr',
+  service: 'sprite',
   settings: 'sprite',
+  sport_baseball: 'sprite',
+  sport_basketball: 'sprite',
+  sport_soccerball: 'sprite',
+  sport_tennis: 'sprite',
+  sport_volleyball: 'sprite',
   time: 'sprite',
   tips_correct: 'sprite',
   tips_error: 'sprite',
@@ -121,7 +117,6 @@ export const SVG_ICON_KIND_MAP = {
   tournament: 'sprite',
   truco: 'sprite',
   vip: 'sprite',
-  window: 'svgr',
 } as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
 
-export const SVG_SPRITE_FILE = '/sprite.c7d76207.svg';
+export const SVG_SPRITE_FILE = '/sprite.6d24015b.svg';

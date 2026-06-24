@@ -6,10 +6,9 @@ import {
   SVG_ICON_KIND_MAP,
   SVG_SPRITE_FILE,
   SVG_SPRITE_ID_MAP,
+  type SvgPathName,
 } from '@/assets/svg/generated';
 import { cn } from '@/libs/class-helpers';
-
-import type { SvgPathName } from './svgPath_all';
 
 export type IconProps = {
   name?: SvgPathName;
@@ -23,7 +22,8 @@ export type IconProps = {
 export default function Icon(props: IconProps) {
   const { name, src, color, style, className, wrapperClass, alt, onClick, ...rest } = props;
 
-  const svgName = (name || (src?.startsWith('http') ? '' : src) || '') as SvgPathName;
+  const isRemoteImage = Boolean(src?.startsWith('http'));
+  const svgName = (name || (!isRemoteImage ? src : '') || '') as SvgPathName;
   const componentMap = SVG_COMPONENT_MAP as Partial<
     Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
   >;
@@ -66,9 +66,10 @@ export default function Icon(props: IconProps) {
           <use href={`${SVG_SPRITE_FILE}#${spriteId}`} />
         </svg>
       )}
-      {src && !iconKind && (
+      {src && isRemoteImage && !iconKind && (
         <img src={src} className={cn('shrink-0', className)} alt={alt || 'icon'} />
       )}
+      {!iconKind && !isRemoteImage && svgName && <span className="text-base">❌</span>}
     </div>
   );
 }

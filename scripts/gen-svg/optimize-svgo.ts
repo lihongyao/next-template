@@ -3,10 +3,10 @@ import { optimize } from 'svgo';
 
 const SVGO_CONFIG: Config = {
   plugins: [
+    // svgo v4 的 preset-default 默认不会移除 viewBox，这里直接使用内建 preset 即可。
     'preset-default',
-    { name: 'removeDimensions' },
-    { name: 'removeComments' },
-    { name: 'sortAttrs' },
+    // 额外移除宽高，让 Icon 组件统一通过 1em 和外部样式控尺寸。
+    'removeDimensions',
   ],
 };
 
@@ -31,8 +31,11 @@ function normalizeFillAndStroke(svg: string): string {
 }
 
 export function optimizeSvgContent(content: string, filePath: string): string {
-  // 先做颜色归一，再走 svgo 常规压缩。
-  const normalized = normalizeFillAndStroke(content);
+  // 当前团队约定：svgrs 默认保留设计稿原色，后续若需要皮肤变量，由开发手动调整 generated/*.tsx。
+  // 若未来需要恢复“统一改成 currentColor 再生成”，放开下一行并删掉下面这行即可。
+  // const normalized = normalizeFillAndStroke(content);
+  // 这里仍保留 normalizeFillAndStroke，避免以后回切 currentColor 时重新找逻辑。
+  const normalized = content;
   const optimized = optimize(normalized, {
     path: filePath,
     ...SVGO_CONFIG,

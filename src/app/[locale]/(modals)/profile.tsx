@@ -2,10 +2,10 @@
 
 import copy from 'copy-to-clipboard';
 
+import type { SvgPathName } from '@/assets/svg/generated';
 import Button from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
 import Icon from '@/components/ui/Icon';
-import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
 import { message } from '@/components/ui/Message';
 import { getImageUrl } from '@/libs/cdn-image';
 import { useDevice } from '@/providers/device.provider';

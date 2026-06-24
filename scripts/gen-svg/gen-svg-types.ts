@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import prettier from 'prettier';
 
-import { ICON_REGISTRY_OUTPUT_FILE, ROOT_DIR, SVG_TYPES_OUTPUT_FILE } from './config.js';
+import { ICON_REGISTRY_OUTPUT_FILE, SVG_TYPES_OUTPUT_FILE } from './config.js';
 import { safeFileBase } from './utils.js';
 
 export type SvgRegistryInput = {
@@ -26,13 +26,12 @@ export async function generateSvgTypesAndRegistry(input: SvgRegistryInput): Prom
   const { spriteNames, svgrNames } = input;
   assertNoDuplicatedNames(spriteNames, svgrNames);
 
-  const prettierConfig = (await prettier.resolveConfig(ROOT_DIR)) ?? {};
+  // 类型文件和注册表都按各自输出路径取 prettier 配置，避免格式漂移。
+  const typePrettierConfig = (await prettier.resolveConfig(SVG_TYPES_OUTPUT_FILE)) ?? {};
   const allNames = [...spriteNames, ...svgrNames].sort((a, b) => a.localeCompare(b));
-  const timestamp = new Date().toISOString();
 
   const typeOutput = `
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: ${timestamp}
 
 export const SVG_PATH_NAMES = [
   ${allNames.map((name) => `'${name}'`).join(',\n  ')}
@@ -44,7 +43,7 @@ export type SvgPathName = (typeof SVG_PATH_NAMES)[number];
   await fs.mkdir(path.dirname(SVG_TYPES_OUTPUT_FILE), { recursive: true });
   await fs.writeFile(
     SVG_TYPES_OUTPUT_FILE,
-    await prettier.format(typeOutput, { ...prettierConfig, parser: 'typescript' }),
+    await prettier.format(typeOutput, { ...typePrettierConfig, parser: 'typescript' }),
     'utf8',
   );
 
@@ -59,12 +58,17 @@ export type SvgPathName = (typeof SVG_PATH_NAMES)[number];
   });
   const spriteEntries = spriteNames.map((name) => `  '${name}': 'icon-${name}',`);
 
+  const registryPrettierConfig = (await prettier.resolveConfig(ICON_REGISTRY_OUTPUT_FILE)) ?? {};
+
   const registryOutput = `
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: ${timestamp}
 import type React from 'react';
 
-import type { SvgPathName } from '@/components/ui/Icon/svgPath_all';
+// 业务统一从 generated/index.ts 取类型，不再直接摸 svgPath_all.ts。
+export { SVG_PATH_NAMES } from './svgPath_all';
+export type { SvgPathName } from './svgPath_all';
+
+import type { SvgPathName } from './svgPath_all';
 
 ${imports.join('\n')}
 
@@ -88,7 +92,7 @@ export const SVG_SPRITE_FILE = '${input.publicSpriteFile}';
   // registry 由脚本统一产出，UI 层只读这个文件，不在业务代码里手写映射。
   await fs.writeFile(
     ICON_REGISTRY_OUTPUT_FILE,
-    await prettier.format(registryOutput, { ...prettierConfig, parser: 'typescript' }),
+    await prettier.format(registryOutput, { ...registryPrettierConfig, parser: 'typescript' }),
     'utf8',
   );
 }

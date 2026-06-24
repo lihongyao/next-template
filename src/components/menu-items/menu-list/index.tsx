@@ -1,8 +1,8 @@
 'use client';
 import { memo } from 'react';
 
+import type { SvgPathName } from '@/assets/svg/generated';
 import Icon from '@/components/ui/Icon';
-import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
 import { useRouter } from '@/router';
 
 export interface MenuListItemProps {

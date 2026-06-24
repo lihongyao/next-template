@@ -7,7 +7,6 @@ import {
   PUBLIC_SPRITE_PREFIX,
   PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE,
   ROOT_DIR,
-  SPRITE_PREVIEW_OUTPUT_FILE,
   SVG_SOURCE_SPRITES_DIR,
 } from './config.js';
 import { readSvgNamesFromDir } from './utils.js';
@@ -51,7 +50,7 @@ function createPreviewHtml(spriteNames: string[], publicSpriteFile: string): str
       ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
       .item { border: 1px solid #242833; border-radius: 10px; background: #171a21; padding: 12px; text-align: center; }
       .icon-wrap { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 8px; background: #0f1115; display: flex; align-items: center; justify-content: center; }
-      .icon { width: 24px; height: 24px; color: #60a5fa; fill: currentColor; }
+      .icon { width: 24px; height: 24px; color: #ffffff; fill: currentColor; }
       code { font-size: 12px; color: #cbd5e1; word-break: break-all; }
       .empty { color: #9ca3af; }
     </style>
@@ -96,7 +95,6 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
   const spriteNames = await readSvgNamesFromDir(SVG_SOURCE_SPRITES_DIR);
 
   await fs.mkdir(PUBLIC_DIR, { recursive: true });
-  await fs.mkdir(path.dirname(SPRITE_PREVIEW_OUTPUT_FILE), { recursive: true });
 
   if (spriteNames.length === 0) {
     const emptySprite = `<svg xmlns="http://www.w3.org/2000/svg"></svg>`;
@@ -106,7 +104,6 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
     await removeOldSpriteFiles();
     await fs.writeFile(publicSpritePath, emptySprite, 'utf8');
     const previewHtml = createPreviewHtml([], publicSpriteFile);
-    await fs.writeFile(SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
     await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
     return { spriteNames: [], publicSpriteFile };
   }
@@ -138,9 +135,9 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
 
   const fileName = await resolveLatestSpriteFile();
   const publicSpriteFile = `/${fileName}`;
+  // 预览页只读最终产物路径，避免手动查 hash。
   const previewHtml = createPreviewHtml(spriteNames, publicSpriteFile);
-  await fs.writeFile(SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
-  // await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
+  await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
 
   return {
     spriteNames,

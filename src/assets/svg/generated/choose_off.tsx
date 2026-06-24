@@ -9,7 +9,7 @@ const SvgChooseOff = (props: SVGProps<SVGSVGElement>) => (
     height="1em"
     {...props}
   >
-    <rect width={15} height={15} x={0.5} y={0.5} stroke="currentColor" rx={3.5} />
+    <rect width={15} height={15} x={0.5} y={0.5} stroke="#b3b8c1" rx={3.5} />
   </svg>
 );
 export default SvgChooseOff;

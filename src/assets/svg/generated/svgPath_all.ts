@@ -1,7 +1,7 @@
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
-// 生成时间: 2026-06-19T13:18:54.218Z
 
 export const SVG_PATH_NAMES = [
+  'adult',
   'affiliate',
   'arrow_down',
   'arrow_left',
@@ -23,15 +23,12 @@ export const SVG_PATH_NAMES = [
   'copy',
   'edit',
   'favorites',
-  'file',
-  'glass-border',
   'globe',
   'help',
   'home',
   'hot',
   'menu',
   'message',
-  'next',
   'order',
   'profile',
   'promotion',
@@ -39,6 +36,11 @@ export const SVG_PATH_NAMES = [
   'search',
   'service',
   'settings',
+  'sport_baseball',
+  'sport_basketball',
+  'sport_soccerball',
+  'sport_tennis',
+  'sport_volleyball',
   'time',
   'tips_correct',
   'tips_error',
@@ -47,7 +49,6 @@ export const SVG_PATH_NAMES = [
   'tournament',
   'truco',
   'vip',
-  'window',
 ] as const;
 
 export type SvgPathName = (typeof SVG_PATH_NAMES)[number];

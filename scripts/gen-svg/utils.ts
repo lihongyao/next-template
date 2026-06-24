@@ -27,10 +27,13 @@ export function componentNameFromOriginal(originalBase: string): string {
 
 export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
-  return entries
-    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.svg'))
-    .map((entry) => path.basename(entry.name, '.svg'))
-    .sort((a, b) => a.localeCompare(b));
+  return (
+    entries
+      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.svg'))
+      // registry / type 都只认文件名本体，不带目录层级。
+      .map((entry) => path.basename(entry.name, '.svg'))
+      .sort((a, b) => a.localeCompare(b))
+  );
 }
 
 /**

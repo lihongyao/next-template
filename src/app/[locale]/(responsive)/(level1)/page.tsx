@@ -114,10 +114,10 @@ export default function HomePage() {
           测试 sentry
         </Button>
       </div>
-
-      <div className="text-[#187843]">1231232</div>
+      <Icon name="adult" className="size-12" />
       <div className="w-full max-w-[560px] rounded-xl border border-white/10 bg-black/30 p-4">
         <div className="mb-3 text-sm text-white">Icon 混合渲染示例（sprites + svgr）</div>
+
         <div className="flex flex-wrap gap-3">
           {/* <Icon
             name="arrow_long_left"
@@ -152,26 +152,27 @@ export default function HomePage() {
           <Icon
             name="globe"
             className="size-6"
-            color="white"
-            wrapperClass="size-10 rounded-md bg-black"
+            color="blue"
+            wrapperClass="size-10 rounded-md bg-white"
           />
+
           <Icon
             name="file"
             className="size-6"
             color="#FFC271"
-            wrapperClass="size-10 rounded-md bg-black"
+            wrapperClass="size-10 rounded-md bg-white"
           />
           <Icon
             name="next"
             className="size-6"
             color="#31ED87"
-            wrapperClass="size-10 rounded-md bg-black"
+            wrapperClass="size-10 rounded-md bg-white"
           />
           <Icon
             name="window"
             className="size-6"
             color="#8C928F"
-            wrapperClass="size-10 rounded-md bg-black"
+            wrapperClass="size-10 rounded-md bg-white"
           />
         </div>
       </div>

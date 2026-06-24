@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
+import type { SvgPathName } from '@/assets/svg/generated';
 import Icon from '@/components/ui/Icon';
-import { SvgPathName } from '@/components/ui/Icon/svgPath_all';
 
 export default memo(function NavigationGrid({
   colSpan = 1,
