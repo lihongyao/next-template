@@ -1,6 +1,6 @@
 'use client';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 

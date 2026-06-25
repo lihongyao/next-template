@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 
 import AppHeader from '@/components/ui/AppHeader';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import CustomSwiper, {
   type CustomSwiperRef,
   type CustomSwiperState,

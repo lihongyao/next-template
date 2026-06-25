@@ -6,6 +6,8 @@ import Icon_arrow_long_left from './arrow_long_left';
 import Icon_arrow_long_right from './arrow_long_right';
 import Icon_choose_off from './choose_off';
 import Icon_choose_on from './choose_on';
+import Icon_first_visit_frame from './first_visit_frame';
+import Icon_subtract from './subtract';
 import type { SvgPathName } from './svgPath_all';
 
 // 业务统一从 generated/index.ts 取类型，不再直接摸 svgPath_all.ts。
@@ -18,6 +20,8 @@ export const SVG_COMPONENT_MAP = {
   arrow_long_right: Icon_arrow_long_right,
   choose_off: Icon_choose_off,
   choose_on: Icon_choose_on,
+  first_visit_frame: Icon_first_visit_frame,
+  subtract: Icon_subtract,
 } as const satisfies Partial<
   Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
 >;
@@ -91,6 +95,7 @@ export const SVG_ICON_KIND_MAP = {
   copy: 'sprite',
   edit: 'sprite',
   favorites: 'sprite',
+  first_visit_frame: 'svgr',
   globe: 'sprite',
   help: 'sprite',
   home: 'sprite',
@@ -109,6 +114,7 @@ export const SVG_ICON_KIND_MAP = {
   sport_soccerball: 'sprite',
   sport_tennis: 'sprite',
   sport_volleyball: 'sprite',
+  subtract: 'svgr',
   time: 'sprite',
   tips_correct: 'sprite',
   tips_error: 'sprite',

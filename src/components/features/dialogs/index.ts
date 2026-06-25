@@ -3,6 +3,7 @@ import SignOut from './SignOut';
 import X1Dialog from './X1Dialog';
 import X2Dialog from './X2Dialog';
 import X3Dialog from './X3Dialog';
+import { FirstVisit, Minors18 } from './popus';
 
 // 注册弹框组件
 export const dialogRegistry = {
@@ -10,4 +11,6 @@ export const dialogRegistry = {
   X2Dialog,
   X3Dialog,
   SignOut,
+  Minors18,
+  FirstVisit,
 } as const;

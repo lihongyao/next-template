@@ -2,7 +2,7 @@
 'use client';
 import { useEffect } from 'react';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import Carousel from '@/components/ui/Carousel';
 import Icon from '@/components/ui/Icon';
 import { notification } from '@/components/ui/Notification';
@@ -153,25 +153,6 @@ export default function HomePage() {
             name="globe"
             className="size-6"
             color="blue"
-            wrapperClass="size-10 rounded-md bg-white"
-          />
-
-          <Icon
-            name="file"
-            className="size-6"
-            color="#FFC271"
-            wrapperClass="size-10 rounded-md bg-white"
-          />
-          <Icon
-            name="next"
-            className="size-6"
-            color="#31ED87"
-            wrapperClass="size-10 rounded-md bg-white"
-          />
-          <Icon
-            name="window"
-            className="size-6"
-            color="#8C928F"
             wrapperClass="size-10 rounded-md bg-white"
           />
         </div>

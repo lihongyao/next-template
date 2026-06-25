@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { games } from '@/constants/data';
 
-import Button from '../ui/Button';
+import Button from '../ui/Buttons/BaseButton';
 import LazyImg from '../ui/LazyImage';
 
 export default function SwiperGameList() {

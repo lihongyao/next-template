@@ -1,6 +1,6 @@
 'use client';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { useDialog } from '@/components/ui/Dialog';
 import { useBrandConfig } from '@/providers/brand.provider';
 

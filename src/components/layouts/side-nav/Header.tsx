@@ -1,6 +1,6 @@
 'use client';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { ZIndex } from '@/constants/z-index';
 import { useBrandConfig } from '@/providers/brand.provider';
 import { Link, useRouter } from '@/router';

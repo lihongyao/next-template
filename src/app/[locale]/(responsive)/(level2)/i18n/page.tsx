@@ -3,7 +3,7 @@
 import ClientComp from '@/components/features/ClientComp';
 import LanguageSwitcher from '@/components/features/LanguageSwitcher';
 import AppHeader from '@/components/ui/AppHeader';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 

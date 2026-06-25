@@ -1,7 +1,7 @@
 // src/components/features/dialogs/X2Dialog.tsx
 'use client';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { useDialog } from '@/components/ui/Dialog';
 
 export default function X2Dialog() {

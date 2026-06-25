@@ -10,6 +10,8 @@ import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
 import { initNavigation } from '@/libs/navigation-direction';
 import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
 
+import { useDialog } from '../ui/Dialog';
+
 export default function ClientInitializer() {
   // PC/H5 路由弹窗 & 页面响应式自动切换
   useModalPageAutoCollapse();
@@ -18,8 +20,11 @@ export default function ClientInitializer() {
   // 版本升级监听
   useCheckAppVersion();
 
+  const dialog = useDialog();
+
   useEffect(() => {
-    // throw new Error('🧨 Sentry test error from client');
+    // dialog.open('Minors18', { maskClosable: false });
+    dialog.open('FirstVisit', { maskClosable: false });
   }, []);
 
   useMount(() => {

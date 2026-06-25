@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { useModalRoutes } from '@/hooks/useModalRoutes';
 import { useModal } from '@/providers/modal.provider';
 import { useRouter } from '@/router';

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMount } from 'ahooks';
 
 import AppHeader from '@/components/ui/AppHeader';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
 import { useRouter } from '@/router';

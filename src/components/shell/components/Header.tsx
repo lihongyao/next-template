@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Buttons/BaseButton';
 import Icon from '@/components/ui/Icon';
 import { ZIndex } from '@/constants/z-index';
 import { getImageUrl } from '@/libs/cdn-image';

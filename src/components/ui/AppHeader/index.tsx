@@ -4,7 +4,7 @@ import { ZIndex } from '@/constants/z-index';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
-import Button from '../Button';
+import Icon from '../Icon';
 
 interface AppHeaderProps {
   title: string;
@@ -21,7 +21,11 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
       }}
     >
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
-        <Button
+        <Icon
+          name="arrow_left"
+          className="size-3"
+          color="white"
+          wrapperClass="size-6 bg-white/20 rounded-sm cursor-pointer"
           onClick={() => {
             if (onBack) {
               onBack();
@@ -33,9 +37,7 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
               router.replace(Routes.Home);
             }
           }}
-        >
-          返回
-        </Button>
+        />
       </div>
       <h1 className="font-semibold text-white">{title}</h1>
       <div className="absolute top-1/2 right-3 -translate-y-1/2"></div>
