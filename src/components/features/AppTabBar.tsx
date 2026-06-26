@@ -7,12 +7,12 @@ import { cn } from '@/libs/class-helpers';
 import { Link, usePathname } from '@/router';
 import { type Route, Routes } from '@/router/routes';
 
-import Icon from '../ui/Icon';
+import Icon, { IconName } from '../ui/Icon';
 
 export interface TabBarItemProps {
   path: Route;
   label: string;
-  icon: string;
+  icon: IconName;
 }
 
 export default memo(function AppTabBar() {
@@ -51,7 +51,7 @@ export default memo(function AppTabBar() {
               <Icon
                 className="size-5"
                 color={pathname === item.path ? '#31ED87' : 'white'}
-                src={item.icon}
+                name={item.icon}
               />
               <span
                 className={cn(

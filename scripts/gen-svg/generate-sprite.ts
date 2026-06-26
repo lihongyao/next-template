@@ -127,7 +127,7 @@ export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
     // 颜色重置为 currentColor，便于在业务侧用 CSS 控制图标颜色。
     resetColors: true,
     // symbol id 统一为 icon-xxx，和 Icon 组件的 use 规则保持一致。
-    getSymbolName: (filePath) => `icon-${path.basename(filePath, '.svg')}`,
+    getSymbolName: (filePath: string) => `icon-${path.basename(filePath, '.svg')}`,
   });
 
   await builder.load('*.svg');

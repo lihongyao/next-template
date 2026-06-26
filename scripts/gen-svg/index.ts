@@ -1,3 +1,5 @@
+// gen-svg 入口：负责串起 sprite、svgr、类型和注册表的整条生成链路。
+// 安装依赖：pnpm add tsx @neodx/svg @svgr/core @svgr/plugin-jsx prettier svgo @trivago/prettier-plugin-sort-imports prettier-plugin-tailwindcss --save-dev
 import { generateSvgrComponents } from './gen-icons.js';
 import { generateSvgTypesAndRegistry } from './gen-svg-types.js';
 import { generateSpriteSvg } from './generate-sprite.js';

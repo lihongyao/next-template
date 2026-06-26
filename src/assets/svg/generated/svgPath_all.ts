@@ -21,6 +21,7 @@ export const SVG_PATH_NAMES = [
   'choose_on',
   'close',
   'copy',
+  'details',
   'edit',
   'favorites',
   'first_visit_frame',

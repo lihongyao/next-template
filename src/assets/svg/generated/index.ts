@@ -42,6 +42,7 @@ export const SVG_SPRITE_ID_MAP = {
   cart: 'icon-cart',
   close: 'icon-close',
   copy: 'icon-copy',
+  details: 'icon-details',
   edit: 'icon-edit',
   favorites: 'icon-favorites',
   globe: 'icon-globe',
@@ -93,6 +94,7 @@ export const SVG_ICON_KIND_MAP = {
   choose_on: 'svgr',
   close: 'sprite',
   copy: 'sprite',
+  details: 'sprite',
   edit: 'sprite',
   favorites: 'sprite',
   first_visit_frame: 'svgr',
@@ -125,4 +127,4 @@ export const SVG_ICON_KIND_MAP = {
   vip: 'sprite',
 } as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
 
-export const SVG_SPRITE_FILE = '/sprite.6d24015b.svg';
+export const SVG_SPRITE_FILE = '/sprite.57275fec.svg';

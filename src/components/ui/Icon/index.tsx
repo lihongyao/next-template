@@ -10,20 +10,26 @@ import {
 } from '@/assets/svg/generated';
 import { cn } from '@/libs/class-helpers';
 
+export type RemoteIconUrl = `http://${string}` | `https://${string}`;
+export type IconName = SvgPathName | RemoteIconUrl;
+
 export type IconProps = {
-  name?: SvgPathName;
-  src?: string;
+  name: IconName;
   color?: string;
   alt?: string;
   wrapperClass?: string;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 } & Omit<React.SVGProps<SVGSVGElement>, 'name' | 'color'>;
 
-export default function Icon(props: IconProps) {
-  const { name, src, color, style, className, wrapperClass, alt, onClick, ...rest } = props;
+function isRemoteIconName(name: IconName): name is RemoteIconUrl {
+  return name.startsWith('http');
+}
 
-  const isRemoteImage = Boolean(src?.startsWith('http'));
-  const svgName = (name || (!isRemoteImage ? src : '') || '') as SvgPathName;
+export default function Icon(props: IconProps) {
+  const { name, color, style, className, wrapperClass, alt, onClick, ...rest } = props;
+
+  const isRemoteImage = isRemoteIconName(name);
+  const svgName = isRemoteImage ? undefined : name;
   const componentMap = SVG_COMPONENT_MAP as Partial<
     Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
   >;
@@ -66,8 +72,8 @@ export default function Icon(props: IconProps) {
           <use href={`${SVG_SPRITE_FILE}#${spriteId}`} />
         </svg>
       )}
-      {src && isRemoteImage && !iconKind && (
-        <img src={src} className={cn('shrink-0', className)} alt={alt || 'icon'} />
+      {isRemoteImage && !iconKind && (
+        <img src={name} className={cn('shrink-0', className)} alt={alt || 'icon'} />
       )}
       {!iconKind && !isRemoteImage && svgName && <span className="text-base">❌</span>}
     </div>

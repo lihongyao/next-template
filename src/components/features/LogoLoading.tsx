@@ -22,6 +22,7 @@ export default function LogoLoading() {
   }, []);
 
   if (loading) return null;
+  return null;
 
   return (
     <>

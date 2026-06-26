@@ -24,7 +24,7 @@ export default function ClientInitializer() {
 
   useEffect(() => {
     // dialog.open('Minors18', { maskClosable: false });
-    dialog.open('FirstVisit', { maskClosable: false });
+    // dialog.open('FirstVisit', { maskClosable: false });
   }, []);
 
   useMount(() => {

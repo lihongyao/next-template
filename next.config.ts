@@ -50,6 +50,18 @@ const baseConfig: NextConfig = {
   rewrites: async () => ({
     beforeFiles: modalRewrites,
   }),
+  headers: async () => [
+    {
+      // sprite 文件名带 hash，可安全走长期强缓存；hash 变化时 URL 会一起变化。
+      source: '/sprite.:hash.svg',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=31536000, immutable',
+        },
+      ],
+    },
+  ],
   allowedDevOrigins: ['192.168.0.53'],
   // 启用 sourcemap
   productionBrowserSourceMaps: enableSentry,
