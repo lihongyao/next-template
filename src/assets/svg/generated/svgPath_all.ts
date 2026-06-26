@@ -43,7 +43,6 @@ export const SVG_PATH_NAMES = [
   'sport_soccerball',
   'sport_tennis',
   'sport_volleyball',
-  'subtract',
   'time',
   'tips_correct',
   'tips_error',
