@@ -2,6 +2,7 @@
 // 安装依赖：pnpm add tsx @neodx/svg @svgr/core @svgr/plugin-jsx prettier svgo @trivago/prettier-plugin-sort-imports prettier-plugin-tailwindcss --save-dev
 import { generateSvgrComponents } from './gen-icons.js';
 import { generateSvgTypesAndRegistry } from './gen-svg-types.js';
+import { generateInlineSpriteTsx } from './generate-inline-sprite.js';
 import { generateSpriteSvg } from './generate-sprite.js';
 
 async function main() {
@@ -10,8 +11,10 @@ async function main() {
 
   const spriteBuildResult = await generateSpriteSvg();
   console.log(
-    `✅ sprite 完成，共 ${spriteBuildResult.spriteNames.length} 个（source/sprites），输出 ${spriteBuildResult.publicSpriteFile}`,
+    `✅ sprite 完成，critical ${spriteBuildResult.critical.spriteNames.length} 个（source/sprites/critical），输出 ${spriteBuildResult.critical.publicSpriteFile}；normal ${spriteBuildResult.normal.spriteNames.length} 个（source/sprites/normal），输出 ${spriteBuildResult.normal.publicSpriteFile}`,
   );
+  await generateInlineSpriteTsx(spriteBuildResult.critical.publicSpriteFile);
+  console.log('✅ inline sprite 组件完成');
 
   const { names: svgrNames, stats: svgrStats } = await generateSvgrComponents();
   console.log(
@@ -19,9 +22,11 @@ async function main() {
   );
 
   await generateSvgTypesAndRegistry({
-    spriteNames: spriteBuildResult.spriteNames,
+    criticalSpriteNames: spriteBuildResult.critical.spriteNames,
+    criticalSpriteFile: spriteBuildResult.critical.publicSpriteFile,
+    normalSpriteNames: spriteBuildResult.normal.spriteNames,
+    normalSpriteFile: spriteBuildResult.normal.publicSpriteFile,
     svgrNames,
-    publicSpriteFile: spriteBuildResult.publicSpriteFile,
   });
   console.log('✅ 类型与注册表完成');
 

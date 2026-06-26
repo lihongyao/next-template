@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 
 import '@/app/globals.css';
 import '@/assets/styles/global-animate.css';
+import SpriteSvgSource from '@/assets/svg/generated/sprite-svg';
 import ClientSideScrollRestorer from '@/components/features/ClientSideScrollRestorer';
 import { CURRENT_VERSION } from '@/constants';
 import { inter } from '@/fonts';
@@ -79,6 +80,7 @@ export default async function LocaleLayout({
       </head>
 
       <body className={inter.className} style={{ background: '#101010' }}>
+        <SpriteSvgSource />
         {/* lcp element */}
         <img
           className="lcp-anchor"

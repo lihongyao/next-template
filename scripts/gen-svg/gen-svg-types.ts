@@ -6,13 +6,29 @@ import { ICON_REGISTRY_OUTPUT_FILE, SVG_TYPES_OUTPUT_FILE } from './config.js';
 import { safeFileBase } from './utils.js';
 
 export type SvgRegistryInput = {
-  spriteNames: string[];
+  criticalSpriteNames: string[];
+  normalSpriteNames: string[];
   svgrNames: string[];
-  publicSpriteFile: string;
+  criticalSpriteFile: string;
+  normalSpriteFile: string;
 };
 
-function assertNoDuplicatedNames(spriteNames: string[], svgrNames: string[]) {
-  const spriteSet = new Set(spriteNames);
+function assertNoDuplicatedNames(
+  criticalSpriteNames: string[],
+  normalSpriteNames: string[],
+  svgrNames: string[],
+) {
+  const allSpriteNames = [...criticalSpriteNames, ...normalSpriteNames];
+  const spriteSet = new Set(allSpriteNames);
+  const duplicatedSprites = allSpriteNames.filter(
+    (name, index) => allSpriteNames.indexOf(name) !== index,
+  );
+  if (duplicatedSprites.length > 0) {
+    throw new Error(
+      `critical sprites 与 normal sprites 存在同名图标：${[...new Set(duplicatedSprites)].join(', ')}。请重命名后重试。`,
+    );
+  }
+
   const duplicated = svgrNames.filter((name) => spriteSet.has(name)).sort();
   if (duplicated.length > 0) {
     // 同名会导致 name 无法判断走 sprite 还是 svgr，直接中断更安全。
@@ -23,12 +39,13 @@ function assertNoDuplicatedNames(spriteNames: string[], svgrNames: string[]) {
 }
 
 export async function generateSvgTypesAndRegistry(input: SvgRegistryInput): Promise<void> {
-  const { spriteNames, svgrNames } = input;
-  assertNoDuplicatedNames(spriteNames, svgrNames);
+  const { criticalSpriteNames, normalSpriteNames, svgrNames } = input;
+  assertNoDuplicatedNames(criticalSpriteNames, normalSpriteNames, svgrNames);
 
   // 类型文件和注册表都按各自输出路径取 prettier 配置，避免格式漂移。
   const typePrettierConfig = (await prettier.resolveConfig(SVG_TYPES_OUTPUT_FILE)) ?? {};
-  const allNames = [...spriteNames, ...svgrNames].sort((a, b) => a.localeCompare(b));
+  const allSpriteNames = [...criticalSpriteNames, ...normalSpriteNames];
+  const allNames = [...allSpriteNames, ...svgrNames].sort((a, b) => a.localeCompare(b));
 
   const typeOutput = `
 // ⚠️ 此文件由脚本自动生成，请勿手动修改
@@ -56,7 +73,11 @@ export type SvgPathName = (typeof SVG_PATH_NAMES)[number];
     const fileName = safeFileBase(name);
     return `  '${name}': Icon_${fileName},`;
   });
-  const spriteEntries = spriteNames.map((name) => `  '${name}': 'icon-${name}',`);
+  const spriteEntries = allSpriteNames.map((name) => `  '${name}': 'icon-${name}',`);
+  const spriteFileEntries = [
+    ...criticalSpriteNames.map((name) => `  '${name}': '${input.criticalSpriteFile}',`),
+    ...normalSpriteNames.map((name) => `  '${name}': '${input.normalSpriteFile}',`),
+  ];
 
   const registryPrettierConfig = (await prettier.resolveConfig(ICON_REGISTRY_OUTPUT_FILE)) ?? {};
 
@@ -80,13 +101,19 @@ export const SVG_SPRITE_ID_MAP = {
 ${spriteEntries.join('\n')}
 } as const satisfies Partial<Record<SvgPathName, string>>;
 
+export const SVG_SPRITE_FILE_MAP = {
+${spriteFileEntries.join('\n')}
+} as const satisfies Partial<Record<SvgPathName, string>>;
+
 export const SVG_ICON_KIND_MAP = {
 ${allNames
-  .map((name) => `  '${name}': ${spriteNames.includes(name) ? "'sprite'" : "'svgr'"},`)
+  .map((name) => {
+    if (criticalSpriteNames.includes(name)) return `  '${name}': 'sprite-inline',`;
+    if (normalSpriteNames.includes(name)) return `  '${name}': 'sprite-external',`;
+    return `  '${name}': 'svgr',`;
+  })
   .join('\n')}
-} as const satisfies Record<SvgPathName, 'sprite' | 'svgr'>;
-
-export const SVG_SPRITE_FILE = '${input.publicSpriteFile}';
+} as const satisfies Record<SvgPathName, 'sprite-inline' | 'sprite-external' | 'svgr'>;
 `;
 
   // registry 由脚本统一产出，UI 层只读这个文件，不在业务代码里手写映射。

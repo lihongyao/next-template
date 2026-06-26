@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import prettier from 'prettier';
 
-import { SVG_GENERATED_DIR, SVG_SOURCE_SVGRS_DIR } from './config.js';
+import { INLINE_SPRITE_COMPONENT_BASE, SVG_GENERATED_DIR, SVG_SOURCE_SVGRS_DIR } from './config.js';
 import { optimizeSvgContent } from './optimize-svgo.js';
 import {
   componentNameFromOriginal,
@@ -104,7 +104,9 @@ export async function generateSvgrComponents(): Promise<GenerateSvgrResult> {
 
   await fs.mkdir(SVG_GENERATED_DIR, { recursive: true });
 
-  const removed = await removeOrphanedSvgrTsxFiles(SVG_GENERATED_DIR, iconNames);
+  const removed = await removeOrphanedSvgrTsxFiles(SVG_GENERATED_DIR, iconNames, [
+    INLINE_SPRITE_COMPONENT_BASE,
+  ]);
 
   const created: string[] = [];
   const skipped: string[] = [];

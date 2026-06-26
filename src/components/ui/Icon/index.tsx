@@ -4,7 +4,7 @@ import type React from 'react';
 import {
   SVG_COMPONENT_MAP,
   SVG_ICON_KIND_MAP,
-  SVG_SPRITE_FILE,
+  SVG_SPRITE_FILE_MAP,
   SVG_SPRITE_ID_MAP,
   type SvgPathName,
 } from '@/assets/svg/generated';
@@ -34,9 +34,11 @@ export default function Icon(props: IconProps) {
     Record<SvgPathName, React.ComponentType<React.SVGProps<SVGSVGElement>>>
   >;
   const spriteIdMap = SVG_SPRITE_ID_MAP as Partial<Record<SvgPathName, string>>;
+  const spriteFileMap = SVG_SPRITE_FILE_MAP as Partial<Record<SvgPathName, string>>;
   const iconKind = svgName ? SVG_ICON_KIND_MAP[svgName] : undefined;
   const Comp = svgName ? componentMap[svgName] : undefined;
   const spriteId = svgName ? spriteIdMap[svgName] : undefined;
+  const spriteFile = svgName ? spriteFileMap[svgName] : undefined;
 
   const a11yProps = alt
     ? { role: 'img', 'aria-label': alt }
@@ -59,7 +61,7 @@ export default function Icon(props: IconProps) {
           }}
         />
       )}
-      {iconKind === 'sprite' && spriteId && (
+      {iconKind === 'sprite-inline' && spriteId && (
         <svg
           {...rest}
           {...a11yProps}
@@ -69,7 +71,20 @@ export default function Icon(props: IconProps) {
             ...style,
           }}
         >
-          <use href={`${SVG_SPRITE_FILE}#${spriteId}`} />
+          <use href={`#${spriteId}`} />
+        </svg>
+      )}
+      {iconKind === 'sprite-external' && spriteId && spriteFile && (
+        <svg
+          {...rest}
+          {...a11yProps}
+          className={className}
+          style={{
+            ...(color ? { color } : null),
+            ...style,
+          }}
+        >
+          <use href={`${spriteFile}#${spriteId}`} />
         </svg>
       )}
       {isRemoteImage && !iconKind && (

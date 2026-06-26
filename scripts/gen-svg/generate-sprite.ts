@@ -4,28 +4,44 @@ import path from 'node:path';
 
 import {
   PUBLIC_DIR,
-  PUBLIC_SPRITE_PREFIX,
+  PUBLIC_SPRITE_CRITICAL_PREFIX,
+  PUBLIC_SPRITE_NORMAL_PREFIX,
   PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE,
   ROOT_DIR,
-  SVG_SOURCE_SPRITES_DIR,
+  SVG_SOURCE_SPRITES_CRITICAL_DIR,
+  SVG_SOURCE_SPRITES_NORMAL_DIR,
 } from './config.js';
 import { readSvgNamesFromDir } from './utils.js';
 
-export type SpriteBuildResult = {
-  spriteNames: string[];
+export type SpriteGroupName = 'critical' | 'normal';
+
+export type SpriteGroupBuildResult = {
+  groupName: SpriteGroupName;
   publicSpriteFile: string;
+  spriteNames: string[];
 };
 
-// 匹配 sprite 文件名，包括 hash 和 empty 两种情况。
-const SPRITE_FILE_PATTERN = /^sprite(?:\.(?:[a-f0-9]{8}|empty))?\.svg$/;
+export type SpritesBuildResult = {
+  critical: SpriteGroupBuildResult;
+  normal: SpriteGroupBuildResult;
+};
 
-function createPreviewHtml(spriteNames: string[], publicSpriteFile: string): string {
+// 匹配当前和历史 sprite 文件名，避免目录结构升级后遗留旧产物。
+const SPRITE_FILE_PATTERN = /^sprite(?:-(?:critical|normal))?(?:\.(?:[a-f0-9]{8}|empty))?\.svg$/;
+
+function createPreviewSection({
+  groupName,
+  publicSpriteFile,
+  spriteNames,
+}: SpriteGroupBuildResult): string {
+  const title = groupName === 'critical' ? 'Critical Sprite' : 'Normal Sprite';
   const list =
     spriteNames.length === 0
       ? '<p class="empty">当前没有可预览的 sprite 图标。</p>'
-      : spriteNames
-          .map(
-            (name) => `
+      : `
+    <ul>${spriteNames
+      .map(
+        (name) => `
       <li class="item">
         <div class="icon-wrap">
           <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
@@ -34,9 +50,19 @@ function createPreviewHtml(spriteNames: string[], publicSpriteFile: string): str
         </div>
         <code>${name}</code>
       </li>`,
-          )
-          .join('\n');
+      )
+      .join('\n')}
+    </ul>`;
 
+  return `
+    <section class="group">
+      <h2>${title}</h2>
+      <p class="desc">当前 sprite：<code>${publicSpriteFile}</code></p>
+      ${list}
+    </section>`;
+}
+
+function createPreviewHtml(result: SpritesBuildResult): string {
   return `<!doctype html>
 <html lang="zh-CN">
   <head>
@@ -45,7 +71,9 @@ function createPreviewHtml(spriteNames: string[], publicSpriteFile: string): str
     <title>Sprite 图标预览</title>
     <style>
       body { margin: 0; padding: 24px; background: #0f1115; color: #e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-      h1 { margin: 0 0 8px; font-size: 20px; }
+      h1 { margin: 0 0 16px; font-size: 20px; }
+      h2 { margin: 0 0 8px; font-size: 16px; }
+      .group + .group { margin-top: 28px; }
       .desc { margin: 0 0 16px; color: #9ca3af; font-size: 13px; }
       ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
       .item { border: 1px solid #242833; border-radius: 10px; background: #171a21; padding: 12px; text-align: center; }
@@ -57,8 +85,8 @@ function createPreviewHtml(spriteNames: string[], publicSpriteFile: string): str
   </head>
   <body>
     <h1>Sprite 图标预览</h1>
-    <p class="desc">当前 sprite：<code>${publicSpriteFile}</code></p>
-    <ul>${list}</ul>
+    ${createPreviewSection(result.critical)}
+    ${createPreviewSection(result.normal)}
   </body>
 </html>`;
 }
@@ -72,15 +100,17 @@ async function removeOldSpriteFiles(): Promise<void> {
   );
 }
 
-async function resolveLatestSpriteFile(): Promise<string> {
+async function resolveLatestSpriteFile(prefix: string): Promise<string> {
+  const filePattern = new RegExp(
+    `^${prefix.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}(?:\\.(?:[a-f0-9]{8}|empty))?\\.svg$`,
+  );
   const entries = await fs.readdir(PUBLIC_DIR, { withFileTypes: true });
-  const files = entries.filter((entry) => entry.isFile() && SPRITE_FILE_PATTERN.test(entry.name));
+  const files = entries.filter((entry) => entry.isFile() && filePattern.test(entry.name));
   if (files.length === 0) {
-    throw new Error('未找到 neodx 生成的 sprite 文件');
+    throw new Error(`未找到 ${prefix} 对应的 sprite 文件`);
   }
   if (files.length === 1) return files[0].name;
 
-  // 正常情况下只会有一个，兜底按 mtime 取最新，避免并发构建时拿错文件。
   const filesWithMtime = await Promise.all(
     files.map(async (file) => {
       const stat = await fs.stat(path.join(PUBLIC_DIR, file.name));
@@ -91,56 +121,69 @@ async function resolveLatestSpriteFile(): Promise<string> {
   return filesWithMtime[0].name;
 }
 
-export async function generateSpriteSvg(): Promise<SpriteBuildResult> {
-  const spriteNames = await readSvgNamesFromDir(SVG_SOURCE_SPRITES_DIR);
-
-  await fs.mkdir(PUBLIC_DIR, { recursive: true });
+async function buildSpriteGroup({
+  groupName,
+  prefix,
+  sourceDir,
+}: {
+  groupName: SpriteGroupName;
+  prefix: string;
+  sourceDir: string;
+}): Promise<SpriteGroupBuildResult> {
+  const spriteNames = await readSvgNamesFromDir(sourceDir);
 
   if (spriteNames.length === 0) {
     const emptySprite = `<svg xmlns="http://www.w3.org/2000/svg"></svg>`;
-    const fileName = `${PUBLIC_SPRITE_PREFIX}.empty.svg`;
+    const fileName = `${prefix}.empty.svg`;
     const publicSpriteFile = `/${fileName}`;
     const publicSpritePath = path.join(PUBLIC_DIR, fileName);
-    await removeOldSpriteFiles();
     await fs.writeFile(publicSpritePath, emptySprite, 'utf8');
-    const previewHtml = createPreviewHtml([], publicSpriteFile);
-    await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
-    return { spriteNames: [], publicSpriteFile };
+    return { groupName, publicSpriteFile, spriteNames: [] };
   }
 
-  await removeOldSpriteFiles();
-
   const builder = createSvgSpriteBuilder({
-    // 以 sprites 目录作为输入根目录，只处理这里的图标。
-    inputRoot: path.relative(ROOT_DIR, SVG_SOURCE_SPRITES_DIR),
-    // 产物写到 public，运行时可直接通过 URL 引用。
+    inputRoot: path.relative(ROOT_DIR, sourceDir),
     output: path.relative(ROOT_DIR, PUBLIC_DIR),
-    // 只产出一个 sprite 文件，不按目录分组。
     group: false,
-    // 项目运行时通过 /sprite.hash.svg 外链引用，关闭 neodx inline asset 生成。
     inline: false,
-    defaultSpriteName: PUBLIC_SPRITE_PREFIX,
-    // 产出文件名带内容 hash，用于缓存失效。
+    defaultSpriteName: prefix,
     fileName: '{name}.{hash:8}.svg',
-    // 清理由外部 removeOldSpriteFiles 统一处理。
     cleanup: false,
-    // 颜色重置为 currentColor，便于在业务侧用 CSS 控制图标颜色。
     resetColors: true,
-    // symbol id 统一为 icon-xxx，和 Icon 组件的 use 规则保持一致。
     getSymbolName: (filePath: string) => `icon-${path.basename(filePath, '.svg')}`,
   });
 
-  await builder.load('*.svg');
+  await builder.load('**/*.svg');
   await builder.build();
 
-  const fileName = await resolveLatestSpriteFile();
-  const publicSpriteFile = `/${fileName}`;
-  // 预览页只读最终产物路径，避免手动查 hash。
-  const previewHtml = createPreviewHtml(spriteNames, publicSpriteFile);
-  await fs.writeFile(PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE, previewHtml, 'utf8');
-
+  const fileName = await resolveLatestSpriteFile(prefix);
   return {
+    groupName,
+    publicSpriteFile: `/${fileName}`,
     spriteNames,
-    publicSpriteFile,
   };
+}
+
+export async function generateSpriteSvg(): Promise<SpritesBuildResult> {
+  await fs.mkdir(PUBLIC_DIR, { recursive: true });
+  await removeOldSpriteFiles();
+
+  const critical = await buildSpriteGroup({
+    groupName: 'critical',
+    prefix: PUBLIC_SPRITE_CRITICAL_PREFIX,
+    sourceDir: SVG_SOURCE_SPRITES_CRITICAL_DIR,
+  });
+  const normal = await buildSpriteGroup({
+    groupName: 'normal',
+    prefix: PUBLIC_SPRITE_NORMAL_PREFIX,
+    sourceDir: SVG_SOURCE_SPRITES_NORMAL_DIR,
+  });
+
+  await fs.writeFile(
+    PUBLIC_SPRITE_PREVIEW_OUTPUT_FILE,
+    createPreviewHtml({ critical, normal }),
+    'utf8',
+  );
+
+  return { critical, normal };
 }

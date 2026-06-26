@@ -25,15 +25,26 @@ export function componentNameFromOriginal(originalBase: string): string {
   return `Svg${composed}`;
 }
 
-export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
+async function collectSvgNamesFromDir(dir: string): Promise<string[]> {
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
-  return (
-    entries
-      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.svg'))
-      // registry / type 都只认文件名本体，不带目录层级。
-      .map((entry) => path.basename(entry.name, '.svg'))
-      .sort((a, b) => a.localeCompare(b))
-  );
+  const names: string[] = [];
+
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (entry.isDirectory()) {
+      names.push(...(await collectSvgNamesFromDir(path.join(dir, entry.name))));
+      continue;
+    }
+
+    if (!entry.isFile() || !entry.name.toLowerCase().endsWith('.svg')) continue;
+    // registry / type 都只认文件名本体，不带目录层级。
+    names.push(path.basename(entry.name, '.svg'));
+  }
+
+  return names;
+}
+
+export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
+  return (await collectSvgNamesFromDir(dir)).sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -43,8 +54,12 @@ export async function readSvgNamesFromDir(dir: string): Promise<string[]> {
 export async function removeOrphanedSvgrTsxFiles(
   dir: string,
   currentSourceBaseNames: string[],
+  reservedBaseNames: string[] = [],
 ): Promise<string[]> {
-  const expected = new Set(currentSourceBaseNames.map((n) => safeFileBase(n)));
+  const expected = new Set([
+    ...currentSourceBaseNames.map((n) => safeFileBase(n)),
+    ...reservedBaseNames,
+  ]);
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
   const removed: string[] = [];
   for (const entry of entries) {
