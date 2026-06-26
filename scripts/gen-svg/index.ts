@@ -11,14 +11,16 @@ async function main() {
 
   const spriteBuildResult = await generateSpriteSvg();
   console.log(
-    `✅ sprite 完成，critical ${spriteBuildResult.critical.spriteNames.length} 个（source/sprites/critical），输出 ${spriteBuildResult.critical.publicSpriteFile}；normal ${spriteBuildResult.normal.spriteNames.length} 个（source/sprites/normal），输出 ${spriteBuildResult.normal.publicSpriteFile}`,
+    `✅ sprite 完成，critical ${spriteBuildResult.critical.spriteNames.length} 个，normal ${spriteBuildResult.normal.spriteNames.length} 个`,
   );
   await generateInlineSpriteTsx(spriteBuildResult.critical.publicSpriteFile);
-  console.log('✅ inline sprite 组件完成');
+  console.log(
+    `✅ critical inline sprite 完成，来源 ${spriteBuildResult.critical.publicSpriteFile}`,
+  );
 
   const { names: svgrNames, stats: svgrStats } = await generateSvgrComponents();
   console.log(
-    `✅ svgr 完成，共 ${svgrNames.length} 个（source/svgrs），新增 ${svgrStats.created.length}，保留已编辑 ${svgrStats.skipped.length}，删除 ${svgrStats.removed.length}`,
+    `✅ svgr 完成，共 ${svgrNames.length} 个，新增 ${svgrStats.created.length}，保留已编辑 ${svgrStats.skipped.length}，删除 ${svgrStats.removed.length}`,
   );
 
   await generateSvgTypesAndRegistry({
