@@ -114,6 +114,7 @@ export default function HomePage() {
           测试 sentry
         </Button>
       </div>
+
       <Icon name="adult" className="size-12" />
       <div className="w-full max-w-[560px] rounded-xl border border-white/10 bg-black/30 p-4">
         <div className="mb-3 text-sm text-white">Icon 混合渲染示例（sprites + svgr）</div>
