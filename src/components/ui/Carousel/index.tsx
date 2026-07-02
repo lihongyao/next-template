@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { EmblaCarouselType } from 'embla-carousel';
 import Autoplay from 'embla-carousel-autoplay';
@@ -36,35 +36,75 @@ export default function Carousel({ loop = true }: CarouselProps) {
   const [prevBtnDisabled, setPrevBtnDisabled] = useState(true);
   const [nextBtnDisabled, setNextBtnDisabled] = useState(true);
   const [snapCount, setSnapCount] = useState(0);
+  const manualInteractionRef = useRef(false);
+  const manualSelectionChangedRef = useRef(false);
 
   const goToPrev = () => emblaApi?.goToPrev();
   const goToNext = () => emblaApi?.goToNext();
 
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    setSelectedSnap(emblaApi?.selectedSnap());
+  const syncCarouselState = useCallback((emblaApi: EmblaCarouselType) => {
+    setSelectedSnap(emblaApi.selectedSnap());
     setPrevBtnDisabled(!emblaApi.canGoToPrev());
     setNextBtnDisabled(!emblaApi.canGoToNext());
+    setSnapCount(emblaApi.snapList().length);
   }, []);
 
-  const updateScrollSnapState = useCallback((emblaApi: EmblaCarouselType) => {
-    setSnapCount(emblaApi.snapList().length);
-    setSelectedSnap(emblaApi.selectedSnap());
+  const getAutoplayPlugin = useCallback((emblaApi: EmblaCarouselType) => {
+    return emblaApi.plugins()?.autoplay;
   }, []);
 
   // 事件监听
   useEffect(() => {
     if (!emblaApi) return;
-    onSelect(emblaApi);
-    updateScrollSnapState(emblaApi);
-    emblaApi.on('reinit', onSelect).on('select', onSelect);
-    emblaApi.on('select', updateScrollSnapState);
-    emblaApi.on('reinit', updateScrollSnapState);
-  }, [emblaApi, onSelect, updateScrollSnapState]);
+
+    const handlePointerDown = (emblaApi: EmblaCarouselType) => {
+      manualInteractionRef.current = true;
+      manualSelectionChangedRef.current = false;
+      getAutoplayPlugin(emblaApi)?.stop();
+    };
+    const handleReInit = (emblaApi: EmblaCarouselType) => {
+      syncCarouselState(emblaApi);
+      manualInteractionRef.current = false;
+      manualSelectionChangedRef.current = false;
+      getAutoplayPlugin(emblaApi)?.play();
+    };
+    const handleSelect = (emblaApi: EmblaCarouselType) => {
+      syncCarouselState(emblaApi);
+
+      if (!manualInteractionRef.current) return;
+
+      manualSelectionChangedRef.current = true;
+      manualInteractionRef.current = false;
+      getAutoplayPlugin(emblaApi)?.play();
+    };
+    const handleSettle = (emblaApi: EmblaCarouselType) => {
+      if (!manualInteractionRef.current) return;
+      if (manualSelectionChangedRef.current) return;
+      manualInteractionRef.current = false;
+      manualSelectionChangedRef.current = false;
+      getAutoplayPlugin(emblaApi)?.play();
+    };
+
+    syncCarouselState(emblaApi);
+
+    emblaApi.on('reinit', handleReInit); // 轮播参数或尺寸变化后重新初始化时，刷新 UI 并重新启动自动播放计时
+    emblaApi.on('select', handleSelect); // 当前激活页变化时触发：同步 UI，并在手动切页后重启自动播放
+    emblaApi.on('pointerdown', handlePointerDown); // 用户开始拖拽/按下轮播时触发：先暂停自动播放
+    emblaApi.on('settle', handleSettle); // 滚动完全稳定后触发：用于兜底恢复“拖了但未切页”的自动播放
+
+    return () => {
+      emblaApi.off('reinit', handleReInit);
+      emblaApi.off('select', handleSelect);
+      emblaApi.off('pointerdown', handlePointerDown);
+      emblaApi.off('settle', handleSettle);
+    };
+  }, [emblaApi, getAutoplayPlugin, syncCarouselState]);
 
   // 自动播放
   useEffect(() => {
-    emblaApi?.plugins()?.autoplay?.play();
-  }, [emblaApi]);
+    if (!emblaApi) return;
+    getAutoplayPlugin(emblaApi)?.play();
+  }, [emblaApi, getAutoplayPlugin]);
 
   return (
     <div className="w-full">

@@ -5,6 +5,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 
 import ClientInitializer from '@/components/features/ClientInitializer';
+import GlobalViewport from '@/components/features/GlobalViewport';
 import LogoLoading from '@/components/features/LogoLoading';
 import RouteModalRenderer from '@/components/features/RouteModalRenderer';
 import { DialogProvider } from '@/components/ui/Dialog';
@@ -42,6 +43,7 @@ export function AppProviders({
                   <ClientInitializer />
                   <RouteModalRenderer />
                   {children}
+                  <GlobalViewport />
                 </MessageProvider>
               </NotificationProvider>
             </DialogProvider>
