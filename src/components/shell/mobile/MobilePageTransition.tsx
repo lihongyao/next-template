@@ -7,7 +7,7 @@ import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.sha
 import { motion } from 'framer-motion';
 
 import { ZIndex } from '@/constants/z-index';
-import { isRouteModalHistoryEntry } from '@/libs/mobile-modal-history';
+import { readRouteModalHistoryState } from '@/libs/mobile-modal-history';
 
 export type Direction = 'forward' | 'back';
 export type TransitionKind = 'none' | 'cover';
@@ -83,6 +83,7 @@ export default function MobilePageTransition({
   const currentLayerRef = useRef<PageLayer | null>(currentLayer);
   const prevLayerRef = useRef<PageLayer | null>(currentLayer);
   const previousKeyRef = useRef(pageKey);
+  const preserveExitLayerRef = useRef(false);
   const shouldAnimate = kind === 'cover';
 
   useLayoutEffect(() => {
@@ -96,8 +97,10 @@ export default function MobilePageTransition({
   });
 
   useLayoutEffect(() => {
-    const handleBackToRouteModal = () => {
-      if (!isRouteModalHistoryEntry()) return;
+    const handleBackToRouteModal = (event: PopStateEvent) => {
+      const eventModalState = readRouteModalHistoryState(event.state);
+      const historyModalState = readRouteModalHistoryState();
+      if (!eventModalState && !historyModalState) return;
 
       const previousLayer = prevLayerRef.current ?? currentLayerRef.current;
       if (!previousLayer) return;
@@ -106,6 +109,7 @@ export default function MobilePageTransition({
       setCurrentLayer(null);
       setExitLayer(previousLayer);
       setExitAboveOverlay(true);
+      preserveExitLayerRef.current = true;
       prevLayerRef.current = null;
       liveLayerRef.current = null;
     };
@@ -119,6 +123,14 @@ export default function MobilePageTransition({
 
     const nextLayer = liveLayerRef.current;
     const previousLayer = prevLayerRef.current;
+
+    if (preserveExitLayerRef.current) {
+      previousKeyRef.current = pageKey;
+      setUnderLayer(null);
+      setCurrentLayer(nextLayer);
+      prevLayerRef.current = nextLayer;
+      return;
+    }
 
     if (previousKeyRef.current === pageKey) {
       prevLayerRef.current = nextLayer;
@@ -199,6 +211,7 @@ export default function MobilePageTransition({
           onAnimationComplete={() => {
             setExitLayer(null);
             setExitAboveOverlay(false);
+            preserveExitLayerRef.current = false;
           }}
         />
       ) : null}

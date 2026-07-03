@@ -62,6 +62,7 @@ export default function RouteModalRenderer() {
   const [isAllow, setIsAllow] = useState(true);
   const [pureHidden, setPureHidden] = useState(false); // 等 exit 播完再隐藏，否则关时会闪
   const [suppressNextMobileEnter, setSuppressNextMobileEnter] = useState(false);
+  const [skipNextExitAnimation, setSkipNextExitAnimation] = useState(false);
 
   const modalKeys = useMemo(() => pathSegments.filter((s) => ModalComponents[s]), [pathSegments]);
   const modalComponents = useMemo(
@@ -110,6 +111,7 @@ export default function RouteModalRenderer() {
 
     if (isRouteModalPageTransitionTarget(pathname)) {
       const timer = window.setTimeout(() => {
+        setSkipNextExitAnimation(true);
         setNativeModalPathname(null);
         finishRouteModalPageTransition(pathname);
       }, 320);
@@ -147,6 +149,13 @@ export default function RouteModalRenderer() {
 
     return () => window.cancelAnimationFrame(frame);
   }, [modalComponents.length, suppressNextMobileEnter]);
+
+  useEffect(() => {
+    if (!skipNextExitAnimation || modalComponents.length) return;
+
+    setPureHidden(true);
+    setSkipNextExitAnimation(false);
+  }, [modalComponents.length, skipNextExitAnimation]);
 
   const handleSwipeBack = useCallback((value: boolean) => {
     setIsAllow(!value);
@@ -206,14 +215,14 @@ export default function RouteModalRenderer() {
               variants={backdropVariants}
               initial={initialState}
               animate="visible"
-              exit="exit"
+              exit={skipNextExitAnimation ? undefined : 'exit'}
               onClick={closeModal}
             />
             <motion.div
               variants={contentVariants}
               initial={initialState}
               animate="visible"
-              exit="exit"
+              exit={skipNextExitAnimation ? undefined : 'exit'}
               style={{ willChange: 'transform, opacity' }}
             >
               <Modal />

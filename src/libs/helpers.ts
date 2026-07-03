@@ -60,3 +60,7 @@ export function getOrchestrate(components: ComponentInfo[]) {
   }
   return { layoutComps, pageComps, footerComps };
 }
+
+export function sleep(interval = 1000) {
+  return new Promise((resolve) => setTimeout(resolve, interval));
+}
