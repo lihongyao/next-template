@@ -136,6 +136,25 @@ function CustomSwiperInner<T>(
     [currentPage, totalPages, enablePrev, enableNext],
   );
 
+  const resetDragState = useCallback(() => {
+    dragRef.current.isDragging = false;
+    dragRef.current.isActive = false;
+    dragRef.current.pointerId = null;
+    setIsMouseDragging(false);
+  }, []);
+
+  const releasePointerCaptureSafely = useCallback((pointerId: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (!container.hasPointerCapture?.(pointerId)) return;
+
+    try {
+      container.releasePointerCapture(pointerId);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     onStateChange?.(swiperState);
   }, [onStateChange, swiperState]);
@@ -357,23 +376,14 @@ function CustomSwiperInner<T>(
 
           // 如果没有进入拖拽模式，放行 click
           if (!dragRef.current.isActive) {
-            dragRef.current.isDragging = false;
-            dragRef.current.isActive = false;
-            dragRef.current.pointerId = null;
+            resetDragState();
             return;
           }
 
           const dragDx = e.clientX - dragRef.current.startClientX;
 
-          dragRef.current.isDragging = false;
-          dragRef.current.isActive = false;
-          dragRef.current.pointerId = null;
-          setIsMouseDragging(false);
-          try {
-            container.releasePointerCapture(e.pointerId);
-          } catch {
-            // ignore
-          }
+          resetDragState();
+          releasePointerCaptureSafely(e.pointerId);
 
           // 将鼠标拖拽映射为“翻页”动作：拖动距离越大，可跨多页
           const paddingLeft = parseInt(getComputedStyle(container).paddingLeft, 10);
@@ -406,17 +416,12 @@ function CustomSwiperInner<T>(
           if (!dragRef.current.isDragging) return;
 
           if (!dragRef.current.isActive) {
-            dragRef.current.isDragging = false;
-            dragRef.current.isActive = false;
-            dragRef.current.pointerId = null;
+            resetDragState();
             return;
           }
 
           const dragDx = e.clientX - dragRef.current.startClientX;
-          dragRef.current.isDragging = false;
-          dragRef.current.isActive = false;
-          dragRef.current.pointerId = null;
-          setIsMouseDragging(false);
+          resetDragState();
 
           const paddingLeft = parseInt(getComputedStyle(container).paddingLeft, 10);
           const paddingRight = parseInt(getComputedStyle(container).paddingRight, 10);
@@ -445,15 +450,8 @@ function CustomSwiperInner<T>(
           if (!container) return;
           if (dragRef.current.pointerId !== e.pointerId) return;
 
-          dragRef.current.isDragging = false;
-          dragRef.current.isActive = false;
-          dragRef.current.pointerId = null;
-          setIsMouseDragging(false);
-          try {
-            container.releasePointerCapture(e.pointerId);
-          } catch {
-            // ignore
-          }
+          resetDragState();
+          releasePointerCaptureSafely(e.pointerId);
           isTouchScroll.current = true;
           syncCurrentPage();
         }}
@@ -461,10 +459,7 @@ function CustomSwiperInner<T>(
           if (supportsPointerEvents) return;
           if (!dragRef.current.isDragging) return;
           // 鼠标移出时取消拖拽状态，避免卡住
-          dragRef.current.isDragging = false;
-          dragRef.current.isActive = false;
-          dragRef.current.pointerId = null;
-          setIsMouseDragging(false);
+          resetDragState();
         }}
         onDragStartCapture={(e) => {
           // 防止在卡片/图片/链接上拖动时触发浏览器原生拖拽（会导致“拖出链接/图片”，并抢走翻页手势）
