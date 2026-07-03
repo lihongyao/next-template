@@ -1,11 +1,11 @@
-// src/lib/routes.ts
+// src/router/routes.ts
 
 /**
  * 路由分类
  * 1. PC/H5 均是独立页
  * 2. PC/H5 均是路由弹窗
- * 2. PC 是路由弹窗，H5 是独立页
- * 3. H5 是路由弹窗，PC 是独立页
+ * 3. PC 是路由弹窗，H5 是独立页
+ * 4. H5 是路由弹窗，PC 是独立页
  */
 
 // 标签栏路由
@@ -32,6 +32,7 @@ export const PageRoutes = {
   CdnImage: '/cdn-image',
   DataPathThrough: '/data-pass-through',
   GameList: '/game-list',
+  // 语义上表示“游戏详情业务路由”，实际仍复用 `/game-list/:id` 这条 canonical 路径。
   GameDetails: '/game-list',
   Menu: '/menu',
   Notice: '/notice',

@@ -18,6 +18,7 @@ type NavigationOptions = {
   [key: string]: unknown;
 };
 
+// 统一抽出 pathname，避免 query/hash 干扰 routeRules 和 modal 判断。
 function normalizeHrefPath(href: string): string {
   try {
     return new URL(href, window.location.origin).pathname;
@@ -26,6 +27,7 @@ function normalizeHrefPath(href: string): string {
   }
 }
 
+// 当当前页面带 locale、目标地址没带 locale 时，补回本地化前缀给原生 history 用。
 function resolveNativeHref(href: string): string {
   const url = new URL(href, window.location.origin);
   const currentFirstSegment = window.location.pathname.split('/').filter(Boolean)[0];
@@ -40,6 +42,7 @@ function resolveNativeHref(href: string): string {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+// 移动端一级/二级页 cover 切换时默认保留滚动位置，避免底页被意外顶回顶部。
 function shouldPreserveScrollForMobileCover({
   currentPathname,
   href,
@@ -68,6 +71,8 @@ export default function useAppRouter() {
   const router = useIntlRouter();
   const { isMobile } = useDevice();
   const currentPathname = usePathname();
+
+  // 目标是 route modal 时不切 Next 页面树，只改地址栏和 history state。
   const navigateModalWithNativeHistory = (
     method: 'pushState' | 'replaceState',
     href: string,
@@ -85,6 +90,7 @@ export default function useAppRouter() {
     return nativeHref;
   };
 
+  // 当前已经在 route modal 里、且目标是普通页面时，先登记“modal 退场 + 页面进场”的桥接状态。
   const prepareActiveRouteModalBeforePageNavigation = (href: string) => {
     const modalState = readRouteModalHistoryState();
     if (!modalState) return;

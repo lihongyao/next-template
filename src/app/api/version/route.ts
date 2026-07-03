@@ -12,7 +12,6 @@ export async function GET() {
     { version },
     {
       headers: {
-        // ⭐ 永远不要缓存
         'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     },
