@@ -1,39 +1,36 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import type { SvgPathName } from '@/assets/svg/generated';
-import Banner from '@/components/menu-items/banner';
-import MenuList, { MenuListItemProps } from '@/components/menu-items/menu-list';
-import NavigationGrid from '@/components/menu-items/navigation-grid';
-import Search from '@/components/menu-items/search';
-import { getImageUrl } from '@/libs/cdn-image';
+import Banner from '@/components/menu-widgets/banner';
+import DateTime from '@/components/menu-widgets/date-time';
+import MenuList from '@/components/menu-widgets/menu-list';
+import { type MenuSection, menuSections } from '@/components/menu-widgets/menu-sections';
+import NavigationGrid from '@/components/menu-widgets/navigation-grid';
+import Search from '@/components/menu-widgets/search';
 import { parseDeviceFromUA } from '@/libs/device';
 import { getDeviceRouteFallback } from '@/router/matchRoute';
 import { Routes } from '@/router/routes';
+import { MenuWidgetTypes } from '@/types/menu-widgets';
 
-const Grids1: Array<MenuListItemProps> = [
-  { label: 'Popular', icon: 'hot' },
-  { label: 'Favorites', icon: 'favorites' },
-  { label: 'Recent', icon: 'recent' },
-];
+function renderMenuSection(section: MenuSection, index: number) {
+  const key = `${section.type}-${index}`;
 
-const GridsList1: Array<MenuListItemProps> = [
-  { label: 'VIP Club', icon: 'vip' },
-  { label: 'Bonus', icon: 'bonus', path: '/i18n' },
-  { label: 'Truco', icon: 'truco', path: '/truco' },
-  { label: 'Tournament', icon: 'tournament' },
-  { label: 'Affiliate', icon: 'affiliate', dot: true },
-  { label: 'Promotions', icon: 'promotion' },
-];
-
-const GridsList2: Array<{
-  label: string;
-  icon: SvgPathName;
-}> = [
-  { label: 'Help Center', icon: 'help' },
-  { label: 'Live Support', icon: 'service' },
-  { label: 'Language', icon: 'globe' },
-];
+  switch (section.type) {
+    case MenuWidgetTypes.Banner:
+      if (!section.data) return null;
+      return <Banner key={key} data={section.data} />;
+    case MenuWidgetTypes.DateTime:
+      return <DateTime key={key} />;
+    case MenuWidgetTypes.MenuList:
+      if (!section.data) return null;
+      return <MenuList key={key} data={section.data} />;
+    case MenuWidgetTypes.NavigationGrid:
+      if (!section.data) return null;
+      return <NavigationGrid key={key} data={section.data} />;
+    case MenuWidgetTypes.Search:
+      return <Search key={key} />;
+  }
+}
 
 export default async function MenuPage() {
   const userAgent = (await headers()).get('user-agent') || '';
@@ -44,12 +41,7 @@ export default async function MenuPage() {
 
   return (
     <div data-name="menu-page" className="flex flex-col gap-3 p-3">
-      <Banner img={getImageUrl('configurable/menu/withdraw.jpg')} />
-      <Search />
-      <NavigationGrid items={Grids1} colSpan={3} />
-      <MenuList items={GridsList1} />
-      <Banner img={getImageUrl('configurable/menu/download_app.jpg')} />
-      <MenuList items={GridsList2} />
+      {menuSections.map((section, index) => renderMenuSection(section, index))}
     </div>
   );
 }

@@ -30,6 +30,8 @@ export const SVG_PATH_NAMES = [
   'home',
   'hot',
   'menu',
+  'menu_close',
+  'menu_open',
   'message',
   'order',
   'profile',
