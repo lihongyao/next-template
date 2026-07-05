@@ -98,7 +98,7 @@ export default function useAppRouter() {
     const canonicalHref = getCanonicalHref(href);
     if (shouldOpenAsRouteModal(canonicalHref, isMobile === true)) return;
 
-    startRouteModalPageTransition(canonicalHref);
+    startRouteModalPageTransition(canonicalHref, modalState.modalPathname);
   };
 
   const getOptions = (href: string, options?: NavigationOptions) =>

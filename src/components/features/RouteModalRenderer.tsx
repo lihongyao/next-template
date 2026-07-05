@@ -18,6 +18,7 @@ import { useSwipeBack } from '@/hooks/useSwipeBack';
 import {
   MOBILE_MODAL_HISTORY_CHANGE_EVENT,
   finishRouteModalPageTransition,
+  getRouteModalPageTransitionModalPathname,
   isRouteModalHistoryEntry,
   isRouteModalPageTransitionTarget,
   readRouteModalHistoryState,
@@ -48,7 +49,9 @@ export default function RouteModalRenderer() {
   const [nativeModalPathname, setNativeModalPathname] = useState<string | null>(() =>
     typeof window === 'undefined' ? null : window.location.pathname,
   );
-  const modalPathname = nativeModalPathname ?? pathname;
+  const transitionModalPathname =
+    typeof window === 'undefined' ? null : getRouteModalPageTransitionModalPathname(pathname);
+  const modalPathname = transitionModalPathname ?? nativeModalPathname ?? pathname;
   const modalRenderPath = useMemo(
     () => getRouteModalRenderPath(modalPathname, renderAsMobile),
     [modalPathname, renderAsMobile],

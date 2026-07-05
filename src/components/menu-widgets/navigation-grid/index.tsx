@@ -32,7 +32,9 @@ export default memo(function NavigationGrid({
         >
           <Icon name={item.icon} className="size-[20px] text-[#B3B8C1] group-hover:text-white" />
           {!collapsed && (
-            <span className="text-xs text-[#B3B8C1] group-hover:text-white">{item.label}</span>
+            <span className="text-xs font-bold text-[#B3B8C1] group-hover:text-white">
+              {item.label}
+            </span>
           )}
         </div>
       ))}

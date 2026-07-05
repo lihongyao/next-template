@@ -3,6 +3,8 @@ const ROUTE_MODAL_HISTORY_STATE_KEY = '__routeModal';
 const ROUTE_MODAL_PAGE_TRANSITION_TTL = 5000;
 
 let routeModalPageTransitionPathname: string | null = null;
+// 普通页入场时仍要把当前 modal 留在下层，避免页面滑入期间透出更底层的一级页。
+let routeModalPageTransitionModalPathname: string | null = null;
 let routeModalPageTransitionStartedAt = 0;
 
 export type RouteModalHistoryState = {
@@ -70,8 +72,9 @@ export function writeRouteModalHistoryEntry({
   notifyMobileModalHistoryChange();
 }
 
-export function startRouteModalPageTransition(href: string): void {
+export function startRouteModalPageTransition(href: string, modalPathname?: string): void {
   routeModalPageTransitionPathname = normalizePathname(href);
+  routeModalPageTransitionModalPathname = modalPathname ? normalizePathname(modalPathname) : null;
   routeModalPageTransitionStartedAt = Date.now();
 }
 
@@ -85,7 +88,12 @@ export function finishRouteModalPageTransition(pathname?: string): void {
   }
 
   routeModalPageTransitionPathname = null;
+  routeModalPageTransitionModalPathname = null;
   routeModalPageTransitionStartedAt = 0;
+}
+
+export function getRouteModalPageTransitionModalPathname(pathname: string): string | null {
+  return isRouteModalPageTransitionTarget(pathname) ? routeModalPageTransitionModalPathname : null;
 }
 
 export function isRouteModalPageTransitionTarget(pathname: string): boolean {
