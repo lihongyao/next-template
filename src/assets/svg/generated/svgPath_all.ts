@@ -26,6 +26,7 @@ export const SVG_PATH_NAMES = [
   'favorites',
   'first_visit_frame',
   'globe',
+  'goods',
   'help',
   'home',
   'hot',

@@ -19,7 +19,7 @@ export default memo(function AppTabBar() {
   const tabBarConfig: TabBarItemProps[] = [
     { path: Routes.Menu, label: 'Menu', icon: 'menu' },
     { path: Routes.Home, label: 'Home', icon: 'home' },
-    { path: Routes.Cart, label: 'Cart', icon: 'cart' },
+    { path: Routes.Goods, label: 'Goods', icon: 'goods' },
     { path: Routes.Truco, label: 'Truco', icon: 'truco' },
     { path: Routes.Promotion, label: 'Promotions', icon: 'promotion' },
   ];

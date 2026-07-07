@@ -14,6 +14,7 @@ export const TabRoutes = {
   Cart: '/cart',
   Promotion: '/promotion',
   Truco: '/truco',
+  Goods: '/goods',
 };
 
 // 页面路由
@@ -36,7 +37,6 @@ export const PageRoutes = {
   GameDetails: '/game-list',
   Menu: '/menu',
   Notice: '/notice',
-  Goods: '/goods',
   News: '/news',
 } as const;
 
