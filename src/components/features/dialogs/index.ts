@@ -1,16 +1,11 @@
 // src/components/features/dialogs/index.ts
-import SignOut from './SignOut';
-import X1Dialog from './X1Dialog';
-import X2Dialog from './X2Dialog';
-import X3Dialog from './X3Dialog';
-import { FirstVisit, Minors18 } from './popus';
+// 注册弹框组件 loader，组件会在真正打开弹窗时再加载。
 
-// 注册弹框组件
 export const dialogRegistry = {
-  X1Dialog,
-  X2Dialog,
-  X3Dialog,
-  SignOut,
-  Minors18,
-  FirstVisit,
+  X1Dialog: () => import('./X1Dialog'),
+  X2Dialog: () => import('./X2Dialog'),
+  X3Dialog: () => import('./X3Dialog'),
+  SignOut: () => import('./SignOut'),
+  Minors18: () => import('./popus/Minors18'),
+  FirstVisit: () => import('./popus/FirstVisit'),
 } as const;
