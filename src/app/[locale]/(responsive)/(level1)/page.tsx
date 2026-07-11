@@ -9,6 +9,15 @@ import { notification } from '@/components/ui/Notification';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
+const carouselItems = [
+  { url: '/banner/1.jpg' },
+  { url: '/banner/2.jpg' },
+  { url: '/banner/3.jpg' },
+  { url: '/banner/4.jpg' },
+  { url: '/banner/5.jpg' },
+  { url: '/banner/6.jpg' },
+];
+
 export default function HomePage() {
   const router = useRouter();
   const [api] = notification.useNotification();
@@ -50,7 +59,18 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <Carousel loop />
+      <Carousel
+        loop
+        items={carouselItems}
+        renderItem={(item) => (
+          <div
+            className="aspect-[351/195] rounded-xl bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${item.url})`,
+            }}
+          />
+        )}
+      />
       <div className="flex flex-wrap gap-2">
         <Button onClick={triggerNotifications}>触发通知</Button>
         <Button

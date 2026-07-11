@@ -34,7 +34,6 @@ export default function i18nPage() {
             新闻
           </Button>
         </div>
-        <div className="h-[600px] w-full bg-orange-500">123123</div>
       </main>
     </div>
   );

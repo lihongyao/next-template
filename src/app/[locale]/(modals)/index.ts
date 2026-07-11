@@ -12,4 +12,5 @@ export const ModalComponents: Record<string, ComponentType> = {
   'game-list-swiper': loadModal('game-list-swiper'),
   'game-details': loadModal('game-details'),
   'news-details': loadModal('news-details'),
+  'goods-details': loadModal('goods-details'),
 };

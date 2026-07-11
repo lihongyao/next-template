@@ -22,6 +22,7 @@ export const routeRules: Array<{
   { path: Routes.GameList + '/:id', meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.Cart, meta: { mobileLevel: 1, desktopLevel: 1 } },
   { path: Routes.Goods, meta: { mobileLevel: 1, desktopLevel: 1 } },
+  { path: Routes.Goods + '/:id', meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.I18n, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.Details, meta: { mobileLevel: 2, desktopLevel: 1 } },
   { path: Routes.Dialog, meta: { mobileLevel: 2, desktopLevel: 1 } },

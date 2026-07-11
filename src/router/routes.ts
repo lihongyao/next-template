@@ -48,6 +48,7 @@ export const ModalRoutes = {
   ModalGameListSwiper: '/game-list-swiper',
   ModalGameDetails: '/game-details',
   ModalNewsDetails: '/news-details',
+  ModalGoodsDetails: '/goods-details',
 } as const;
 
 // 所有路由
@@ -87,6 +88,12 @@ export type ModalPageRouteConfig = {
  * @see useModalRoutes
  */
 export const ModalPageRoutes = {
+  'goods-details': {
+    canonical: Routes.Goods,
+    pc: Routes.ModalGoodsDetails,
+    h5: Routes.Goods,
+    onlySwitchWhenParamPresent: true,
+  },
   'news-details': {
     canonical: Routes.News,
     pc: Routes.ModalNewsDetails,

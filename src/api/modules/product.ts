@@ -10,6 +10,7 @@ export function list() {
   return api<any>('/products', {
     auth: 'none',
     responseMode: 'json',
+    revalidate: 60,
   });
 }
 
