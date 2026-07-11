@@ -9,6 +9,8 @@ import {
   getServerBaseURL,
   normalizeAuthMode,
 } from './core';
+import { createApiMethodHelpers } from './methods';
+import { parseToken, serializeToken } from './token';
 
 const SERVER_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 const SERVER_TOKEN_COOKIE_OPTIONS = {
@@ -16,23 +18,6 @@ const SERVER_TOKEN_COOKIE_OPTIONS = {
   sameSite: 'lax' as const,
   secure: process.env.NODE_ENV === 'production',
 };
-
-function serializeToken(data: TokenData): string {
-  return encodeURIComponent(JSON.stringify(data));
-}
-
-function parseToken(raw?: string | null): TokenData | null {
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as TokenData;
-  } catch {
-    try {
-      return JSON.parse(decodeURIComponent(raw)) as TokenData;
-    } catch {
-      return null;
-    }
-  }
-}
 
 /** 从当前请求 Cookie 中读取鉴权 token 数据。 */
 export async function getServerToken(): Promise<TokenData | null> {
@@ -89,37 +74,10 @@ export async function serverApi<T = unknown>(
   });
 }
 
-export function serverGet<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
-): Promise<T> {
-  return serverApi<T>(input, { ...options, method: 'GET' });
-}
+const serverMethodHelpers = createApiMethodHelpers(serverApi);
 
-export function serverPost<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return serverApi<T>(input, { ...options, method: 'POST' });
-}
-
-export function serverPut<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return serverApi<T>(input, { ...options, method: 'PUT' });
-}
-
-export function serverPatch<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return serverApi<T>(input, { ...options, method: 'PATCH' });
-}
-
-export function serverDel<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
-): Promise<T> {
-  return serverApi<T>(input, { ...options, method: 'DELETE' });
-}
+export const serverGet = serverMethodHelpers.get;
+export const serverPost = serverMethodHelpers.post;
+export const serverPut = serverMethodHelpers.put;
+export const serverPatch = serverMethodHelpers.patch;
+export const serverDel = serverMethodHelpers.del;

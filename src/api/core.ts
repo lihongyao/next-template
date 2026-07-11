@@ -71,8 +71,6 @@ export interface ApiRequestOptions extends Omit<RequestInit, 'body' | 'headers'>
   next?: ApiNextOptions;
   /** 默认按后端 BaseResponse 包装解析。 */
   responseMode?: ApiResponseMode;
-  /** 客户端刷新 token 流程使用的内部保护位。 */
-  _refreshTried?: boolean;
 }
 
 interface InternalRequestOptions extends ApiRequestOptions {
@@ -194,6 +192,12 @@ function normalizeBody(body: ApiBody, headers: Headers): BodyInit | undefined {
   return body as BodyInit;
 }
 
+function assertBodyAllowed(method: string, body: ApiBody): void {
+  if ((method === 'GET' || method === 'HEAD') && body !== undefined && body !== null) {
+    throw new TypeError(`${method} 请求不支持 body，请使用 params 传查询参数。`);
+  }
+}
+
 function createTimeoutSignal(
   timeout: number | false | undefined,
   signal?: AbortSignal,
@@ -267,6 +271,53 @@ function isSuccessCode(code: number): boolean {
   return (SUCCESS_CODES as readonly number[]).includes(code);
 }
 
+function getHttpErrorCode(status: number): number {
+  if (status === ErrorCode.TIMEOUT) return ErrorCode.TIMEOUT;
+  if (status >= 500) return ErrorCode.SERVER_ERROR;
+  if (status === ErrorCode.UNAUTHORIZED) return ErrorCode.UNAUTHORIZED;
+  return status;
+}
+
+function tryParseJson(text: string): { parsed: boolean; value: unknown } {
+  if (!text) return { parsed: true, value: null };
+  try {
+    return { parsed: true, value: JSON.parse(text) };
+  } catch {
+    return { parsed: false, value: null };
+  }
+}
+
+function isBaseResponsePayload<T>(value: unknown): value is BaseResponse<T> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'code' in value &&
+    typeof (value as { code?: unknown }).code === 'number'
+  );
+}
+
+function createHttpError(
+  response: Response,
+  text: string,
+  json: unknown,
+  parsedJson: boolean,
+): ApiError {
+  const payload = parsedJson && isBaseResponsePayload(json) ? json : null;
+  const payloadCode = payload && !isSuccessCode(payload.code) ? payload.code : undefined;
+  const data = payload ? payload.data : parsedJson ? json : text;
+
+  return new ApiError(
+    payloadCode ?? getHttpErrorCode(response.status),
+    response.statusText || '请求失败',
+    data,
+    response.status,
+  );
+}
+
+function createResponseFormatError(response: Response, text: string, json: unknown): ApiError {
+  return new ApiError(ErrorCode.SERVER_ERROR, '响应格式异常', json ?? text, response.status);
+}
+
 function normalizeNextOptions(options: InternalRequestOptions): {
   cache?: RequestCache;
   next?: ApiNextOptions;
@@ -297,7 +348,7 @@ async function parseResponse<T>(response: Response, mode: ApiResponseMode | unde
   if (mode === 'text') {
     if (!response.ok) {
       throw new ApiError(
-        response.status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNAUTHORIZED,
+        getHttpErrorCode(response.status),
         response.statusText || text || '请求失败',
         text,
         response.status,
@@ -306,44 +357,28 @@ async function parseResponse<T>(response: Response, mode: ApiResponseMode | unde
     return text as T;
   }
 
-  let json: unknown = null;
-  try {
-    json = text ? JSON.parse(text) : null;
-  } catch {
-    json = null;
-  }
+  const { parsed, value: json } = tryParseJson(text);
 
   if (mode === 'json') {
-    if (!response.ok) {
-      throw new ApiError(
-        response.status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNAUTHORIZED,
-        response.statusText || '请求失败',
-        json ?? text,
-        response.status,
-      );
-    }
+    if (!response.ok) throw createHttpError(response, text, json, parsed);
+    if (response.status === 204) return undefined as T;
+    if (!text || !parsed) throw createResponseFormatError(response, text, json);
     return json as T;
   }
 
-  const payload = json as BaseResponse<T> | null;
-  if (payload && typeof payload === 'object' && 'code' in payload) {
+  if (!response.ok) throw createHttpError(response, text, json, parsed);
+  if (response.status === 204) return undefined as T;
+  if (!text || !parsed) throw createResponseFormatError(response, text, json);
+
+  if (isBaseResponsePayload<T>(json)) {
+    const payload = json;
     if (isSuccessCode(payload.code)) {
       return payload.data;
     }
     throw new ApiError(payload.code, '请求失败', payload.data, response.status);
   }
 
-  if (!response.ok) {
-    throw new ApiError(
-      response.status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNAUTHORIZED,
-      response.statusText || '请求失败',
-      json ?? text,
-      response.status,
-    );
-  }
-
-  if (response.status === 204 || text === '') return undefined as T;
-  throw new ApiError(ErrorCode.SERVER_ERROR, '响应格式异常', json ?? text, response.status);
+  throw createResponseFormatError(response, text, json);
 }
 
 /**
@@ -373,9 +408,9 @@ export async function baseFetch<T>(
   const method = (rest.method ?? 'GET').toUpperCase();
   const headers = new Headers(inputHeaders);
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+  assertBodyAllowed(method, body);
 
-  const normalizedBody =
-    method === 'GET' || method === 'HEAD' ? undefined : normalizeBody(body, headers);
+  const normalizedBody = normalizeBody(body, headers);
   const { cache, next } = normalizeNextOptions({ ...options, privateRequest });
   const url = appendParams(joinUrl(baseURL, input), params);
   const { signal, clear } = createTimeoutSignal(timeout, rest.signal ?? undefined);

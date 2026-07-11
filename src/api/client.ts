@@ -12,29 +12,14 @@ import {
   getClientBaseURL,
   normalizeAuthMode,
 } from './core';
+import { createApiMethodHelpers } from './methods';
+import { parseToken, serializeToken } from './token';
 
 const CLIENT_TOKEN_COOKIE_OPTIONS = {
   path: '/',
   sameSite: 'lax' as const,
   secure: process.env.NODE_ENV === 'production',
 };
-
-function serializeToken(data: TokenData): string {
-  return encodeURIComponent(JSON.stringify(data));
-}
-
-function parseToken(raw?: string | null): TokenData | null {
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as TokenData;
-  } catch {
-    try {
-      return JSON.parse(decodeURIComponent(raw)) as TokenData;
-    } catch {
-      return null;
-    }
-  }
-}
 
 /** 读取过渡期使用的客户端可读鉴权 Cookie。 */
 export async function getClientToken(): Promise<TokenData | null> {
@@ -98,15 +83,11 @@ export async function getRefreshedToken(): Promise<string> {
   return refreshing;
 }
 
-/**
- * 客户端请求入口。
- *
- * 适合交互触发的数据或纯客户端流程。首屏数据如果有利于 SSR 或流式渲染，
- * 仍然可以使用 ‘serverApi()’。
- */
-export async function clientApi<T = unknown>(
+async function clientApiWithRefresh<T = unknown>(
   input: string,
   options: ApiRequestOptions = {},
+  refreshTried = false,
+  refreshedAccessToken?: string,
 ): Promise<T> {
   if (typeof window === 'undefined') {
     throw new Error('clientApi 只能在客户端运行时使用。');
@@ -114,7 +95,7 @@ export async function clientApi<T = unknown>(
 
   const authMode = normalizeAuthMode(options);
   const tokenData = authMode === 'none' ? null : await getClientToken();
-  const accessToken = tokenData?.token;
+  const accessToken = refreshedAccessToken ?? tokenData?.token;
 
   if (authMode === 'required' && !accessToken) {
     throw new ApiError(ErrorCode.LOGIN_REQUIRED, '请登录');
@@ -133,53 +114,32 @@ export async function clientApi<T = unknown>(
       error instanceof ApiError &&
       error.code === ErrorCode.TOKEN_EXPIRED &&
       authMode !== 'none' &&
-      !options._refreshTried
+      !refreshTried
     ) {
       const nextToken = await getRefreshedToken();
-      return clientApi<T>(input, {
-        ...options,
-        _refreshTried: true,
-        headers: {
-          ...Object.fromEntries(new Headers(options.headers)),
-          Authorization: `Bearer ${nextToken}`,
-        },
-      });
+      return clientApiWithRefresh<T>(input, options, true, nextToken);
     }
     throw error;
   }
 }
 
-export function clientGet<T = unknown>(
+/**
+ * 客户端请求入口。
+ *
+ * 适合交互触发的数据或纯客户端流程。首屏数据如果有利于 SSR 或流式渲染，
+ * 仍然可以使用 ‘serverApi()’。
+ */
+export async function clientApi<T = unknown>(
   input: string,
-  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
+  options: ApiRequestOptions = {},
 ): Promise<T> {
-  return clientApi<T>(input, { ...options, method: 'GET' });
+  return clientApiWithRefresh<T>(input, options);
 }
 
-export function clientPost<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return clientApi<T>(input, { ...options, method: 'POST' });
-}
+const clientMethodHelpers = createApiMethodHelpers(clientApi);
 
-export function clientPut<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return clientApi<T>(input, { ...options, method: 'PUT' });
-}
-
-export function clientPatch<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method'>,
-): Promise<T> {
-  return clientApi<T>(input, { ...options, method: 'PATCH' });
-}
-
-export function clientDel<T = unknown>(
-  input: string,
-  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
-): Promise<T> {
-  return clientApi<T>(input, { ...options, method: 'DELETE' });
-}
+export const clientGet = clientMethodHelpers.get;
+export const clientPost = clientMethodHelpers.post;
+export const clientPut = clientMethodHelpers.put;
+export const clientPatch = clientMethodHelpers.patch;
+export const clientDel = clientMethodHelpers.del;
