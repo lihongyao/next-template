@@ -1,12 +1,12 @@
 /**
  * API 请求层的共享基础能力。
  *
- * 这里刻意只放运行时无关的代码：协议类型、请求参数归一化、后端响应解析、重试、超时，以及 Next fetch 缓存参数处理。
- * 客户端 token 刷新放在 ‘client.ts‘；HttpOnly Cookie 访问放在 ‘server.ts‘。
+ * 只放运行时无关的代码：协议类型、token 编解码、请求参数处理、响应解析、重试和超时。
+ * 客户端 token 刷新在 client.ts；HttpOnly Cookie 访问在 server.ts。
  */
 
 export interface BaseResponse<T = unknown> {
-  /** 后端业务码。约定 ‘0‘ 表示成功。 */
+  /** 后端业务码，0 表示成功。 */
   code: number;
   /** 成功数据或后端返回的错误数据。 */
   data: T;
@@ -18,58 +18,60 @@ export interface TokenData {
   refreshToken: string;
 }
 
+export function serializeToken(data: TokenData): string {
+  return encodeURIComponent(JSON.stringify(data));
+}
+
+export function parseToken(raw?: string | null): TokenData | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as TokenData;
+  } catch {
+    try {
+      return JSON.parse(decodeURIComponent(raw)) as TokenData;
+    } catch {
+      return null;
+    }
+  }
+}
+
 export type QueryValue = string | number | boolean | null | undefined;
-export type QueryParams = string | Record<string, QueryValue | readonly QueryValue[]>;
+export type QueryParams = string | Record<string, QueryValue>;
 
 /**
  * 请求鉴权行为。
  *
- * - ‘none’: 公开请求；不会读取鉴权 Cookie。
- * - ‘optional’: 有 token 就携带；没有 token 也继续请求。
- * - ‘required’: 没有 token 时，请求前抛出 ‘LOGIN_REQUIRED’。
+ * - none: 公开请求，不读取鉴权 Cookie。
+ * - optional: 有 token 就携带，没有也继续请求。
+ * - required: 没有 token 时，请求前抛出 LOGIN_REQUIRED。
  */
 export type ApiAuthMode = 'none' | 'optional' | 'required';
-
 export type ApiResponseMode = 'base-response' | 'json' | 'text' | 'response';
-
-export interface ApiNextOptions {
-  /** Next fetch 重新验证时间。 */
-  revalidate?: number | false;
-  /** Next fetch 缓存标签，用于后续失效。 */
-  tags?: string[];
-}
-
-export type JsonBody =
-  | Record<string, unknown>
-  | readonly unknown[]
-  | string
-  | number
-  | boolean
-  | null;
-
-export type ApiBody = BodyInit | JsonBody | undefined;
+export type ApiNextOptions = NonNullable<RequestInit['next']>;
+export type ApiBody = BodyInit | Record<string, unknown> | undefined;
 
 export interface ApiRequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
+  /** URL 查询参数。字符串会原样拼接；对象会通过 URLSearchParams 编码。 */
   params?: QueryParams;
+  /** 请求体。普通对象会序列化为 JSON；FormData 等 BodyInit 会原样透传。 */
   body?: ApiBody;
+  /** 请求头。传 JSON 对象 body 且未显式设置 Content-Type 时，会自动补 application/json。 */
   headers?: HeadersInit;
-  /** 默认是 ‘none’。 */
+  /** 默认是 none。 */
   auth?: ApiAuthMode;
   /** 覆盖当前运行时的基础 URL。 */
   baseURL?: string;
-  /** 毫秒。传 ‘false’ 时不创建 ‘AbortSignal’。 */
+  /** 毫秒。传 false 时不创建 AbortSignal。 */
   timeout?: number | false;
   /** 网络重试次数。默认只有幂等方法会重试。 */
   retry?: number;
   /** 明确需要时，允许非幂等方法重试。 */
   retryUnsafe?: boolean;
-  /** Next fetch ‘next.revalidate’ 的简写。 */
-  revalidate?: ApiNextOptions['revalidate'];
-  /** Next fetch ‘next.tags’ 的简写。 */
-  tags?: string[];
-  /** 原生 Next fetch 配置。 */
+  /** 客户端请求失败时是否派发全局错误事件。默认 true。 */
+  errorToast?: boolean;
+  /** 原生 Next fetch 配置，如 next.revalidate 和 next.tags。 */
   next?: ApiNextOptions;
-  /** 默认按后端 BaseResponse 包装解析。 */
+  /** 响应解析模式。默认按后端 BaseResponse 包装解析。 */
   responseMode?: ApiResponseMode;
 }
 
@@ -77,8 +79,6 @@ interface InternalRequestOptions extends ApiRequestOptions {
   accessToken?: string;
   privateRequest?: boolean;
 }
-
-export type NormalizedAuthMode = 'none' | 'optional' | 'required';
 
 export const ErrorCode = {
   SUCCESS: 0,
@@ -107,9 +107,14 @@ export class ApiError extends Error {
   }
 }
 
+export const API_ERROR_EVENT = 'api-error';
+
+export interface ApiErrorEventDetail {
+  error: ApiError;
+}
+
 export const TOKEN_STORAGE_KEY = 'AUTHORIZATION_TOKEN';
 export const REFRESH_TOKEN_PATH = '/v1/token/refresh';
-export const SUCCESS_CODES = [ErrorCode.SUCCESS] as const;
 
 export const DEFAULT_CONFIG = {
   clientTimeout: 60_000,
@@ -117,39 +122,15 @@ export const DEFAULT_CONFIG = {
   retry: 0,
 } as const;
 
-export const RETRY_CONFIG = {
+const RETRY_CONFIG = {
   initialDelay: 300,
   maxDelay: 10_000,
   backoffMultiplier: 2,
 } as const;
 
-export const DEV_CONFIG = {
-  enableRequestLog: process.env.NODE_ENV === 'development',
-} as const;
+const ENABLE_REQUEST_LOG = process.env.NODE_ENV === 'development';
 
 const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
-
-/** 解析服务端后端源地址。优先使用非公开环境变量。 */
-export function getServerBaseURL(): string {
-  return process.env.API_HOST_S ?? process.env.NEXT_PUBLIC_API_HOST_S ?? '';
-}
-
-/** 解析客户端后端源地址。 */
-export function getClientBaseURL(): string {
-  return process.env.NEXT_PUBLIC_API_HOST_C ?? process.env.NEXT_PUBLIC_API_HOST_S ?? '';
-}
-
-/** 根据当前运行时解析基础 URL。 */
-export function getBaseURL(): string {
-  return typeof window === 'undefined' ? getServerBaseURL() : getClientBaseURL();
-}
-
-/** 归一化公开、可选鉴权、必须鉴权三种配置。 */
-export function normalizeAuthMode(options: ApiRequestOptions): NormalizedAuthMode {
-  if (options.auth === 'required') return 'required';
-  if (options.auth === 'optional') return 'optional';
-  return 'none';
-}
 
 function appendParams(url: string, params?: QueryParams): string {
   if (!params) return url;
@@ -157,10 +138,7 @@ function appendParams(url: string, params?: QueryParams): string {
 
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    const values = Array.isArray(value) ? value : [value];
-    for (const item of values) {
-      if (item !== undefined && item !== null) search.append(key, String(item));
-    }
+    if (value !== undefined && value !== null) search.append(key, String(value));
   }
 
   const query = search.toString();
@@ -173,14 +151,16 @@ function joinUrl(baseURL: string | undefined, path: string): string {
   return `${baseURL.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 }
 
-function isPlainJsonBody(body: ApiBody): body is Exclude<ApiBody, BodyInit | undefined> {
-  if (body === undefined || body === null) return false;
-  if (typeof body === 'string') return false;
+function isPlainJsonBody(body: ApiBody): body is Record<string, unknown> {
+  if (body === undefined || body === null || Array.isArray(body)) return false;
+  if (typeof body !== 'object') return false;
   if (typeof FormData !== 'undefined' && body instanceof FormData) return false;
   if (typeof Blob !== 'undefined' && body instanceof Blob) return false;
   if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) return false;
   if (typeof ArrayBuffer !== 'undefined' && body instanceof ArrayBuffer) return false;
-  return typeof body === 'object' || typeof body === 'number' || typeof body === 'boolean';
+  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(body)) return false;
+  if (typeof ReadableStream !== 'undefined' && body instanceof ReadableStream) return false;
+  return true;
 }
 
 function normalizeBody(body: ApiBody, headers: Headers): BodyInit | undefined {
@@ -268,7 +248,7 @@ async function fetchWithRetry(
 }
 
 function isSuccessCode(code: number): boolean {
-  return (SUCCESS_CODES as readonly number[]).includes(code);
+  return code === ErrorCode.SUCCESS;
 }
 
 function getHttpErrorCode(status: number): number {
@@ -318,28 +298,6 @@ function createResponseFormatError(response: Response, text: string, json: unkno
   return new ApiError(ErrorCode.SERVER_ERROR, '响应格式异常', json ?? text, response.status);
 }
 
-function normalizeNextOptions(options: InternalRequestOptions): {
-  cache?: RequestCache;
-  next?: ApiNextOptions;
-} {
-  if (options.privateRequest) {
-    return { cache: 'no-store' };
-  }
-
-  const cache = options.cache;
-  const next: ApiNextOptions = { ...options.next };
-
-  if (options.revalidate !== undefined) next.revalidate = options.revalidate;
-  if (options.tags?.length) next.tags = options.tags;
-
-  const hasNext = next.revalidate !== undefined || next.tags !== undefined;
-  if (cache === 'no-store') return { cache };
-  return {
-    cache,
-    next: hasNext ? next : undefined,
-  };
-}
-
 async function parseResponse<T>(response: Response, mode: ApiResponseMode | undefined) {
   if (mode === 'response') return response as T;
 
@@ -384,8 +342,7 @@ async function parseResponse<T>(response: Response, mode: ApiResponseMode | unde
 /**
  * 底层请求执行器。
  *
- * 业务侧优先使用 ‘serverApi’、‘clientApi’ 或领域模块。这个函数只负责构建
- * fetch 请求，并解析后端响应包装。
+ * 业务侧优先使用 serverApi、clientApi 或领域模块。这里只负责构建 fetch 请求并解析响应。
  */
 export async function baseFetch<T>(
   input: string,
@@ -393,9 +350,13 @@ export async function baseFetch<T>(
 ): Promise<T> {
   const {
     accessToken,
+    auth: _auth,
     baseURL,
     body,
+    cache: inputCache,
+    errorToast: _errorToast,
     headers: inputHeaders,
+    next: inputNext,
     params,
     privateRequest,
     retry = DEFAULT_CONFIG.retry,
@@ -411,7 +372,8 @@ export async function baseFetch<T>(
   assertBodyAllowed(method, body);
 
   const normalizedBody = normalizeBody(body, headers);
-  const { cache, next } = normalizeNextOptions({ ...options, privateRequest });
+  const cache = privateRequest ? 'no-store' : inputCache;
+  const next = cache === 'no-store' ? undefined : inputNext;
   const url = appendParams(joinUrl(baseURL, input), params);
   const { signal, clear } = createTimeoutSignal(timeout, rest.signal ?? undefined);
 
@@ -425,7 +387,7 @@ export async function baseFetch<T>(
     signal,
   };
 
-  if (DEV_CONFIG.enableRequestLog) {
+  if (ENABLE_REQUEST_LOG) {
     console.log(`[API] ${method} ${url}`);
   }
 

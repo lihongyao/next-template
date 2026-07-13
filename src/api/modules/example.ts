@@ -35,7 +35,7 @@ export interface UserListResponse {
 
 /**
  * 默认是公开请求。列表适合被 Next Data Cache 缓存时，可以传入
- * cache、revalidate 或 tags。
+ * cache 或 next。
  */
 export async function getUserList(params?: UserListParams, options?: ApiRequestOptions) {
   return get<UserListResponse>('/users', {

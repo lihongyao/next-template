@@ -6,11 +6,9 @@ import {
   TOKEN_STORAGE_KEY,
   type TokenData,
   baseFetch,
-  getServerBaseURL,
-  normalizeAuthMode,
+  parseToken,
+  serializeToken,
 } from './core';
-import { createApiMethodHelpers } from './methods';
-import { parseToken, serializeToken } from './token';
 
 const SERVER_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 const SERVER_TOKEN_COOKIE_OPTIONS = {
@@ -51,13 +49,13 @@ export async function clearServerToken(): Promise<void> {
  * 服务端请求入口。
  *
  * 公开请求默认不会读取 Cookie，并且可以参与 Next fetch 缓存。私有请求会强制
- * 使用 ‘cache: 'no-store'’。
+ * 使用 no-store。
  */
 export async function serverApi<T = unknown>(
   input: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const authMode = normalizeAuthMode(options);
+  const authMode = options.auth ?? 'none';
   const tokenData = authMode === 'none' ? null : await getServerToken();
   const accessToken = tokenData?.token;
 
@@ -68,16 +66,43 @@ export async function serverApi<T = unknown>(
   return baseFetch<T>(input, {
     ...options,
     accessToken,
-    baseURL: options.baseURL ?? getServerBaseURL(),
+    baseURL: options.baseURL ?? process.env.NEXT_PUBLIC_API_HOST_S,
     privateRequest: Boolean(accessToken) || authMode === 'required',
     timeout: options.timeout ?? DEFAULT_CONFIG.serverTimeout,
   });
 }
 
-const serverMethodHelpers = createApiMethodHelpers(serverApi);
+export function serverGet<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
+): Promise<T> {
+  return serverApi<T>(input, { ...options, method: 'GET' });
+}
 
-export const serverGet = serverMethodHelpers.get;
-export const serverPost = serverMethodHelpers.post;
-export const serverPut = serverMethodHelpers.put;
-export const serverPatch = serverMethodHelpers.patch;
-export const serverDel = serverMethodHelpers.del;
+export function serverPost<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return serverApi<T>(input, { ...options, method: 'POST' });
+}
+
+export function serverPut<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return serverApi<T>(input, { ...options, method: 'PUT' });
+}
+
+export function serverPatch<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return serverApi<T>(input, { ...options, method: 'PATCH' });
+}
+
+export function serverDel<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
+): Promise<T> {
+  return serverApi<T>(input, { ...options, method: 'DELETE' });
+}

@@ -1,7 +1,9 @@
 import cookieHelper from '@/libs/cookie-helper';
 
 import {
+  API_ERROR_EVENT,
   ApiError,
+  type ApiErrorEventDetail,
   type ApiRequestOptions,
   DEFAULT_CONFIG,
   ErrorCode,
@@ -9,17 +11,25 @@ import {
   TOKEN_STORAGE_KEY,
   type TokenData,
   baseFetch,
-  getClientBaseURL,
-  normalizeAuthMode,
+  parseToken,
+  serializeToken,
 } from './core';
-import { createApiMethodHelpers } from './methods';
-import { parseToken, serializeToken } from './token';
 
 const CLIENT_TOKEN_COOKIE_OPTIONS = {
   path: '/',
   sameSite: 'lax' as const,
   secure: process.env.NODE_ENV === 'production',
 };
+
+function dispatchApiError(error: unknown, options: ApiRequestOptions): void {
+  if (options.errorToast === false || !(error instanceof ApiError)) return;
+
+  window.dispatchEvent(
+    new CustomEvent<ApiErrorEventDetail>(API_ERROR_EVENT, {
+      detail: { error },
+    }),
+  );
+}
 
 /** 读取过渡期使用的客户端可读鉴权 Cookie。 */
 export async function getClientToken(): Promise<TokenData | null> {
@@ -30,8 +40,8 @@ export async function getClientToken(): Promise<TokenData | null> {
 /**
  * 过渡期使用的客户端 token 写入方法。
  *
- * 生产鉴权优先使用 Route Handler 或 Server Function 调用 ‘setServerToken()’，
- * 让 token 存在 HttpOnly Cookie 中。
+ * 生产鉴权优先在 Route Handler 或 Server Function 里调用 setServerToken()，
+ * 把 token 存到 HttpOnly Cookie。
  */
 export async function setClientToken(data: TokenData): Promise<void> {
   if (typeof window === 'undefined') return;
@@ -57,7 +67,7 @@ export async function refreshToken(): Promise<string> {
 
   try {
     const data = await baseFetch<TokenData>(REFRESH_TOKEN_PATH, {
-      baseURL: getClientBaseURL(),
+      baseURL: process.env.NEXT_PUBLIC_API_HOST_C,
       body: { refreshToken: current.refreshToken },
       cache: 'no-store',
       method: 'POST',
@@ -74,7 +84,7 @@ export async function refreshToken(): Promise<string> {
 
 let refreshing: Promise<string> | null = null;
 
-/** ‘clientApi()’ 使用的单飞 token 刷新辅助函数。 */
+/** clientApi 使用的单飞 token 刷新 helper。 */
 export async function getRefreshedToken(): Promise<string> {
   if (refreshing) return refreshing;
   refreshing = refreshToken().finally(() => {
@@ -93,7 +103,7 @@ async function clientApiWithRefresh<T = unknown>(
     throw new Error('clientApi 只能在客户端运行时使用。');
   }
 
-  const authMode = normalizeAuthMode(options);
+  const authMode = options.auth ?? 'none';
   const tokenData = authMode === 'none' ? null : await getClientToken();
   const accessToken = refreshedAccessToken ?? tokenData?.token;
 
@@ -105,7 +115,7 @@ async function clientApiWithRefresh<T = unknown>(
     return await baseFetch<T>(input, {
       ...options,
       accessToken,
-      baseURL: options.baseURL ?? getClientBaseURL(),
+      baseURL: options.baseURL ?? process.env.NEXT_PUBLIC_API_HOST_C,
       privateRequest: Boolean(accessToken) || authMode === 'required',
       timeout: options.timeout ?? DEFAULT_CONFIG.clientTimeout,
     });
@@ -127,19 +137,51 @@ async function clientApiWithRefresh<T = unknown>(
  * 客户端请求入口。
  *
  * 适合交互触发的数据或纯客户端流程。首屏数据如果有利于 SSR 或流式渲染，
- * 仍然可以使用 ‘serverApi()’。
+ * 仍然可以使用 serverApi。
  */
 export async function clientApi<T = unknown>(
   input: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  return clientApiWithRefresh<T>(input, options);
+  try {
+    return await clientApiWithRefresh<T>(input, options);
+  } catch (error) {
+    dispatchApiError(error, options);
+    throw error;
+  }
 }
 
-const clientMethodHelpers = createApiMethodHelpers(clientApi);
+export function clientGet<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
+): Promise<T> {
+  return clientApi<T>(input, { ...options, method: 'GET' });
+}
 
-export const clientGet = clientMethodHelpers.get;
-export const clientPost = clientMethodHelpers.post;
-export const clientPut = clientMethodHelpers.put;
-export const clientPatch = clientMethodHelpers.patch;
-export const clientDel = clientMethodHelpers.del;
+export function clientPost<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return clientApi<T>(input, { ...options, method: 'POST' });
+}
+
+export function clientPut<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return clientApi<T>(input, { ...options, method: 'PUT' });
+}
+
+export function clientPatch<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method'>,
+): Promise<T> {
+  return clientApi<T>(input, { ...options, method: 'PATCH' });
+}
+
+export function clientDel<T = unknown>(
+  input: string,
+  options?: Omit<ApiRequestOptions, 'method' | 'body'>,
+): Promise<T> {
+  return clientApi<T>(input, { ...options, method: 'DELETE' });
+}

@@ -1,16 +1,10 @@
 import { api } from '../fetch';
 
-export interface Product {
-  id: string | number;
-  name: string;
-  [key: string]: unknown;
-}
-
 export function list() {
   return api<any>('/products', {
     auth: 'none',
+    next: { revalidate: 60 },
     responseMode: 'json',
-    revalidate: 60,
   });
 }
 
