@@ -32,7 +32,7 @@ export function AppProviders({
   userAgent,
 }: AppProvidersProps) {
   return (
-    <NextIntlClientProvider messages={messages} locale={locale}>
+    <NextIntlClientProvider messages={messages} locale={locale} timeZone="UTC">
       <BrandConfigProvider value={brandConfig}>
         <DeviceProvider userAgent={userAgent}>
           <ModalProvider>

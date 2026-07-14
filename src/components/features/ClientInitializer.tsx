@@ -32,7 +32,7 @@ export default function ClientInitializer() {
     ({ detail: { error } }: CustomEvent<ApiErrorEventDetail>) => {
       handleApiError(error, api, t);
     },
-    { target: window },
+    { target: () => window },
   );
 
   const dialog = useDialog();
