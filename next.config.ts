@@ -73,7 +73,7 @@ const baseConfig: NextConfig = {
     },
   ],
   allowedDevOrigins: ['192.168.0.53'],
-  // 启用 sourcemap
+  // 仅在启用 Sentry 时生成浏览器 sourcemap，供构建阶段上传后还原客户端堆栈。
   productionBrowserSourceMaps: enableSentry,
   // 环境变量
   env: {
@@ -105,33 +105,37 @@ const baseConfig: NextConfig = {
 let configWithPlugins = createNextIntlPlugin()(baseConfig);
 
 if (enableSentry) {
-  // Conditionally enable Sentry configuration
+  // 仅在 prod 环境启用 Sentry 构建插件，用于上传 sourcemap 并关联 release。
   configWithPlugins = withSentryConfig(configWithPlugins, {
-    // For all available options, see:
-    // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+    // Sentry 组织 slug
     org: '8u8',
+    // Sentry 项目 slug
     project: 'javascript-nextjs',
+    // 上传 sourcemap 和 release 信息使用的认证 token
+    authToken: '',
+    // Sentry 实例基础地址，官方默认 https://sentry.io/
+    sentryUrl: 'https://sentry.io/',
+    // release 配置用于把运行时事件、构建产物和上传的 sourcemap 关联到同一版本。
+    release: {
+      // release 唯一标识，这里使用应用版本号，和 generateBuildId 保持一致。
+      name: appVersion,
+    },
 
-    release: { name: appVersion },
+    // 是否隐藏所有 Sentry 构建日志；false 会保留上传和错误日志，便于生产构建排查。
+    silent: false,
+    // 是否输出更详细的构建调试信息；false 避免常规构建产生过多 debug 日志。
+    debug: false,
 
-    // Only print logs for uploading source maps in CI
-    silent: !process.env.CI,
-
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    // 上传 Next.js 内部代码和依赖的客户端 sourcemap，让依赖和框架栈帧更可读，但会增加构建时间。
     widenClientFileUpload: true,
 
-    // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-    // This can increase your server load as well as your hosting bill.
-    // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-    // side errors will fail.
+    // 浏览器事件先请求本站 /monitoring，再由 Next.js rewrite 转发到 Sentry，降低被广告拦截器拦截的概率。
     tunnelRoute: '/monitoring',
 
+    // sourcemap 上传相关配置；withSentryConfig 会在构建时按这些选项处理上传和清理。
     sourcemaps: {
-      // 由 scripts/sentry/upload-sourcemaps.ts 统一使用 sentry-cli 上传并删除 .map，避免重复上传。
-      disable: true,
+      // 上传成功后删除 Next.js 构建目录中的客户端 .map 文件；服务端 sourcemap 会保留给运行时报错使用。
+      deleteSourcemapsAfterUpload: true,
     },
   });
 }
