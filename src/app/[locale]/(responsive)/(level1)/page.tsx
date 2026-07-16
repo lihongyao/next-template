@@ -176,6 +176,12 @@ export default function HomePage() {
             color="blue"
             wrapperClass="size-10 rounded-md bg-white"
           />
+          <Icon
+            name="https://video.qg5k.com/10210/188c4c688264452c8439c99b56b6ce14.svg"
+            className="size-6"
+            color="green"
+            wrapperClass="size-10 rounded-md bg-white"
+          />
         </div>
       </div>
 
