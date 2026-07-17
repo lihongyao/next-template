@@ -30,8 +30,13 @@ export type DialogEnterAnimation = 'fade-in' | 'zoom-in' | 'slide-up-in' | 'slid
 /** 退出动画 */
 export type DialogExitAnimation = 'fade-out' | 'zoom-out' | 'slide-up-out' | 'slide-right-out';
 
-/** Dialog 关闭原因 */
-export type DialogCloseReason = 'manual' | 'mask' | 'autoDestroy' | 'popstate';
+/** Dialog 内置关闭原因 */
+export type DialogBuiltInCloseReason = 'manual' | 'mask' | 'autoDestroy' | 'popstate';
+/** Dialog 关闭原因：保留内置值补全，同时允许业务传入自定义字符串 */
+export type DialogCloseReason = DialogBuiltInCloseReason | (string & Record<never, never>);
+export type DialogCloseOptions = {
+  reason?: DialogCloseReason;
+};
 export type DialogAfterCloseEvent = {
   reason: DialogCloseReason;
   stayDurationMs: number;
@@ -307,8 +312,11 @@ const DialogComponent = forwardRef<DialogRef, DialogProps>((props, ref) => {
 
 // === 导出 Dialog ===
 export const Dialog = DialogComponent as typeof DialogComponent & {
-  open: (options: DialogStaticOptions) => { key: string; close: () => Promise<void> };
-  close: (key?: string) => Promise<void>;
+  open: (options: DialogStaticOptions) => {
+    key: string;
+    close: (options?: DialogCloseOptions) => Promise<void>;
+  };
+  close: (key?: string, options?: DialogCloseOptions) => Promise<void>;
 };
 
 // === 静态方法管理 ===
@@ -321,7 +329,7 @@ type DialogEntry = {
   root: Root;
   container: HTMLDivElement;
   key: string;
-  closeDialog: () => void;
+  closeDialog: (reason?: DialogCloseReason) => void;
   promise?: Promise<void>;
 };
 
@@ -341,7 +349,7 @@ Dialog.open = (options: DialogStaticOptions) => {
 
   const dialogRef: { current: DialogRef | null } = { current: null };
 
-  const closeDialog = () => dialogRef.current?.setIsExiting('manual');
+  const closeDialog = (reason?: DialogCloseReason) => dialogRef.current?.setIsExiting(reason);
 
   root.render(
     <DialogComponent
@@ -369,10 +377,10 @@ Dialog.open = (options: DialogStaticOptions) => {
 
   return {
     key,
-    close: () => {
+    close: (closeOptions?: DialogCloseOptions) => {
       const entry = dialogMap.get(key);
       if (entry) {
-        entry.closeDialog();
+        entry.closeDialog(closeOptions?.reason);
         return entry.promise ?? Promise.resolve();
       }
       return Promise.resolve();
@@ -380,16 +388,16 @@ Dialog.open = (options: DialogStaticOptions) => {
   };
 };
 
-Dialog.close = async (key?: string) => {
+Dialog.close = async (key?: string, closeOptions?: DialogCloseOptions) => {
   if (key) {
     const entry = dialogMap.get(key);
     if (!entry) return;
-    entry.closeDialog();
+    entry.closeDialog(closeOptions?.reason);
     return entry.promise;
   } else {
     const promises: Promise<void>[] = [];
     dialogMap.forEach((entry) => {
-      entry.closeDialog();
+      entry.closeDialog(closeOptions?.reason);
       if (entry.promise) promises.push(entry.promise);
     });
     return Promise.all(promises).then(() => {});
@@ -411,8 +419,7 @@ type PropsOf<K extends DialogType> = K extends DialogType
     : object
   : never;
 type DialogPropsUpdater<K extends DialogType> =
-  | PropsOf<K>
-  | ((prev: PropsOf<K> | null) => PropsOf<K>);
+  PropsOf<K> | ((prev: PropsOf<K> | null) => PropsOf<K>);
 /** 构造 dialog.open options */
 type OpenDialogOmitProps =
   | 'open'
@@ -431,7 +438,7 @@ export type DialogInstance<K extends DialogType = DialogType> = {
   closeOnPopstate: boolean;
   props: PropsOf<K>;
   content: ReactNode;
-  requestClose: () => void;
+  requestClose: (options?: DialogCloseOptions) => void;
   updateProps: (updater: DialogPropsUpdater<K>) => void;
   /** 内部字段：存储最新的 onAfterClose 回调 */
   _onAfterClose?: (event: DialogAfterCloseEvent) => void;
@@ -459,8 +466,8 @@ export type DialogContextValue = {
 
   updateProps: <K extends DialogType>(type: K, updater: DialogPropsUpdater<K>) => void;
 
-  closeTop: () => void;
-  close: (type?: DialogType) => Promise<void>;
+  closeTop: (options?: DialogCloseOptions) => void;
+  close: (type?: DialogType, options?: DialogCloseOptions) => Promise<void>;
 };
 
 const DialogContext = createContext<DialogContextValue | null>(null);
@@ -558,8 +565,8 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
     const dialogRef = React.createRef<DialogRef | null>();
     instance._dialogRef = dialogRef;
 
-    instance.requestClose = () => {
-      dialogRef.current?.setIsExiting('manual');
+    instance.requestClose = (closeOptions?: DialogCloseOptions) => {
+      dialogRef.current?.setIsExiting(closeOptions?.reason);
     };
 
     const LazyComponent = lazy(
@@ -649,15 +656,16 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /** closeTop */
-  const closeTop = () => dialogsRef.current.at(-1)?.requestClose();
+  const closeTop = (closeOptions?: DialogCloseOptions) =>
+    dialogsRef.current.at(-1)?.requestClose(closeOptions);
 
   /** close */
-  const close = async (type?: DialogType) => {
+  const close = async (type?: DialogType, closeOptions?: DialogCloseOptions) => {
     const promises: Promise<void>[] = [];
     dialogsRef.current
       .filter((d) => !type || d.type === type)
       .forEach((d) => {
-        d.requestClose();
+        d.requestClose(closeOptions);
         if (d._afterClosePromise) promises.push(d._afterClosePromise);
       });
     await Promise.all(promises);

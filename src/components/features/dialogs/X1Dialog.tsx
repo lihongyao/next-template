@@ -14,7 +14,7 @@ export default function X1Dialog({ message, count }: X1DialogProps) {
   const brand = useBrandConfig();
 
   const onClose1 = () => dialog.closeTop();
-  const onClose2 = () => dialog.close('X1Dialog');
+  const onClose2 = () => dialog.close('X1Dialog', { reason: '自定义关闭原因' });
 
   return (
     <div data-name="X1Dialog" className="rounded bg-white p-4 shadow-lg">

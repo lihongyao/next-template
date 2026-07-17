@@ -137,11 +137,17 @@ dialogRef.current?.setIsExiting('manual');
 ## DialogCloseReason
 
 ```ts
-type DialogCloseReason =
+type DialogBuiltInCloseReason =
   | 'manual' // 手动关闭（调用 close / requestClose）
   | 'mask' // 点击遮罩
   | 'autoDestroy' // 定时自动关闭
   | 'popstate'; // 路由返回
+
+type DialogCloseReason = DialogBuiltInCloseReason | (string & Record<never, never>); // 自定义业务关闭原因
+
+type DialogCloseOptions = {
+  reason?: DialogCloseReason;
+};
 ```
 
 ## DialogAfterCloseEvent
@@ -247,7 +253,7 @@ const { key, close } = Dialog.open({
 ```ts
 {
   key: string; // 实例唯一标识
-  close: () => Promise<void>; // 关闭并等待动画结束
+  close: (options?: DialogCloseOptions) => Promise<void>; // 关闭并等待动画结束
 }
 ```
 
@@ -257,6 +263,9 @@ const { key, close } = Dialog.open({
 await close(); // 关闭当前实例，等待动画结束
 Dialog.close(key); // 关闭指定实例
 Dialog.close(); // 关闭所有静态方法打开的弹窗
+
+await close({ reason: 'confirmed' }); // 使用自定义原因关闭当前实例
+await Dialog.close(key, { reason: 'cancel-button' }); // 使用自定义原因关闭指定实例
 ```
 
 **说明：** 静态方法打开的弹窗由 `createPortal` 渲染到 `document.body`，`zIndex` 从 4000 起自增；`closeOnPopstate` 默认生效，路由后退时会自动关闭。
@@ -422,6 +431,9 @@ await dialog.queue('confirm', { props: { title: '第二步' } });
 dialog.closeTop(); // 关闭最上层
 await dialog.close('confirm'); // 关闭指定类型
 await dialog.close(); // 关闭全部
+
+dialog.closeTop({ reason: 'cancel-button' }); // 使用自定义原因关闭最上层
+await dialog.close('confirm', { reason: 'confirmed' }); // 使用自定义原因关闭
 ```
 
 ### ⭕️ 路由联动
@@ -465,8 +477,8 @@ type DialogContextValue = {
   open: <K>(type: K, options?) => DialogInstance<K>;
   queue: <K>(type: K, options?) => Promise<void>;
   updateProps: <K>(type: K, updater) => void;
-  closeTop: () => void;
-  close: (type?: DialogType) => Promise<void>;
+  closeTop: (options?: DialogCloseOptions) => void;
+  close: (type?: DialogType, options?: DialogCloseOptions) => Promise<void>;
 };
 ```
 
@@ -475,8 +487,8 @@ type DialogContextValue = {
 | `open(type, options)`        | 打开弹窗，返回实例；同类型默认单例，传 `multiple: true` 可多实例 |
 | `queue(type, options)`       | 队列打开，等前一个完全关闭后再显示                               |
 | `updateProps(type, updater)` | 更新指定类型弹窗的 props                                         |
-| `closeTop()`                 | 关闭最上层弹窗                                                   |
-| `close(type?)`               | 关闭指定类型或全部，返回 Promise                                 |
+| `closeTop(options?)`         | 关闭最上层弹窗，可传入自定义关闭原因                             |
+| `close(type?, options?)`     | 关闭指定类型或全部，可传入自定义关闭原因，返回 Promise           |
 
 # 推荐使用场景
 
