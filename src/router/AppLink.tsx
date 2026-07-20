@@ -14,11 +14,18 @@ function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-export default function AppLink({ href, replace, children, ...rest }: AppLinkProps) {
+export default function AppLink({
+  href,
+  replace,
+  scroll,
+  onClick,
+  children,
+  ...rest
+}: AppLinkProps) {
   const router = useAppRouter();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    rest.onClick?.(e);
+    onClick?.(e);
     if (e.defaultPrevented) return;
     if (!href) return;
     if (!isPlainLeftClick(e)) return;
@@ -27,15 +34,17 @@ export default function AppLink({ href, replace, children, ...rest }: AppLinkPro
 
     e.preventDefault();
 
+    const navigationOptions = scroll === undefined ? undefined : { scroll };
+
     if (replace) {
-      router.replace(href as string);
+      router.replace(href as string, navigationOptions);
     } else {
-      router.push(href as string);
+      router.push(href as string, navigationOptions);
     }
   };
 
   return (
-    <Link href={href ?? ''} replace={replace} onClick={handleClick} {...rest}>
+    <Link href={href ?? ''} replace={replace} scroll={scroll} onClick={handleClick} {...rest}>
       {children}
     </Link>
   );

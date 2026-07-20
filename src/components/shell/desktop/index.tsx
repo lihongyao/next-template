@@ -17,10 +17,8 @@ export default function DesktopShell({ children }: { children: React.ReactNode }
       />
       <main className="flex min-w-0 flex-1 flex-col">
         <Header />
-        <div className="mx-auto w-full max-w-[1200px]">
-          {children}
-          <Footer />
-        </div>
+        <div className="mx-auto w-full max-w-[1200px]">{children}</div>
+        <Footer />
       </main>
     </div>
   );

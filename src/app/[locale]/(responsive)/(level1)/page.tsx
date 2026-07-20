@@ -1,6 +1,6 @@
 // src/app/[locale]/(home)/page.tsx
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import Button from '@/components/ui/Buttons/BaseButton';
 import Carousel from '@/components/ui/Carousel';
@@ -21,6 +21,13 @@ const carouselItems = [
 export default function HomePage() {
   const router = useRouter();
   const [api] = notification.useNotification();
+
+  const [shouldThrow, setShouldThrow] = useState(false);
+
+  if (shouldThrow) {
+    throw new Error('测试 sentry');
+  }
+
   // const routerA = useTransitionRouter();
   useEffect(() => {
     console.log('render home page...');
@@ -133,6 +140,7 @@ export default function HomePage() {
         >
           测试 sentry
         </Button>
+        <Button onClick={() => setShouldThrow(true)}>捕获异常</Button>
       </div>
 
       <Icon name="adult" className="size-12" />

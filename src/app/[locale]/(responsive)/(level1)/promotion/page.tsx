@@ -6,7 +6,7 @@ export default function PromotionPage() {
   const list = new Array(10).fill(0);
   return (
     <div data-name="promotion-page" className="p-3">
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {list.map((_, i) => (
           <div key={i} className="overflow-hidden rounded-lg bg-[#212121] text-black">
             <div
