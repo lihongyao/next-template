@@ -13,6 +13,7 @@ import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
 import { API_ERROR_EVENT, handleApiError } from '@/libs/error';
 import { initNavigation } from '@/libs/navigation-direction';
 import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
+import { preloadSounds } from '@/libs/sound';
 
 import { useDialog } from '../ui/Dialog';
 import { notification } from '../ui/Notification';
@@ -46,6 +47,7 @@ export default function ClientInitializer() {
     console.log('__ClientInitializer__');
     import('vconsole').then(({ default: VConsole }) => new VConsole());
     initNavigation();
+    preloadSounds();
 
     bootstrapSDK({
       // debug: process.env.NODE_ENV === 'development',

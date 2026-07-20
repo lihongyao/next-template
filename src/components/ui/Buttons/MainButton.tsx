@@ -1,12 +1,22 @@
+'use client';
+
 import { cn } from '@/libs/class-helpers';
+import { type SoundName, playSound } from '@/libs/sound';
 
 interface MainButtonProps {
   children: React.ReactNode;
   disabled?: boolean;
   className?: string;
   onClick?: () => void;
+  sound?: SoundName | false;
 }
-export default function Button({ children, disabled, className, onClick }: MainButtonProps) {
+export default function Button({
+  children,
+  disabled,
+  className,
+  onClick,
+  sound = 'buttonClick',
+}: MainButtonProps) {
   return (
     <div
       className={cn(
@@ -15,6 +25,7 @@ export default function Button({ children, disabled, className, onClick }: MainB
       )}
       onClick={() => {
         if (disabled) return;
+        if (sound) playSound(sound);
         onClick?.();
       }}
     >

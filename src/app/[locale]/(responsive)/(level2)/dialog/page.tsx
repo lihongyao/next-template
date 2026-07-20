@@ -8,6 +8,7 @@ import AppHeader from '@/components/ui/AppHeader';
 import Button from '@/components/ui/Buttons/BaseButton';
 import { Dialog, type DialogType, useDialog } from '@/components/ui/Dialog';
 import brandConfig from '@/configs/brands';
+import { playSound } from '@/libs/sound';
 import { useRouter } from '@/router';
 import { Routes } from '@/router/routes';
 
@@ -31,6 +32,7 @@ export default function DialogPage() {
   });
 
   const openX1 = () => {
+    playSound('get_reward_money');
     dialog.open('X1Dialog', {
       props: { message: 'Hello X1!', count: 3.14 },
       contentClassName: 'w-[80%] max-w-[400px]',
@@ -42,6 +44,7 @@ export default function DialogPage() {
   };
 
   const openX2 = () => {
+    playSound('event_sound');
     dialog.open('X2Dialog', {
       onAfterClose() {
         console.log('X2 closed');
@@ -199,8 +202,12 @@ export default function DialogPage() {
           </Button>
 
           <Button onClick={() => setOpen(true)}>组件调用(受控)</Button>
-          <Button onClick={openX1}>Open X1</Button>
-          <Button onClick={openX2}>Open X2</Button>
+          <Button onClick={openX1} sound={false}>
+            Open X1
+          </Button>
+          <Button onClick={openX2} sound={false}>
+            Open X2
+          </Button>
           <Button onClick={openX2AutoClose}>openX2AutoClose</Button>
           <Button onClick={openQueue}>queue dialogs</Button>
           <Button onClick={openStatic}>静态调用</Button>
