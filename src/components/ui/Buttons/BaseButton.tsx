@@ -15,7 +15,7 @@ export default function BaseButton({
   disabled,
   className,
   onClick,
-  sound = 'buttonClick',
+  sound = 'button_click',
 }: ButtonProps) {
   return (
     <div

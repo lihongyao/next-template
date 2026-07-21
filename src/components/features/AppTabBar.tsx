@@ -4,6 +4,7 @@ import { memo, useRef } from 'react';
 
 import { ZIndex } from '@/constants/z-index';
 import { cn } from '@/libs/class-helpers';
+import { playSound } from '@/libs/sound';
 import { Link, usePathname } from '@/router';
 import { type Route, Routes } from '@/router/routes';
 
@@ -47,6 +48,7 @@ export default memo(function AppTabBar() {
               href={item.path}
               key={item.path}
               scroll={false}
+              onClick={() => playSound('button_click')}
             >
               <Icon
                 className="size-5"

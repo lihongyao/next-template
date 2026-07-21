@@ -1,7 +1,7 @@
 import type { SoundDefinition } from './types';
 
 export const SOUND_CONFIG = {
-  buttonClick: {
+  button_click: {
     src: ['/sounds/btn_click.mp3'],
     preload: 'eager',
     volume: 0.7,

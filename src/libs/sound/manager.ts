@@ -6,7 +6,7 @@ import type { SoundDefinition, SoundId } from './types';
 /**
  * 音效运行时管理器。
  * 负责创建和缓存 Howler 实例，并统一处理预加载、播放与资源释放。
- * 业务代码应优先使用 `index.ts` 导出的公共函数，而不是直接操作该类。
+ * 业务代码应优先使用 index.ts 导出的公共函数，而不是直接操作该类。
  */
 export class SoundManager {
   /** 全局唯一的管理器实例。 */
@@ -15,7 +15,7 @@ export class SoundManager {
   /** 已创建的音效实例缓存，确保同一音效可以复用解码结果。 */
   private readonly sounds = new Map<SoundName, Howl>();
 
-  /** 限制外部创建实例，统一通过 `getInstance` 获取单例。 */
+  /** 限制外部创建实例，统一通过 getInstance 获取单例。 */
   private constructor() {}
 
   /** 获取 SoundManager 单例。 */
@@ -28,7 +28,7 @@ export class SoundManager {
   }
 
   /**
-   * 预加载指定音效；不传名称时只加载配置为 `eager` 的音效。
+   * 预加载指定音效；不传名称时只加载配置为 eager 的音效。
    *
    * @param names 需要预加载的音效名称。
    */

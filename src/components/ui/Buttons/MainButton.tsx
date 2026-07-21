@@ -15,7 +15,7 @@ export default function Button({
   disabled,
   className,
   onClick,
-  sound = 'buttonClick',
+  sound = 'button_click',
 }: MainButtonProps) {
   return (
     <div
