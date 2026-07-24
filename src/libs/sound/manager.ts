@@ -15,6 +15,9 @@ export class SoundManager {
   /** 已创建的音效实例缓存，确保同一音效可以复用解码结果。 */
   private readonly sounds = new Map<SoundName, Howl>();
 
+  /** 是否已在用户手势中完成首次初始化。 */
+  private initialized = false;
+
   /** 限制外部创建实例，统一通过 getInstance 获取单例。 */
   private constructor() {}
 
@@ -25,6 +28,31 @@ export class SoundManager {
     }
 
     return SoundManager.instance;
+  }
+
+  /**
+   * 在首次用户手势中创建并解锁 AudioContext，同时预加载 eager 音效。
+   * 重复调用不会重复初始化。
+   *
+   * @returns 是否已完成初始化；当前调用没有有效用户激活时返回 false。
+   */
+  initialize(): boolean {
+    if (typeof window === 'undefined') return false;
+    if (this.initialized) return true;
+    if (navigator.userActivation && !navigator.userActivation.isActive) return false;
+
+    this.preload();
+    this.initialized = true;
+
+    if (Howler.ctx?.state === 'suspended') {
+      void Howler.ctx.resume().catch((error) => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[SoundManager] Failed to resume AudioContext', error);
+        }
+      });
+    }
+
+    return true;
   }
 
   /**
@@ -57,7 +85,11 @@ export class SoundManager {
     const sound = this.getOrCreateSound(name);
     if (!sound) return undefined;
 
-    if (this.getDefinition(name).interrupt) {
+    const state = sound.state();
+
+    if (state === 'unloaded') {
+      sound.load();
+    } else if (state === 'loaded' && this.getDefinition(name).interrupt) {
       sound.stop();
     }
 

@@ -13,7 +13,7 @@ import useModalPageAutoCollapse from '@/hooks/useModalPageAutoCollapse';
 import { API_ERROR_EVENT, handleApiError } from '@/libs/error';
 import { initNavigation } from '@/libs/navigation-direction';
 import { SDKName, bootstrapSDK } from '@/libs/sdk-manager/core';
-import { preloadSounds } from '@/libs/sound';
+import { useInitializeSounds } from '@/libs/sound/hooks';
 
 import { useDialog } from '../ui/Dialog';
 import { notification } from '../ui/Notification';
@@ -27,6 +27,8 @@ export default function ClientInitializer() {
   useDeviceRouteAvailability();
   // 版本升级监听
   useCheckAppVersion();
+  // 首次用户交互时初始化音效
+  useInitializeSounds();
   // 错误处理
   useEventListener(
     API_ERROR_EVENT,
@@ -47,8 +49,6 @@ export default function ClientInitializer() {
     console.log('__ClientInitializer__');
     import('vconsole').then(({ default: VConsole }) => new VConsole());
     initNavigation();
-    preloadSounds();
-
     bootstrapSDK({
       // debug: process.env.NODE_ENV === 'development',
       debug: true,

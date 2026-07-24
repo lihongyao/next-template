@@ -5,7 +5,18 @@ import type { SoundId } from './types';
 const soundManager = SoundManager.getInstance();
 
 /**
+ * 在首次用户手势中初始化音效系统并预加载 eager 音效。
+ * 必须从 click、键盘等有效用户交互事件的同步调用栈中调用。
+ *
+ * @returns 是否已完成初始化；当前调用没有有效用户激活时返回 false。
+ */
+export function initializeSounds(): boolean {
+  return soundManager.initialize();
+}
+
+/**
  * 预加载并解码音效资源，降低首次播放延迟。
+ * 应用首次预加载请使用 `initializeSounds`；该方法适合 AudioContext 解锁后的按需预加载。
  *
  * @param names 指定要预加载的音效；不传时只加载配置为 `eager` 的音效。
  */

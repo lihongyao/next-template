@@ -10,14 +10,14 @@ export const SOUND_CONFIG = {
   },
   event_sound: {
     src: ['/sounds/event_sound.mp3'],
-    preload: 'eager',
+    preload: 'lazy',
     volume: 0.7,
     pool: 3,
     interrupt: true,
   },
   get_reward_money: {
     src: ['/sounds/get_reward_money.mp3'],
-    preload: 'eager',
+    preload: 'lazy',
     volume: 0.7,
     pool: 3,
     interrupt: true,
