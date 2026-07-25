@@ -7,6 +7,7 @@ allowBuilds:
   core-js: true
   esbuild: true
   sharp: true
+minimumReleaseAge: 0
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
