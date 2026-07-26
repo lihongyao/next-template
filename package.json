@@ -2,12 +2,15 @@
   "name": "nextjs-template",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "^25.1.0"
+  },
   "scripts": {
-    "predev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
-    "dev": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next dev",
-    "prebuild": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
-    "build": "cross-env app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next build",
-    "start": "cross-env app=${app:-afun} env=${env:-dev} tsx scripts/start/index.ts",
+    "predev": "cross-env NODE_OPTIONS=--no-webstorage app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
+    "dev": "cross-env NODE_OPTIONS=--no-webstorage app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next dev",
+    "prebuild": "cross-env NODE_OPTIONS=--no-webstorage app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- tsx scripts/pre-setup/index.ts",
+    "build": "cross-env NODE_OPTIONS=--no-webstorage app=${app:-afun} env=${env:-dev} dotenv -e env/.env.${app-afun}.${env-dev} -- next build",
+    "start": "cross-env NODE_OPTIONS=--no-webstorage app=${app:-afun} env=${env:-dev} tsx scripts/start/index.ts",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "prettier --write .",
