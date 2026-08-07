@@ -1,11 +1,9 @@
 'use client';
 
-import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { LayoutRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useSelectedLayoutSegments } from 'next/navigation';
-
-import { motion } from 'framer-motion';
 
 import AppTabBar from '@/components/features/AppTabBar';
 import {
@@ -31,7 +29,6 @@ type PageLayer = {
   routerContext: RouterContextValue;
 };
 
-const tabTransition = { type: 'tween' as const, duration: 0.2, ease: 'easeOut' as const };
 const modalRouteSegments = new Set(
   Object.values(ModalRoutes).map((value) => value.replace(/^\//, '')),
 );
@@ -73,8 +70,9 @@ export default function MobileShell({ children }: { children: React.ReactNode })
   const prevPathnameRef = useRef(pathname);
   const pathRef = useRef(pathname);
   const skipForCurrentPathRef = useRef(false);
-  const level1CacheRef = useRef(new Map<string, PageLayer>());
+  const pendingTabTransitionPathRef = useRef<string | null>(null);
   const lastLevel1Ref = useRef<PageLayer | null>(null);
+  const [animatingTabPathname, setAnimatingTabPathname] = useState<string | null>(null);
   const currentIsModal = isModalRoute(pathname);
   const currentIsLevel1 = meta.mobileLevel === 1;
   const currentIsTabPage = currentIsLevel1 && !currentIsModal;
@@ -83,13 +81,26 @@ export default function MobileShell({ children }: { children: React.ReactNode })
     currentIsTabPage && renderedIsLevel1 && renderedPathname === pathname
       ? { pathname: renderedPathname, node: children, routerContext }
       : null;
+  const currentLevel1Ready = currentLevel1Layer !== null;
 
   if (pathRef.current !== pathname) {
+    const previousPathname = pathRef.current;
+    const previousMeta = matchRouteMeta(previousPathname);
+
     pathRef.current = pathname;
     skipForCurrentPathRef.current = shouldSkipNextTransition();
     if (skipForCurrentPathRef.current) {
       consumeSkipNextTransition();
     }
+
+    pendingTabTransitionPathRef.current =
+      previousMeta.mobileLevel === 1 &&
+      currentIsLevel1 &&
+      !isModalRoute(previousPathname) &&
+      !currentIsModal &&
+      !skipForCurrentPathRef.current
+        ? pathname
+        : null;
   }
 
   const prevPathname = prevPathnameRef.current;
@@ -101,19 +112,9 @@ export default function MobileShell({ children }: { children: React.ReactNode })
   const transitionKind: TransitionKind = useCover ? 'cover' : 'none';
   const transitionDirection: Direction = direction;
   const prevMeta = matchRouteMeta(prevPathname);
-  const baseLayer =
-    currentLevel1Layer ??
-    (currentIsTabPage ? level1CacheRef.current.get(pathname) : null) ??
-    lastLevel1Ref.current ??
-    null;
+  const baseLayer = currentLevel1Layer ?? lastLevel1Ref.current ?? null;
   const showSubPage = meta.mobileLevel === 2;
   const renderSubPage = showSubPage && renderedMeta.mobileLevel === 2;
-  const useTabTransition =
-    prevMeta.mobileLevel === 1 &&
-    currentIsLevel1 &&
-    !currentIsModal &&
-    prevPathname !== pathname &&
-    !skipForCurrentPathRef.current;
   const isNativeRouteModalEntry =
     typeof window !== 'undefined' ? isRouteModalHistoryEntry() : false;
   const elevatedPageTransition =
@@ -132,9 +133,19 @@ export default function MobileShell({ children }: { children: React.ReactNode })
     if (!renderedIsLevel1) return;
 
     const nextLayer = { pathname: renderedPathname, node: children, routerContext };
-    level1CacheRef.current.set(renderedPathname, nextLayer);
     lastLevel1Ref.current = nextLayer;
   }, [children, renderedIsLevel1, renderedPathname, routerContext]);
+
+  useLayoutEffect(() => {
+    if (animatingTabPathname && animatingTabPathname !== pathname) {
+      setAnimatingTabPathname(null);
+    }
+
+    if (!currentLevel1Ready || pendingTabTransitionPathRef.current !== pathname) return;
+
+    pendingTabTransitionPathRef.current = null;
+    setAnimatingTabPathname(pathname);
+  }, [animatingTabPathname, currentLevel1Ready, pathname]);
 
   const level1Page = baseLayer ? (
     <LayoutRouterContext.Provider value={baseLayer.routerContext}>
@@ -150,18 +161,22 @@ export default function MobileShell({ children }: { children: React.ReactNode })
       >
         <Header fixed />
         <main className="pt-[56px] pb-[calc(65px+env(safe-area-inset-bottom))]">
-          {useTabTransition ? (
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0.4, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={tabTransition}
+          {baseLayer ? (
+            <div
+              key={baseLayer.pathname}
+              className={
+                animatingTabPathname === baseLayer.pathname ? 'animate-tab-page-enter' : undefined
+              }
+              onAnimationEnd={(event) => {
+                if (event.currentTarget !== event.target) return;
+                setAnimatingTabPathname((current) =>
+                  current === baseLayer.pathname ? null : current,
+                );
+              }}
             >
               {level1Page}
-            </motion.div>
-          ) : (
-            level1Page
-          )}
+            </div>
+          ) : null}
         </main>
         <AppTabBar />
       </div>

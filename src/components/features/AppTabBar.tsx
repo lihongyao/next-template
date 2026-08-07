@@ -47,8 +47,12 @@ export default memo(function AppTabBar() {
               className="flex flex-1 flex-col items-center justify-center gap-1"
               href={item.path}
               key={item.path}
-              scroll={false}
-              onClick={() => playSound('button_click')}
+              prefetch
+              scroll
+              onClick={(event) => {
+                playSound('button_click');
+                if (pathname === item.path) event.preventDefault();
+              }}
             >
               <Icon
                 className="size-5"
